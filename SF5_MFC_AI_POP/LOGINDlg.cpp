@@ -52,7 +52,7 @@ void LOGINDlg::OnBnClickedOk()
 	MySQL_Connector mysql;
 
 	// 데이터베이스 서버 연결
-	if (mysql.connect("tcp://127.0.0.1:3306", "user", "1234")) {
+	if (mysql.connect("tcp://127.0.0.1:3306", "user", "1234")) { // 수정
 		// 로그인 처리
 		if (mysql.login(stdID, stdPW)) {
 			MessageBox(_T("로그인 성공"), _T("알림"), MB_OK | MB_ICONINFORMATION);

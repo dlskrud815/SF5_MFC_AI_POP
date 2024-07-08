@@ -77,7 +77,7 @@ BOOL CSF5MFCAIPOPDlg::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
 
-	// Display login dialog first
+	// 로그인 다이얼로그 먼저 띄움
 	LOGINDlg loginDlg;
 	if (loginDlg.DoModal() != IDOK)
 	{
@@ -113,6 +113,8 @@ BOOL CSF5MFCAIPOPDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// Set small icon
 
 	// TODO: Add extra initialization here
+
+	ShowWindow(SW_SHOWMAXIMIZED);
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }

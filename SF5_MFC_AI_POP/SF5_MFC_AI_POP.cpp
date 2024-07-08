@@ -74,6 +74,7 @@ BOOL CSF5MFCAIPOPApp::InitInstance()
 	CSF5MFCAIPOPDlg dlg;
 	m_pMainWnd = &dlg;
 	INT_PTR nResponse = dlg.DoModal();
+
 	if (nResponse == IDOK)
 	{
 		// TODO: Place code here to handle when the dialog is
@@ -102,6 +103,7 @@ BOOL CSF5MFCAIPOPApp::InitInstance()
 
 	// Since the dialog has been closed, return FALSE so that we exit the
 	//  application, rather than start the application's message pump.
+
 	return FALSE;
 }
 
