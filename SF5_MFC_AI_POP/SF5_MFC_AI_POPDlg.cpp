@@ -67,7 +67,7 @@ BEGIN_MESSAGE_MAP(CSF5MFCAIPOPDlg, CDialogEx)
 	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
-	ON_WM_LBUTTONDOWN()
+	ON_WM_SIZE()
 END_MESSAGE_MAP()
 
 
@@ -169,12 +169,31 @@ HCURSOR CSF5MFCAIPOPDlg::OnQueryDragIcon()
 }
 
 
-
-void CSF5MFCAIPOPDlg::OnLButtonDown(UINT nFlags, CPoint point)
+void CSF5MFCAIPOPDlg::OnSize(UINT nType, int cx, int cy)
 {
-	// TODO: Add your message handler code here and/or call default
-	//다이얼로그 드래그
-	SendMessage(WM_NCLBUTTONDOWN, HTCAPTION, MAKELPARAM(point.x, point.y));
+	CDialogEx::OnSize(nType, cx, cy);
 
-	CDialogEx::OnLButtonDown(nFlags, point);
+	// TODO: Add your message handler code here
+	const int controlWidth = 150;
+	const int controlHeight = 40;
+	const int margin = 20;
+
+	int xPosCancel = cx - controlWidth - margin;
+	int xPosOK = xPosCancel - controlWidth - margin;
+	int yPos = cy - controlHeight - margin;
+	
+
+	CWnd* pOKButton = GetDlgItem(IDOK);
+	CWnd* pCancelButton = GetDlgItem(IDCANCEL);
+
+
+	if (pOKButton != nullptr)
+	{
+		pOKButton->SetWindowPos(nullptr, xPosOK, yPos, controlWidth, controlHeight, SWP_NOZORDER);
+	}
+
+	if (pCancelButton != nullptr)
+	{
+		pCancelButton->SetWindowPos(nullptr, xPosCancel, yPos, controlWidth, controlHeight, SWP_NOZORDER);
+	}
 }
