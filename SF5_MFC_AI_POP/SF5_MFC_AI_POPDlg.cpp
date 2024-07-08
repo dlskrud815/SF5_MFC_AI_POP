@@ -114,7 +114,10 @@ BOOL CSF5MFCAIPOPDlg::OnInitDialog()
 
 	// TODO: Add extra initialization here
 
-	ShowWindow(SW_SHOWMAXIMIZED);
+	ShowWindow(SW_SHOWMAXIMIZED); // 최대화
+
+
+
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
