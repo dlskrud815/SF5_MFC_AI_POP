@@ -174,26 +174,35 @@ void CSF5MFCAIPOPDlg::OnSize(UINT nType, int cx, int cy)
 	CDialogEx::OnSize(nType, cx, cy);
 
 	// TODO: Add your message handler code here
-	const int controlWidth = 150;
-	const int controlHeight = 40;
+	const int buttonWidth = 150;
+	const int buttonHeight = 40;
 	const int margin = 20;
 
-	int xPosCancel = cx - controlWidth - margin;
-	int xPosOK = xPosCancel - controlWidth - margin;
-	int yPos = cy - controlHeight - margin;
-	
+	const int listHeight = 500;
+
+	int xPosCancel = cx - buttonWidth - margin;
+	int xPosOK = xPosCancel - buttonWidth - margin;
+	int yPos = margin; //- buttonHeight - margin;
+
+	int yPosListControl = cy - listHeight - margin;
 
 	CWnd* pOKButton = GetDlgItem(IDOK);
 	CWnd* pCancelButton = GetDlgItem(IDCANCEL);
+	CWnd* pListControl = GetDlgItem(IDC_LIST_ERROR);
 
 
 	if (pOKButton != nullptr)
 	{
-		pOKButton->SetWindowPos(nullptr, xPosOK, yPos, controlWidth, controlHeight, SWP_NOZORDER);
+		pOKButton->SetWindowPos(nullptr, xPosOK, yPos, buttonWidth, buttonHeight, SWP_NOZORDER);
 	}
 
 	if (pCancelButton != nullptr)
 	{
-		pCancelButton->SetWindowPos(nullptr, xPosCancel, yPos, controlWidth, controlHeight, SWP_NOZORDER);
+		pCancelButton->SetWindowPos(nullptr, xPosCancel, yPos, buttonWidth, buttonHeight, SWP_NOZORDER);
+	}
+
+	if (pListControl != nullptr)
+	{
+		pListControl->SetWindowPos(nullptr, margin, yPosListControl, cx - 2 * margin, listHeight, SWP_NOZORDER);
 	}
 }
