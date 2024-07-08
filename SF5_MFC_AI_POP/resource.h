@@ -9,8 +9,8 @@
 #define IDD_LOGIN_DIALOG                103
 #define IDR_MAINFRAME                   128
 #define IDC_STATIC_TEXT1                1000
-#define IDC_EDIT1                       1001
-#define IDC_EDIT2                       1002
+#define IDC_EDIT_ID                     1001
+#define IDC_EDIT_PW                     1002
 
 // Next default values for new objects
 // 

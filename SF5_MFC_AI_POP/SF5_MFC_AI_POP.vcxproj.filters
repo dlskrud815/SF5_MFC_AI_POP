@@ -36,6 +36,9 @@
     <ClInclude Include="LOGINDlg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="MySQL_Connector.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="SF5_MFC_AI_POP.cpp">
@@ -48,6 +51,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="LOGINDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MySQL_Connector.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
