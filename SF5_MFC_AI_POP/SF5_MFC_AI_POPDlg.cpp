@@ -7,8 +7,8 @@
 #include "SF5_MFC_AI_POP.h"
 #include "SF5_MFC_AI_POPDlg.h"
 #include "afxdialogex.h"
-
 #include "LOGINDlg.h"
+
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -62,6 +62,8 @@ void CSF5MFCAIPOPDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_LIST_ERROR, m_listCtrl);
+	DDX_Control(pDX, IDC_STATIC_Test1, m_test1);
+	DDX_Control(pDX, IDC_STATIC_Test2, m_test2);
 }
 
 BEGIN_MESSAGE_MAP(CSF5MFCAIPOPDlg, CDialogEx)
@@ -295,7 +297,16 @@ UINT CSF5MFCAIPOPDlg::Thread_DB_Get_Cur(LPVOID _mothod)
 	if (mysql.connect("tcp://127.0.0.1:3306", "user", "1234", "chatting_project")) // 수정
 	{ 
 		Sleep(2000);
-		CString cstr = mysql.getID();
+
+		if (mysql.getID()) 
+		{
+			CString message = mysql.getMessage();
+			pDlg->m_test1.SetWindowText(message);
+		}
+		else 
+		{
+			pDlg->MessageBox(_T("데이터를 받아오지 못 했습니다."), _T("오류"), MB_OK | MB_ICONERROR);
+		}
 	}
 	else {
 		pDlg->MessageBox(_T("데이터베이스 연결 실패"), _T("오류"), MB_OK | MB_ICONERROR);
@@ -315,7 +326,16 @@ UINT CSF5MFCAIPOPDlg::Thread_DB_Get_Vib(LPVOID _mothod)
 	if (mysql.connect("tcp://127.0.0.1:3306", "user", "1234", "chatting_project")) // 수정
 	{
 		Sleep(5000);
-		CString cstr = mysql.getFrom();
+
+		if (mysql.getFrom()) 
+		{
+			CString message = mysql.getMessage();
+			pDlg->m_test2.SetWindowText(message);
+		}
+		else 
+		{
+			pDlg->MessageBox(_T("데이터를 받아오지 못 했습니다."), _T("오류"), MB_OK | MB_ICONERROR);
+		}	
 	}
 	else {
 		pDlg->MessageBox(_T("데이터베이스 연결 실패"), _T("오류"), MB_OK | MB_ICONERROR);

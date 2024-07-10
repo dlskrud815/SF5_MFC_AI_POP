@@ -47,4 +47,6 @@ protected:
 
 public:
 	afx_msg void OnBnClickedButton1();
+	CStatic m_test1;
+	CStatic m_test2;
 };

@@ -26,8 +26,8 @@ public:
     CString getMessage();
 
 
-    CString getID();
-    CString getFrom();
+    bool getID();
+    bool getFrom();
 
 private:
     sql::Driver* driver;

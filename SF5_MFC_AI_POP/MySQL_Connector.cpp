@@ -59,30 +59,28 @@ CString MySQL_Connector::getMessage()
     }
 }
 
-CString MySQL_Connector::getID()
+bool MySQL_Connector::getID()
 {
     try {
-        pstmt = con->prepareStatement("SELECT id FROM chat LIMIT 1"); // 수정
+        pstmt = con->prepareStatement("SELECT message FROM chat LIMIT 1, 1"); // 수정
         result = pstmt->executeQuery();
-        string message = result->getString("id");
 
-        return CString(message.c_str());
+        return result->next();  // 결과가 있는지 여부를 반환
     }
     catch (sql::SQLException& e) {
-        return _T("");
+        return false;
     }
 }
 
-CString MySQL_Connector::getFrom()
+bool MySQL_Connector::getFrom()
 {
     try {
-        pstmt = con->prepareStatement("SELECT id_from FROM chat LIMIT 1"); // 수정
+        pstmt = con->prepareStatement("SELECT message FROM chat LIMIT 2, 1"); // 수정
         result = pstmt->executeQuery();
-        string message = result->getString("id_from");
 
-        return CString(message.c_str());
+        return result->next();  // 결과가 있는지 여부를 반환
     }
     catch (sql::SQLException& e) {
-        return _T("");
+        return false;
     }
 }
