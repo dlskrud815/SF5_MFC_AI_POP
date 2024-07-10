@@ -61,6 +61,7 @@ CSF5MFCAIPOPDlg::CSF5MFCAIPOPDlg(CWnd* pParent /*=nullptr*/)
 void CSF5MFCAIPOPDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
+	DDX_Control(pDX, IDC_LIST_ERROR, m_listCtrl);
 }
 
 BEGIN_MESSAGE_MAP(CSF5MFCAIPOPDlg, CDialogEx)
@@ -68,6 +69,7 @@ BEGIN_MESSAGE_MAP(CSF5MFCAIPOPDlg, CDialogEx)
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
 	ON_WM_SIZE()
+	ON_BN_CLICKED(IDC_BUTTON1, &CSF5MFCAIPOPDlg::OnBnClickedButton1)
 END_MESSAGE_MAP()
 
 
@@ -116,8 +118,12 @@ BOOL CSF5MFCAIPOPDlg::OnInitDialog()
 
 	ShowWindow(SW_SHOWMAXIMIZED); // 최대화
 
-
-
+	//리스트 칼럼 넣기
+	m_listCtrl.InsertColumn(0, L"메시지", LVCFMT_LEFT, 400, -1);
+	m_listCtrl.InsertColumn(0, L"설비", LVCFMT_LEFT, 200, -1);
+	m_listCtrl.InsertColumn(0, L"상태", LVCFMT_LEFT, 100, -1);
+	m_listCtrl.InsertColumn(0, L"시간", LVCFMT_LEFT, 200, -1);
+	m_listCtrl.InsertColumn(0, L"순번", LVCFMT_LEFT, 50, -1);
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
@@ -208,4 +214,53 @@ void CSF5MFCAIPOPDlg::OnSize(UINT nType, int cx, int cy)
 	{
 		pListControl->SetWindowPos(nullptr, margin, yPosListControl, cx - 2 * margin, listHeight, SWP_NOZORDER);
 	}
+}
+
+
+void CSF5MFCAIPOPDlg::OnBnClickedButton1()
+{
+	// TODO: Add your control notification handler code here
+
+	CWinThread* p1 = NULL;
+	p1 = AfxBeginThread(ThreadTest, this);
+	//새 스레드 시작 - 현재 객체를 스레드 함수에 전달
+
+	if (p1 == NULL) //스레드 생성 실패 시
+	{
+		AfxMessageBox(L"Error");
+	}
+}
+
+
+UINT CSF5MFCAIPOPDlg::ThreadTest(LPVOID _mothod)
+{
+	// pParam을 CSF5MFCAIPOPDlg 객체로 변환
+	CSF5MFCAIPOPDlg* pDlg = (CSF5MFCAIPOPDlg*)_mothod;
+
+	// MySQLConnector 객체 생성
+	MySQL_Connector mysql;
+	int i = 0;
+
+	// 데이터베이스 서버 연결
+	if (mysql.connect("tcp://127.0.0.1:3306", "user", "1234", "chatting_project"))
+	{
+		while (mysql.getData(i)) // db에 다음행이 있을 때까지
+		{
+			CString message = mysql.getMessage();
+			CString strIndex;
+			strIndex.Format(_T("%d"), i);  // i 값을 문자열로 변환
+
+			pDlg->m_listCtrl.InsertItem(0, strIndex);
+			pDlg->m_listCtrl.SetItem(0, 1, LVIF_TEXT, message, 0, 0, 0, NULL);
+
+			Sleep(1000); //1초 대기
+			i++;
+		}
+	}
+	else {
+		pDlg->MessageBox(_T("데이터베이스 연결 실패"), _T("오류"), MB_OK | MB_ICONERROR);
+	}
+
+	//스레드 함수 종료 시
+	return 0;
 }

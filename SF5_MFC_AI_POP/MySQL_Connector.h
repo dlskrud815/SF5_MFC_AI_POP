@@ -5,6 +5,8 @@
 #include <cppconn/prepared_statement.h>
 #include <string>
 
+#include "SF5_MFC_AI_POPDlg.h"
+
 using namespace std;
 
 class MySQL_Connector
@@ -18,8 +20,10 @@ public:
         if (con) { delete con; con = nullptr; }
     }
 
-    bool connect(const string& server, const string& username, const string& password);
-    bool login(const string& id, const string& pw);
+    bool connect(string server, string username, string password, string database);
+    bool login(string id, string pw);
+    bool getData(int i);
+    CString getMessage();
 
 private:
     sql::Driver* driver;

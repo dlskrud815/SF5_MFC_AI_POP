@@ -4,6 +4,9 @@
 
 #pragma once
 
+#include "MySQL_Connector.h"
+#include <string>
+
 
 // CSF5MFCAIPOPDlg dialog
 class CSF5MFCAIPOPDlg : public CDialogEx
@@ -32,5 +35,11 @@ protected:
 	afx_msg HCURSOR OnQueryDragIcon();
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 
+	static UINT ThreadTest(LPVOID _mothod);
+	CListCtrl m_listCtrl;
+	
 	DECLARE_MESSAGE_MAP()
+
+public:
+	afx_msg void OnBnClickedButton1();
 };
