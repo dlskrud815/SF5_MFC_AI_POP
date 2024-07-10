@@ -37,6 +37,11 @@ protected:
 
 	static UINT ThreadTest(LPVOID _mothod);
 	CListCtrl m_listCtrl;
+
+	// sync 맞추기
+	static UINT Thread_DB_Wait(LPVOID _mothod);
+	static UINT Thread_DB_Get_Cur(LPVOID _mothod);
+	static UINT Thread_DB_Get_Vib(LPVOID _mothod);
 	
 	DECLARE_MESSAGE_MAP()
 

@@ -51,7 +51,35 @@ bool MySQL_Connector::getData(int i)
 CString MySQL_Connector::getMessage()
 {
     try {
-        string message = result->getString("message");
+        string message = result->getString("message"); //수정
+        return CString(message.c_str());
+    }
+    catch (sql::SQLException& e) {
+        return _T("");
+    }
+}
+
+CString MySQL_Connector::getID()
+{
+    try {
+        pstmt = con->prepareStatement("SELECT id FROM chat LIMIT 1"); // 수정
+        result = pstmt->executeQuery();
+        string message = result->getString("id");
+
+        return CString(message.c_str());
+    }
+    catch (sql::SQLException& e) {
+        return _T("");
+    }
+}
+
+CString MySQL_Connector::getFrom()
+{
+    try {
+        pstmt = con->prepareStatement("SELECT id_from FROM chat LIMIT 1"); // 수정
+        result = pstmt->executeQuery();
+        string message = result->getString("id_from");
+
         return CString(message.c_str());
     }
     catch (sql::SQLException& e) {

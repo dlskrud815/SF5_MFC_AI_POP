@@ -25,11 +25,15 @@ public:
     bool getData(int i);
     CString getMessage();
 
+
+    CString getID();
+    CString getFrom();
+
 private:
     sql::Driver* driver;
     sql::Connection* con;
     sql::Statement* stmt;
     sql::PreparedStatement* pstmt;
-    sql::ResultSet* result;
+    sql::ResultSet* result; // 추후 스레드별 result 변수 추가
 };
 

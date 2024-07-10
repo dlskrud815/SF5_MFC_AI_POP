@@ -125,6 +125,15 @@ BOOL CSF5MFCAIPOPDlg::OnInitDialog()
 	m_listCtrl.InsertColumn(0, L"시간", LVCFMT_LEFT, 200, -1);
 	m_listCtrl.InsertColumn(0, L"순번", LVCFMT_LEFT, 50, -1);
 
+	CWinThread* p1 = NULL;
+	p1 = AfxBeginThread(ThreadTest, this);
+	//새 스레드 시작 - 현재 객체를 스레드 함수에 전달
+
+	if (p1 == NULL) //스레드 생성 실패 시
+	{
+		AfxMessageBox(L"Error");
+	}
+
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
 
@@ -219,16 +228,13 @@ void CSF5MFCAIPOPDlg::OnSize(UINT nType, int cx, int cy)
 
 void CSF5MFCAIPOPDlg::OnBnClickedButton1()
 {
-	// TODO: Add your control notification handler code here
+	// Create and start the threads
+	CWinThread* pThreadCur = AfxBeginThread(Thread_DB_Get_Cur, this);
+	CWinThread* pThreadVib = AfxBeginThread(Thread_DB_Get_Vib, this);
 
-	CWinThread* p1 = NULL;
-	p1 = AfxBeginThread(ThreadTest, this);
-	//새 스레드 시작 - 현재 객체를 스레드 함수에 전달
-
-	if (p1 == NULL) //스레드 생성 실패 시
-	{
-		AfxMessageBox(L"Error");
-	}
+	// Create and start the wait thread, passing the thread handles
+	HANDLE hThreads[2] = { pThreadCur->m_hThread, pThreadVib->m_hThread };
+	AfxBeginThread(Thread_DB_Wait, hThreads);
 }
 
 
@@ -242,7 +248,7 @@ UINT CSF5MFCAIPOPDlg::ThreadTest(LPVOID _mothod)
 	int i = 0;
 
 	// 데이터베이스 서버 연결
-	if (mysql.connect("tcp://127.0.0.1:3306", "user", "1234", "chatting_project"))
+	if (mysql.connect("tcp://127.0.0.1:3306", "user", "1234", "chatting_project")) // 수정
 	{
 		while (mysql.getData(i)) // db에 다음행이 있을 때까지
 		{
@@ -256,6 +262,60 @@ UINT CSF5MFCAIPOPDlg::ThreadTest(LPVOID _mothod)
 			Sleep(1000); //1초 대기
 			i++;
 		}
+	}
+	else {
+		pDlg->MessageBox(_T("데이터베이스 연결 실패"), _T("오류"), MB_OK | MB_ICONERROR);
+	}
+
+	//스레드 함수 종료 시
+	return 0;
+}
+
+
+UINT CSF5MFCAIPOPDlg::Thread_DB_Wait(LPVOID _mothod)
+{
+	HANDLE* hThreads = (HANDLE*)_mothod;
+
+	// Wait for both threads to finish
+	WaitForMultipleObjects(2, hThreads, TRUE, INFINITE);
+
+	// Display the message box after both threads are done
+	AfxMessageBox(_T("데이터베이스 양측 수신 완료"));
+
+	return 0;
+}
+
+
+UINT CSF5MFCAIPOPDlg::Thread_DB_Get_Cur(LPVOID _mothod)
+{
+	CSF5MFCAIPOPDlg* pDlg = (CSF5MFCAIPOPDlg*)_mothod; // pParam을 CSF5MFCAIPOPDlg 객체로 변환	
+	MySQL_Connector mysql; // MySQLConnector 객체 생성
+
+	// 데이터베이스 서버 연결
+	if (mysql.connect("tcp://127.0.0.1:3306", "user", "1234", "chatting_project")) // 수정
+	{ 
+		Sleep(2000);
+		CString cstr = mysql.getID();
+	}
+	else {
+		pDlg->MessageBox(_T("데이터베이스 연결 실패"), _T("오류"), MB_OK | MB_ICONERROR);
+	}
+
+	//스레드 함수 종료 시
+	return 0;
+}
+
+
+UINT CSF5MFCAIPOPDlg::Thread_DB_Get_Vib(LPVOID _mothod)
+{
+	CSF5MFCAIPOPDlg* pDlg = (CSF5MFCAIPOPDlg*)_mothod; // pParam을 CSF5MFCAIPOPDlg 객체로 변환	
+	MySQL_Connector mysql; // MySQLConnector 객체 생성
+
+	// 데이터베이스 서버 연결
+	if (mysql.connect("tcp://127.0.0.1:3306", "user", "1234", "chatting_project")) // 수정
+	{
+		Sleep(5000);
+		CString cstr = mysql.getFrom();
 	}
 	else {
 		pDlg->MessageBox(_T("데이터베이스 연결 실패"), _T("오류"), MB_OK | MB_ICONERROR);
