@@ -8,6 +8,7 @@
 #include "SF5_MFC_AI_POPDlg.h"
 #include "afxdialogex.h"
 #include "LOGINDlg.h"
+#include "PROCESSDlg.h"
 
 
 #ifdef _DEBUG
@@ -72,6 +73,7 @@ BEGIN_MESSAGE_MAP(CSF5MFCAIPOPDlg, CDialogEx)
 	ON_WM_QUERYDRAGICON()
 	ON_WM_SIZE()
 	ON_BN_CLICKED(IDC_BUTTON1, &CSF5MFCAIPOPDlg::OnBnClickedButton1)
+	ON_BN_CLICKED(IDC_BUTTON2, &CSF5MFCAIPOPDlg::OnBnClickedButton2)
 END_MESSAGE_MAP()
 
 
@@ -343,4 +345,12 @@ UINT CSF5MFCAIPOPDlg::Thread_DB_Get_Vib(LPVOID _mothod)
 
 	//스레드 함수 종료 시
 	return 0;
+}
+
+
+void CSF5MFCAIPOPDlg::OnBnClickedButton2()
+{
+	// TODO: Add your control notification handler code here
+	PROCESSDlg proDlg;
+	proDlg.DoModal();
 }
