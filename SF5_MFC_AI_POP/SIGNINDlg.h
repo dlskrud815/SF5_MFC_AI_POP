@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include "afxdialogex.h"
-
+#include "MySQL_Connector.h"
+#include <string>
 
 // SIGNINDlg dialog
 
@@ -17,8 +18,13 @@ public:
 	enum { IDD = IDD_SIGNIN_DIALOG };
 #endif
 
+private:
+	CString m_userCode, m_userID_sign, m_userPW_sign, m_userRePW_sign;
+
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 
 	DECLARE_MESSAGE_MAP()
+public:
+	afx_msg void OnBnClickedOk();
 };
