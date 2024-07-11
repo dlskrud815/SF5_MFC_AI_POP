@@ -32,6 +32,7 @@ void LOGINDlg::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(LOGINDlg, CDialogEx)
 	ON_BN_CLICKED(IDOK, &LOGINDlg::OnBnClickedOk)
 	ON_WM_LBUTTONDOWN()
+	ON_BN_CLICKED(IDC_BUTTON_SIGNIN, &LOGINDlg::OnBnClickedButtonSignin)
 END_MESSAGE_MAP()
 
 
@@ -52,7 +53,9 @@ void LOGINDlg::OnBnClickedOk()
 	MySQL_Connector mysql;
 
 	// 데이터베이스 서버 연결
-	if (mysql.connect("tcp://127.0.0.1:3306", "user", "1234", "chatting_project")) { // 수정
+	if (mysql.connect("tcp://192.168.1.245", "Nia", "0000", "pop"))
+	//if (mysql.connect("tcp://127.0.0.1:3306", "user", "1234", "chatting_project")) // 수정
+	{ 
 		// 로그인 처리
 		if (mysql.login(stdID, stdPW)) {
 			MessageBox(_T("로그인 성공"), _T("알림"), MB_OK | MB_ICONINFORMATION);
@@ -77,4 +80,10 @@ void LOGINDlg::OnLButtonDown(UINT nFlags, CPoint point)
 	SendMessage(WM_NCLBUTTONDOWN, HTCAPTION, MAKELPARAM(point.x, point.y));
 
 	CDialogEx::OnLButtonDown(nFlags, point);
+}
+
+
+void LOGINDlg::OnBnClickedButtonSignin()
+{
+	// TODO: Add your control notification handler code here
 }

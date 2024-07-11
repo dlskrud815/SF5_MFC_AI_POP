@@ -195,6 +195,7 @@
     <ClInclude Include="Resource.h" />
     <ClInclude Include="SF5_MFC_AI_POP.h" />
     <ClInclude Include="SF5_MFC_AI_POPDlg.h" />
+    <ClInclude Include="SIGNINDlg.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
@@ -210,6 +211,7 @@
     <ClCompile Include="PROCESSDlg.cpp" />
     <ClCompile Include="SF5_MFC_AI_POP.cpp" />
     <ClCompile Include="SF5_MFC_AI_POPDlg.cpp" />
+    <ClCompile Include="SIGNINDlg.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="SF5MFCAIPOP.rc" />
