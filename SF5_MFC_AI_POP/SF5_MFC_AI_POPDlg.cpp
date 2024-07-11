@@ -18,6 +18,12 @@
 #endif
 
 
+CString CSF5MFCAIPOPDlg::strCur;
+CString CSF5MFCAIPOPDlg::strVib;
+int CSF5MFCAIPOPDlg::offsetCur = 10;
+int CSF5MFCAIPOPDlg::offsetVib = 10;
+CCriticalSection CSF5MFCAIPOPDlg::critSect;
+
 // CAboutDlg dialog used for App About
 
 class CAboutDlg : public CDialogEx
@@ -138,14 +144,14 @@ BOOL CSF5MFCAIPOPDlg::OnInitDialog()
 	m_listCtrl.InsertColumn(0, L"시간", LVCFMT_LEFT, 200, -1);
 	m_listCtrl.InsertColumn(0, L"순번", LVCFMT_LEFT, 100, -1);
 
-	CWinThread* p1 = NULL;
-	p1 = AfxBeginThread(ThreadTest, this);
-	//새 스레드 시작 - 현재 객체를 스레드 함수에 전달
+	//CWinThread* p1 = NULL;
+	//p1 = AfxBeginThread(ThreadTest, this);
+	////새 스레드 시작 - 현재 객체를 스레드 함수에 전달
 
-	if (p1 == NULL) //스레드 생성 실패 시
-	{
-		AfxMessageBox(L"Error");
-	}
+	//if (p1 == NULL) //스레드 생성 실패 시
+	//{
+	//	AfxMessageBox(L"Error");
+	//}
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
@@ -256,103 +262,6 @@ void CSF5MFCAIPOPDlg::OnSize(UINT nType, int cx, int cy)
 }
 
 
-void CSF5MFCAIPOPDlg::OnBnClickedButton1()
-{
-	CThreadTest::Thread_DB_Wait();
-
-	CStringA cur(CThreadTest::strCur.c_str());
-	CStringA vib(CThreadTest::strVib.c_str());
-
-	HINTERNET hSession = WinHttpOpen(L"A WinHTTP Example Program/1.0",
-		WINHTTP_ACCESS_TYPE_DEFAULT_PROXY,
-		WINHTTP_NO_PROXY_NAME,
-		WINHTTP_NO_PROXY_BYPASS, 0);
-
-	if (hSession)
-	{
-		HINTERNET hConnect = WinHttpConnect(hSession, L"127.0.0.1", 5000, 0);
-
-		if (hConnect)
-		{
-			CStringA jsonData;
-			jsonData.Format("{\"vibration\": [%s], \"current\": [%s]}", vib, cur);
-
-			HINTERNET hRequest = WinHttpOpenRequest(hConnect, L"POST", L"/api/robot_welding_predicitive_maintenance",
-				NULL, WINHTTP_NO_REFERER,
-				WINHTTP_DEFAULT_ACCEPT_TYPES,
-				0);
-
-			if (hRequest)
-			{
-				// Set request headers
-				const wchar_t* headers = L"Content-Type: application/json";
-				if (!WinHttpSendRequest(hRequest, headers, -1L,
-					(LPVOID)(LPSTR)jsonData.GetBuffer(), jsonData.GetLength(), jsonData.GetLength(), 0))
-				{
-					AfxMessageBox(_T("Error sending request."));
-				}
-				else
-				{
-					if (!WinHttpReceiveResponse(hRequest, NULL))
-					{
-						AfxMessageBox(_T("Error receiving response."));
-					}
-					else
-					{
-						DWORD dwSize = 0;
-						DWORD dwDownloaded = 0;
-						LPSTR pszOutBuffer;
-						CStringA response;
-
-						do
-						{
-							dwSize = 0;
-							if (!WinHttpQueryDataAvailable(hRequest, &dwSize))
-							{
-								AfxMessageBox(_T("Error in WinHttpQueryDataAvailable."));
-								break;
-							}
-
-							pszOutBuffer = new char[dwSize + 1];
-
-							if (!pszOutBuffer)
-							{
-								AfxMessageBox(_T("Out of memory."));
-								dwSize = 0;
-							}
-							else
-							{
-								ZeroMemory(pszOutBuffer, dwSize + 1);
-
-								if (!WinHttpReadData(hRequest, (LPVOID)pszOutBuffer,
-									dwSize, &dwDownloaded))
-								{
-									AfxMessageBox(_T("Error in WinHttpReadData."));
-								}
-								else
-								{
-									response += CStringA(pszOutBuffer);
-								}
-
-								delete[] pszOutBuffer;
-							}
-						} while (dwSize > 0);
-
-						AfxMessageBox(CString(response));
-					}
-				}
-
-				WinHttpCloseHandle(hRequest);
-			}
-
-			WinHttpCloseHandle(hConnect);
-		}
-
-		WinHttpCloseHandle(hSession);
-	}
-}
-
-
 UINT CSF5MFCAIPOPDlg::ThreadTest(LPVOID _mothod)
 {
 	// pParam을 CSF5MFCAIPOPDlg 객체로 변환
@@ -419,3 +328,247 @@ void CSF5MFCAIPOPDlg::UpdateCurrentTime()
 		pWnd->SetWindowText(strTime);
 	}
 }
+
+
+void CSF5MFCAIPOPDlg::OnBnClickedButton1()
+{
+	//CWinThread* p1 = AfxBeginThread(ThreadTest, this);
+
+	//CWinThread* pThreadCur = AfxBeginThread(Thread_DB_Get_Cur, this);
+	//CWinThread* pThreadVib = AfxBeginThread(Thread_DB_Get_Vib, this);
+
+	//HANDLE hThreads[2] = { pThreadCur->m_hThread, pThreadVib->m_hThread };
+	//WaitForMultipleObjects(2, hThreads, TRUE, INFINITE);
+
+	CThreadTest::Thread_DB_Wait();
+
+	string cur = CThreadTest::strCur;
+	string vib = CThreadTest::strVib;
+
+	CStringA A_cur(cur.c_str());
+	CStringA A_vib(vib.c_str());
+	CStringA result = winHttp(A_vib, A_cur);
+
+	vector<int> parse = parsing(result);
+
+	string cur_result, vib_result;
+
+	if (parse.size() >= 2) {
+		if (parse[0] == 1)
+		{
+			cur_result = "전류 이상";
+		}
+		else
+		{
+			cur_result = "전류 정상";
+		}
+
+		if (parse[1] == 1)
+		{
+			vib_result = "진동 이상";
+		}
+		else
+		{
+			vib_result = "진동 정상";
+		}
+	}
+
+	m_listCtrl.InsertItem(0, CString(cur_result.c_str()));
+	m_listCtrl.SetItem(0, 1, LVIF_TEXT, CString(vib_result.c_str()), 0, 0, 0, NULL);
+}
+
+
+vector<int> CSF5MFCAIPOPDlg::parsing(CStringA response)
+{
+	// JSON 파싱을 위한 간단한 문자열 처리
+	CStringA vibToken = "\"vib_result\":";
+	CStringA curToken = "\"cur_result\":";
+
+	// vib_result 추출
+	int vibResult = 0;
+	int posVib = response.Find(vibToken);
+	if (posVib >= 0)
+	{
+		posVib += vibToken.GetLength();
+		CStringA vibValueStr = response.Mid(posVib);
+		vibResult = atoi(vibValueStr); // atoi 함수를 사용하여 문자열을 정수로 변환
+	}
+
+	// cur_result 추출
+	int curResult = 0;
+	int posCur = response.Find(curToken);
+	if (posCur >= 0)
+	{
+		posCur += curToken.GetLength();
+		CStringA curValueStr = response.Mid(posCur);
+		curResult = atoi(curValueStr); // atoi 함수를 사용하여 문자열을 정수로 변환
+	}
+
+	return { vibResult, curResult };
+}
+
+
+CStringA CSF5MFCAIPOPDlg::winHttp(CStringA vib, CStringA cur)
+{
+	CStringA response;
+
+	HINTERNET hSession = WinHttpOpen(L"A WinHTTP Example Program/1.0",
+		WINHTTP_ACCESS_TYPE_DEFAULT_PROXY,
+		WINHTTP_NO_PROXY_NAME,
+		WINHTTP_NO_PROXY_BYPASS, 0);
+
+	if (hSession)
+	{
+		HINTERNET hConnect = WinHttpConnect(hSession, L"127.0.0.1", 5000, 0);
+
+		if (hConnect)
+		{
+			CStringA jsonData;
+			jsonData.Format("{\"vibration\": [%s], \"current\": [%s]}", vib, cur);
+
+			HINTERNET hRequest = WinHttpOpenRequest(hConnect, L"POST", L"/api/robot_welding_predicitive_maintenance",
+				NULL, WINHTTP_NO_REFERER,
+				WINHTTP_DEFAULT_ACCEPT_TYPES,
+				0);
+
+			if (hRequest)
+			{
+				// Set request headers
+				const wchar_t* headers = L"Content-Type: application/json";
+				if (!WinHttpSendRequest(hRequest, headers, -1L,
+					(LPVOID)(LPSTR)jsonData.GetBuffer(), jsonData.GetLength(), jsonData.GetLength(), 0))
+				{
+					AfxMessageBox(_T("Error sending request."));
+				}
+				else
+				{
+					if (!WinHttpReceiveResponse(hRequest, NULL))
+					{
+						AfxMessageBox(_T("Error receiving response."));
+					}
+					else
+					{
+						DWORD dwSize = 0;
+						DWORD dwDownloaded = 0;
+						LPSTR pszOutBuffer;
+						
+						do
+						{
+							dwSize = 0;
+							if (!WinHttpQueryDataAvailable(hRequest, &dwSize))
+							{
+								AfxMessageBox(_T("Error in WinHttpQueryDataAvailable."));
+								break;
+							}
+
+							pszOutBuffer = new char[dwSize + 1];
+
+							if (!pszOutBuffer)
+							{
+								AfxMessageBox(_T("Out of memory."));
+								dwSize = 0;
+							}
+							else
+							{
+								ZeroMemory(pszOutBuffer, dwSize + 1);
+
+								if (!WinHttpReadData(hRequest, (LPVOID)pszOutBuffer,
+									dwSize, &dwDownloaded))
+								{
+									AfxMessageBox(_T("Error in WinHttpReadData."));
+								}
+								else
+								{
+									response += CStringA(pszOutBuffer);
+								}
+
+								delete[] pszOutBuffer;
+							}
+						} while (dwSize > 0);
+
+						AfxMessageBox(CString(response));
+					}
+				}
+
+				WinHttpCloseHandle(hRequest);
+			}
+
+			WinHttpCloseHandle(hConnect);
+		}
+
+		WinHttpCloseHandle(hSession);
+	}
+
+	return response;
+}
+
+
+UINT CSF5MFCAIPOPDlg::Thread_DB_Get_Cur(LPVOID _method)
+{
+	MySQL_Connector* mysql = new MySQL_Connector();
+	int i = 0;
+	string output;
+
+	if (mysql->connect("tcp://192.168.1.241:3306", "Nia", "0000", "pop"))
+	{
+		vector<double> cur = mysql->fetchDataFromTable("current", offsetCur);
+
+		// 크리티컬 영역 지정
+		critSect.Lock();
+
+		for (double num : cur)
+		{
+			i++;
+			if (i >= cur.size())
+			{
+				output += to_string(num);
+			}
+			else
+			{
+				output += to_string(num) + ", ";
+			}
+		}
+
+		strCur = output.c_str();
+		critSect.Unlock();
+	}
+
+	delete mysql;
+	return 0;
+}
+
+
+UINT CSF5MFCAIPOPDlg::Thread_DB_Get_Vib(LPVOID _method)
+{
+	MySQL_Connector* mysql = new MySQL_Connector();
+	int i = 0;
+	string output;
+
+	if (mysql->connect("tcp://192.168.1.241:3306", "Nia", "0000", "pop"))
+	{
+		vector<double> vib = mysql->fetchDataFromTable("vibration", offsetVib);
+
+		// 크리티컬 영역 지정
+		critSect.Lock();
+
+		for (double num : vib)
+		{
+			i++;
+			if (i >= vib.size())
+			{
+				output += to_string(num);
+			}
+			else
+			{
+				output += to_string(num) + ", ";
+			}
+		}
+
+		strVib = output.c_str();
+		critSect.Unlock();
+	}
+
+	delete mysql;
+	return 0;
+}
+

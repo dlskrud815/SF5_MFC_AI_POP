@@ -45,13 +45,21 @@ protected:
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
 
 	static UINT ThreadTest(LPVOID _mothod);
-	CListCtrl m_listCtrl;
 
-	// sync 맞추기
-	//static UINT Thread_DB_Wait(LPVOID _mothod);
-	//static UINT Thread_DB_Get_Cur(LPVOID _mothod);
-	//static UINT Thread_DB_Get_Vib(LPVOID _mothod);
-	//void winHttp(MySQL_Connector* mysql1, MySQL_Connector* mysql2);
+
+	CStringA winHttp(CStringA vib, CStringA cur);
+	vector<int> parsing(CStringA response);
+	static UINT Thread_DB_Get_Cur(LPVOID _method);
+	static UINT Thread_DB_Get_Vib(LPVOID _method);
+	
+	static CString strCur;
+	static CString strVib;
+	static CCriticalSection critSect;
+	static int offsetCur;
+	static int offsetVib;
+
+	
+	CListCtrl m_listCtrl;
 
 	DECLARE_MESSAGE_MAP()
 

@@ -19,5 +19,5 @@ public:
 
     static void Thread_DB_Get_Cur();
     static void Thread_DB_Get_Vib();
-    static void Thread_DB_Wait();
+    static int Thread_DB_Wait();
 };

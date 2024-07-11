@@ -6,8 +6,8 @@ string CThreadTest::strVib;
 
 mutex CThreadTest::critSect;
 
-int CThreadTest::offsetCur = 10;
-int CThreadTest::offsetVib = 10;
+int CThreadTest::offsetCur = 1;
+int CThreadTest::offsetVib = 1;
 
 
 void CThreadTest::Thread_DB_Get_Cur()
@@ -18,7 +18,7 @@ void CThreadTest::Thread_DB_Get_Cur()
 
     if (mysql->connect("tcp://192.168.1.241:3306", "Nia", "0000", "pop"))
     {
-        vector<double> cur = mysql->fetchDataFromTable("current", offsetCur);
+        vector<double> cur = mysql->fetchDataFromTable("current", offsetCur++);
 
         lock_guard<mutex> lock(critSect);
 
@@ -49,7 +49,7 @@ void CThreadTest::Thread_DB_Get_Vib()
 
     if (mysql->connect("tcp://192.168.1.241:3306", "Nia", "0000", "pop"))
     {
-        vector<double> vib = mysql->fetchDataFromTable("vibration", offsetVib);
+        vector<double> vib = mysql->fetchDataFromTable("vibration", offsetVib++);
 
         lock_guard<mutex> lock(critSect);
 
@@ -72,11 +72,13 @@ void CThreadTest::Thread_DB_Get_Vib()
     delete mysql;
 }
 
-void CThreadTest::Thread_DB_Wait()
+int CThreadTest::Thread_DB_Wait()
 {
     thread t1(Thread_DB_Get_Cur);
     thread t2(Thread_DB_Get_Vib);
 
     t1.join();
     t2.join();
+
+    return 0;
 }
