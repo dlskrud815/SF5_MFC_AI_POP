@@ -3,7 +3,9 @@
 //
 
 #pragma once
+
 #include "MySQL_Connector.h"
+#include "ThreadTest.h"
 
 using namespace std;
 

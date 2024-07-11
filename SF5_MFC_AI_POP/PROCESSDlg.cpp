@@ -53,7 +53,7 @@ BOOL PROCESSDlg::OnInitDialog()
 
 	// TODO:  Add extra initialization here
 	//ShowWindow(SW_SHOWMAXIMIZED); // 최대화
-
+	
 	SetTimer(1, 1000, NULL);
 	updateChart();
 

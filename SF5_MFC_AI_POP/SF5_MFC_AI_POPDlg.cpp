@@ -10,6 +10,8 @@
 #include "LOGINDlg.h"
 #include "PROCESSDlg.h"
 
+#include <winhttp.h>
+#pragma comment(lib, "winhttp.lib")
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -256,7 +258,98 @@ void CSF5MFCAIPOPDlg::OnSize(UINT nType, int cx, int cy)
 
 void CSF5MFCAIPOPDlg::OnBnClickedButton1()
 {
+	CThreadTest::Thread_DB_Wait();
 
+	CStringA cur(CThreadTest::strCur.c_str());
+	CStringA vib(CThreadTest::strVib.c_str());
+
+	HINTERNET hSession = WinHttpOpen(L"A WinHTTP Example Program/1.0",
+		WINHTTP_ACCESS_TYPE_DEFAULT_PROXY,
+		WINHTTP_NO_PROXY_NAME,
+		WINHTTP_NO_PROXY_BYPASS, 0);
+
+	if (hSession)
+	{
+		HINTERNET hConnect = WinHttpConnect(hSession, L"127.0.0.1", 5000, 0);
+
+		if (hConnect)
+		{
+			CStringA jsonData;
+			jsonData.Format("{\"vibration\": [%s], \"current\": [%s]}", vib, cur);
+
+			HINTERNET hRequest = WinHttpOpenRequest(hConnect, L"POST", L"/api/robot_welding_predicitive_maintenance",
+				NULL, WINHTTP_NO_REFERER,
+				WINHTTP_DEFAULT_ACCEPT_TYPES,
+				0);
+
+			if (hRequest)
+			{
+				// Set request headers
+				const wchar_t* headers = L"Content-Type: application/json";
+				if (!WinHttpSendRequest(hRequest, headers, -1L,
+					(LPVOID)(LPSTR)jsonData.GetBuffer(), jsonData.GetLength(), jsonData.GetLength(), 0))
+				{
+					AfxMessageBox(_T("Error sending request."));
+				}
+				else
+				{
+					if (!WinHttpReceiveResponse(hRequest, NULL))
+					{
+						AfxMessageBox(_T("Error receiving response."));
+					}
+					else
+					{
+						DWORD dwSize = 0;
+						DWORD dwDownloaded = 0;
+						LPSTR pszOutBuffer;
+						CStringA response;
+
+						do
+						{
+							dwSize = 0;
+							if (!WinHttpQueryDataAvailable(hRequest, &dwSize))
+							{
+								AfxMessageBox(_T("Error in WinHttpQueryDataAvailable."));
+								break;
+							}
+
+							pszOutBuffer = new char[dwSize + 1];
+
+							if (!pszOutBuffer)
+							{
+								AfxMessageBox(_T("Out of memory."));
+								dwSize = 0;
+							}
+							else
+							{
+								ZeroMemory(pszOutBuffer, dwSize + 1);
+
+								if (!WinHttpReadData(hRequest, (LPVOID)pszOutBuffer,
+									dwSize, &dwDownloaded))
+								{
+									AfxMessageBox(_T("Error in WinHttpReadData."));
+								}
+								else
+								{
+									response += CStringA(pszOutBuffer);
+								}
+
+								delete[] pszOutBuffer;
+							}
+						} while (dwSize > 0);
+
+						AfxMessageBox(CString(response));
+					}
+				}
+
+				WinHttpCloseHandle(hRequest);
+			}
+
+			WinHttpCloseHandle(hConnect);
+		}
+
+		WinHttpCloseHandle(hSession);
+	}
 }
 
 
