@@ -35,6 +35,11 @@ protected:
 	afx_msg HCURSOR OnQueryDragIcon();
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 
+	// 타이머 ID
+	static const UINT_PTR m_nTimerID = 0;
+	void UpdateCurrentTime();
+	afx_msg void OnTimer(UINT_PTR nIDEvent);
+
 	static UINT ThreadTest(LPVOID _mothod);
 	CListCtrl m_listCtrl;
 

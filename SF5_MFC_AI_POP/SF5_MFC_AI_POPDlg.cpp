@@ -74,6 +74,7 @@ BEGIN_MESSAGE_MAP(CSF5MFCAIPOPDlg, CDialogEx)
 	ON_WM_SIZE()
 	ON_BN_CLICKED(IDC_BUTTON1, &CSF5MFCAIPOPDlg::OnBnClickedButton1)
 	ON_BN_CLICKED(IDC_BUTTON2, &CSF5MFCAIPOPDlg::OnBnClickedButton2)
+	ON_WM_TIMER()
 END_MESSAGE_MAP()
 
 
@@ -121,6 +122,11 @@ BOOL CSF5MFCAIPOPDlg::OnInitDialog()
 	// TODO: Add extra initialization here
 
 	ShowWindow(SW_SHOWMAXIMIZED); // 최대화
+
+
+	// 타이머를 설정하여 1초마다 시간을 업데이트합니다.
+	SetTimer(m_nTimerID, 1000, nullptr);
+
 
 	//리스트 칼럼 넣기
 	m_listCtrl.InsertColumn(0, L"메시지", LVCFMT_LEFT, 400, -1);
@@ -353,4 +359,32 @@ void CSF5MFCAIPOPDlg::OnBnClickedButton2()
 	// TODO: Add your control notification handler code here
 	PROCESSDlg proDlg;
 	proDlg.DoModal();
+}
+
+void CSF5MFCAIPOPDlg::OnTimer(UINT_PTR nIDEvent)
+{
+	// 타이머가 발생하면 현재 시각을 업데이트합니다.
+	if (nIDEvent == m_nTimerID)
+	{
+		UpdateCurrentTime();
+	}
+
+	CDialogEx::OnTimer(nIDEvent);
+}
+
+void CSF5MFCAIPOPDlg::UpdateCurrentTime()
+{
+	// 현재 시간을 가져옵니다.
+	CTime currentTime = CTime::GetCurrentTime();
+
+	// 포맷을 설정하고 문자열로 변환합니다.
+	CString strTime = currentTime.Format(_T("%Y-%m-%d %H:%M:%S"));
+
+	// IDC_STATIC_TIME은 다이얼로그 디자이너에서 생성된 스태틱 텍스트 컨트롤의 ID입니다.
+	CWnd* pWnd = GetDlgItem(IDC_STATIC_CURRENT_TIME);
+
+	if (pWnd)
+	{
+		pWnd->SetWindowText(strTime);
+	}
 }
