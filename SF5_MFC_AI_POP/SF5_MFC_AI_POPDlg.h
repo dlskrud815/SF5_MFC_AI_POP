@@ -35,6 +35,9 @@ protected:
 	afx_msg HCURSOR OnQueryDragIcon();
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 
+	//CImage back;
+	COLORREF m_backgroundColor;
+
 	// 타이머 ID
 	static const UINT_PTR m_nTimerID = 0;
 	void UpdateCurrentTime();

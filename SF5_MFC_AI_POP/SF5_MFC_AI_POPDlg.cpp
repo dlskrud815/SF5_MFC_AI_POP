@@ -122,7 +122,7 @@ BOOL CSF5MFCAIPOPDlg::OnInitDialog()
 	// TODO: Add extra initialization here
 
 	ShowWindow(SW_SHOWMAXIMIZED); // 최대화
-
+	//back.Load(_T("res\\img\\BACK1.png"));
 
 	// 타이머를 설정하여 1초마다 시간을 업데이트합니다.
 	SetTimer(m_nTimerID, 1000, nullptr);
@@ -133,7 +133,7 @@ BOOL CSF5MFCAIPOPDlg::OnInitDialog()
 	m_listCtrl.InsertColumn(0, L"설비", LVCFMT_LEFT, 200, -1);
 	m_listCtrl.InsertColumn(0, L"상태", LVCFMT_LEFT, 100, -1);
 	m_listCtrl.InsertColumn(0, L"시간", LVCFMT_LEFT, 200, -1);
-	m_listCtrl.InsertColumn(0, L"순번", LVCFMT_LEFT, 50, -1);
+	m_listCtrl.InsertColumn(0, L"순번", LVCFMT_LEFT, 100, -1);
 
 	CWinThread* p1 = NULL;
 	p1 = AfxBeginThread(ThreadTest, this);
@@ -185,6 +185,13 @@ void CSF5MFCAIPOPDlg::OnPaint()
 	}
 	else
 	{
+		//CPaintDC dc(this); // device context for painting
+
+		//CRect rect;//픽쳐 컨트롤의 크기를 저장할 CRect 객체
+		//GetClientRect(&rect);
+
+		//back.StretchBlt(dc.m_hDC, 0, 0, rect.Width(), rect.Height(), SRCCOPY);//이미지를 픽쳐 컨트롤 크기로 조정
+
 		CDialogEx::OnPaint();
 	}
 }
@@ -206,18 +213,23 @@ void CSF5MFCAIPOPDlg::OnSize(UINT nType, int cx, int cy)
 	const int buttonHeight = 40;
 	const int margin = 20;
 
+	const int timeWidth = 300;
+	const int timeHeight = 40;
+
 	const int listHeight = 500;
 
 	int xPosCancel = cx - buttonWidth - margin;
 	int xPosOK = xPosCancel - buttonWidth - margin;
-	int yPos = margin; //- buttonHeight - margin;
-
+	int yPos = timeHeight + 2 * margin;
 	int yPosListControl = cy - listHeight - margin;
+
+	int xPosTime = cx - timeWidth - margin;
+	int yPosTime = margin;
 
 	CWnd* pOKButton = GetDlgItem(IDOK);
 	CWnd* pCancelButton = GetDlgItem(IDCANCEL);
 	CWnd* pListControl = GetDlgItem(IDC_LIST_ERROR);
-
+	CWnd* pCurTime = GetDlgItem(IDC_STATIC_CURRENT_TIME);
 
 	if (pOKButton != nullptr)
 	{
@@ -232,6 +244,11 @@ void CSF5MFCAIPOPDlg::OnSize(UINT nType, int cx, int cy)
 	if (pListControl != nullptr)
 	{
 		pListControl->SetWindowPos(nullptr, margin, yPosListControl, cx - 2 * margin, listHeight, SWP_NOZORDER);
+	}
+
+	if (pCurTime != nullptr)
+	{
+		pCurTime->SetWindowPos(nullptr, xPosTime, yPosTime, timeWidth, timeHeight, SWP_NOZORDER);
 	}
 }
 

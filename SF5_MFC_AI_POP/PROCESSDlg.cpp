@@ -49,7 +49,7 @@ BOOL PROCESSDlg::OnInitDialog()
 	CDialogEx::OnInitDialog();
 
 	// TODO:  Add extra initialization here
-	ShowWindow(SW_SHOWMAXIMIZED); // 최대화
+	//ShowWindow(SW_SHOWMAXIMIZED); // 최대화
 
 	SetTimer(1, 1000, NULL);
 	updateChart();
@@ -80,6 +80,11 @@ void PROCESSDlg::updateChart()
 
 	// Set the plot area at (30, 20) and of size 200 x 200 pixels
 	c->setPlotArea(30, 20, 200, 200);
+	c->setBackground(0x454C54);
+
+	// Hide x-axis and y-axis labels
+	c->xAxis()->setLabelStyle("arial.ttf", 8, 0xffffff); // Adjust font and color as needed
+	c->yAxis()->setLabelStyle("arial.ttf", 8, 0xffffff); // Adjust font and color as needed
 
 	// Convert yData to DoubleArray
 	double* yArray = new double[yData.size()];
