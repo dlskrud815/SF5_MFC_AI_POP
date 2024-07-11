@@ -65,6 +65,7 @@ void CSF5MFCAIPOPDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_LIST_ERROR, m_listCtrl);
 	DDX_Control(pDX, IDC_STATIC_Test1, m_test1);
 	DDX_Control(pDX, IDC_STATIC_Test2, m_test2);
+	DDX_Control(pDX, IDC_STATIC_RESULT, m_result);
 }
 
 BEGIN_MESSAGE_MAP(CSF5MFCAIPOPDlg, CDialogEx)
@@ -255,13 +256,7 @@ void CSF5MFCAIPOPDlg::OnSize(UINT nType, int cx, int cy)
 
 void CSF5MFCAIPOPDlg::OnBnClickedButton1()
 {
-	// Create and start the threads
-	CWinThread* pThreadCur = AfxBeginThread(Thread_DB_Get_Cur, this);
-	CWinThread* pThreadVib = AfxBeginThread(Thread_DB_Get_Vib, this);
 
-	// Create and start the wait thread, passing the thread handles
-	HANDLE hThreads[2] = { pThreadCur->m_hThread, pThreadVib->m_hThread };
-	AfxBeginThread(Thread_DB_Wait, hThreads);
 }
 
 
@@ -271,15 +266,15 @@ UINT CSF5MFCAIPOPDlg::ThreadTest(LPVOID _mothod)
 	CSF5MFCAIPOPDlg* pDlg = (CSF5MFCAIPOPDlg*)_mothod;
 
 	// MySQLConnector 객체 생성
-	MySQL_Connector mysql;
+	MySQL_Connector* mysql = new MySQL_Connector();
 	int i = 0;
 
 	// 데이터베이스 서버 연결
-	if (mysql.connect("tcp://127.0.0.1:3306", "user", "1234", "chatting_project")) // 수정
+	if (mysql->connect("tcp://127.0.0.1:3306", "user", "1234", "chatting_project")) // 수정
 	{
-		while (mysql.getData(i)) // db에 다음행이 있을 때까지
+		while (mysql->getData(i)) // db에 다음행이 있을 때까지
 		{
-			CString message = mysql.getMessage();
+			CString message = mysql->getMessage();
 			CString strIndex;
 			strIndex.Format(_T("%d"), i);  // i 값을 문자열로 변환
 
@@ -298,82 +293,8 @@ UINT CSF5MFCAIPOPDlg::ThreadTest(LPVOID _mothod)
 	return 0;
 }
 
-
-UINT CSF5MFCAIPOPDlg::Thread_DB_Wait(LPVOID _mothod)
-{
-	HANDLE* hThreads = (HANDLE*)_mothod;
-
-	// Wait for both threads to finish
-	WaitForMultipleObjects(2, hThreads, TRUE, INFINITE);
-
-	// Display the message box after both threads are done
-	AfxMessageBox(_T("데이터베이스 양측 수신 완료"));
-
-	return 0;
-}
-
-
-UINT CSF5MFCAIPOPDlg::Thread_DB_Get_Cur(LPVOID _mothod)
-{
-	CSF5MFCAIPOPDlg* pDlg = (CSF5MFCAIPOPDlg*)_mothod; // pParam을 CSF5MFCAIPOPDlg 객체로 변환	
-	MySQL_Connector mysql; // MySQLConnector 객체 생성
-
-	// 데이터베이스 서버 연결
-	if (mysql.connect("tcp://127.0.0.1:3306", "user", "1234", "chatting_project")) // 수정
-	{ 
-		Sleep(2000);
-
-		if (mysql.getID()) 
-		{
-			CString message = mysql.getMessage();
-			pDlg->m_test1.SetWindowText(message);
-		}
-		else 
-		{
-			pDlg->MessageBox(_T("데이터를 받아오지 못 했습니다."), _T("오류"), MB_OK | MB_ICONERROR);
-		}
-	}
-	else {
-		pDlg->MessageBox(_T("데이터베이스 연결 실패"), _T("오류"), MB_OK | MB_ICONERROR);
-	}
-
-	//스레드 함수 종료 시
-	return 0;
-}
-
-
-UINT CSF5MFCAIPOPDlg::Thread_DB_Get_Vib(LPVOID _mothod)
-{
-	CSF5MFCAIPOPDlg* pDlg = (CSF5MFCAIPOPDlg*)_mothod; // pParam을 CSF5MFCAIPOPDlg 객체로 변환	
-	MySQL_Connector mysql; // MySQLConnector 객체 생성
-
-	// 데이터베이스 서버 연결
-	if (mysql.connect("tcp://127.0.0.1:3306", "user", "1234", "chatting_project")) // 수정
-	{
-		Sleep(5000);
-
-		if (mysql.getFrom()) 
-		{
-			CString message = mysql.getMessage();
-			pDlg->m_test2.SetWindowText(message);
-		}
-		else 
-		{
-			pDlg->MessageBox(_T("데이터를 받아오지 못 했습니다."), _T("오류"), MB_OK | MB_ICONERROR);
-		}	
-	}
-	else {
-		pDlg->MessageBox(_T("데이터베이스 연결 실패"), _T("오류"), MB_OK | MB_ICONERROR);
-	}
-
-	//스레드 함수 종료 시
-	return 0;
-}
-
-
 void CSF5MFCAIPOPDlg::OnBnClickedButton2()
 {
-	// TODO: Add your control notification handler code here
 	PROCESSDlg proDlg;
 	proDlg.DoModal();
 }

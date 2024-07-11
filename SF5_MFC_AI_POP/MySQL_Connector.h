@@ -4,6 +4,7 @@
 #include <cppconn/exception.h>
 #include <cppconn/prepared_statement.h>
 #include <string>
+#include <vector>
 
 #include "SF5_MFC_AI_POPDlg.h"
 
@@ -23,8 +24,13 @@ public:
     bool connect(string server, string username, string password, string database);
     bool login(string id, string pw);
     bool getData(int i);
-    CString getMessage();
 
+    vector<double> fetchDataFromTable(string tableName, int offset);
+    void getTable(vector<double> dataset);
+
+    CString data2;
+
+    CString getMessage();
 
     bool getID();
     bool getFrom();

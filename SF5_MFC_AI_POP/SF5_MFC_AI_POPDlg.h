@@ -3,10 +3,9 @@
 //
 
 #pragma once
-
 #include "MySQL_Connector.h"
-#include <string>
 
+using namespace std;
 
 // CSF5MFCAIPOPDlg dialog
 class CSF5MFCAIPOPDlg : public CDialogEx
@@ -47,16 +46,16 @@ protected:
 	CListCtrl m_listCtrl;
 
 	// sync 맞추기
-	static UINT Thread_DB_Wait(LPVOID _mothod);
-	static UINT Thread_DB_Get_Cur(LPVOID _mothod);
-	static UINT Thread_DB_Get_Vib(LPVOID _mothod);
-	
+	//static UINT Thread_DB_Wait(LPVOID _mothod);
+	//static UINT Thread_DB_Get_Cur(LPVOID _mothod);
+	//static UINT Thread_DB_Get_Vib(LPVOID _mothod);
+	//void winHttp(MySQL_Connector* mysql1, MySQL_Connector* mysql2);
+
 	DECLARE_MESSAGE_MAP()
 
 public:
 	afx_msg void OnBnClickedButton1();
 	afx_msg void OnBnClickedButton2();
 
-	CStatic m_test1;
-	CStatic m_test2;
+	CStatic m_test1, m_test2, m_result;
 };

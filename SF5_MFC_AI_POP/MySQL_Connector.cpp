@@ -84,3 +84,53 @@ bool MySQL_Connector::getFrom()
         return false;
     }
 }
+
+vector<double> MySQL_Connector::fetchDataFromTable(string tableName, int offset)
+{
+    string col, data, column_name;
+    vector<double> data_set;
+    try {
+        pstmt = con->prepareStatement("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '" + tableName + "' ORDER BY ORDINAL_POSITION LIMIT 1 OFFSET ?");
+        pstmt->setString(1, to_string(offset));
+        result = pstmt->executeQuery();
+
+        if (result->next()) {
+            col = result->getString(1).c_str();
+        }
+        pstmt = con->prepareStatement("select " + col + " from pop." + tableName);
+        result = pstmt->executeQuery();
+
+        while (result->next()) {
+            data = result->getString(1).c_str();
+            data_set.push_back(stod(data));
+        }
+
+        return data_set;
+    }
+    catch (sql::SQLException& e) {
+        cerr << "SQLException: " << e.what() << endl;
+    }
+}
+
+void MySQL_Connector::getTable(vector<double> dataset)
+{
+    string output;
+    int i = 0;
+
+    for (double num : dataset)
+    {
+        i++;
+
+        if (i >= dataset.size())
+        {
+            output += to_string(num);
+        }
+        else
+        {
+            output += to_string(num) + ", ";
+        }
+    }
+
+    this->data2 = output.c_str();
+}
+
