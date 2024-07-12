@@ -25,6 +25,8 @@ public:
     bool login(string id, string pw);
     bool getData(int i);
 
+    bool newAdmin(string id, string pw);
+
     vector<double> fetchDataFromTable(string tableName, int offset);
     void getTable(vector<double> dataset);
 

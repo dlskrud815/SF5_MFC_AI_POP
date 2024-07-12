@@ -84,6 +84,7 @@ BEGIN_MESSAGE_MAP(CSF5MFCAIPOPDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON1, &CSF5MFCAIPOPDlg::OnBnClickedButton1)
 	ON_BN_CLICKED(IDC_BUTTON2, &CSF5MFCAIPOPDlg::OnBnClickedButton2)
 	ON_WM_TIMER()
+	ON_BN_CLICKED(IDC_BUTTON3, &CSF5MFCAIPOPDlg::OnBnClickedButton3)
 END_MESSAGE_MAP()
 
 
@@ -340,41 +341,51 @@ void CSF5MFCAIPOPDlg::OnBnClickedButton1()
 	//HANDLE hThreads[2] = { pThreadCur->m_hThread, pThreadVib->m_hThread };
 	//WaitForMultipleObjects(2, hThreads, TRUE, INFINITE);
 
-	CThreadTest::Thread_DB_Wait();
+	while (1)
+	{
+		CThreadTest::Thread_DB_Wait();
 
-	string cur = CThreadTest::strCur;
-	string vib = CThreadTest::strVib;
+		string cur = CThreadTest::strCur;
+		string vib = CThreadTest::strVib;
 
-	CStringA A_cur(cur.c_str());
-	CStringA A_vib(vib.c_str());
-	CStringA result = winHttp(A_vib, A_cur);
+		CString C_cur(cur.c_str());
+		CString C_vib(vib.c_str());
 
-	vector<int> parse = parsing(result);
+		CStringA A_cur(cur.c_str());
+		CStringA A_vib(vib.c_str());
 
-	string cur_result, vib_result;
+		//AfxMessageBox(C_cur);
+		//AfxMessageBox(C_vib);
 
-	if (parse.size() >= 2) {
-		if (parse[0] == 1)
-		{
-			cur_result = "전류 이상";
+		CStringA result = winHttp(A_vib, A_cur);
+
+		vector<int> parse = parsing(result);
+
+		string cur_result, vib_result;
+
+		if (parse.size() >= 2) {
+			if (parse[0] == 1)
+			{
+				cur_result = "전류 이상";
+			}
+			else
+			{
+				cur_result = "전류 정상";
+			}
+
+			if (parse[1] == 1)
+			{
+				vib_result = "진동 이상";
+			}
+			else
+			{
+				vib_result = "진동 정상";
+			}
 		}
-		else
-		{
-			cur_result = "전류 정상";
-		}
 
-		if (parse[1] == 1)
-		{
-			vib_result = "진동 이상";
-		}
-		else
-		{
-			vib_result = "진동 정상";
-		}
+		m_listCtrl.InsertItem(0, CString(cur_result.c_str()));
+		m_listCtrl.SetItem(0, 1, LVIF_TEXT, CString(vib_result.c_str()), 0, 0, 0, NULL);
 	}
-
-	m_listCtrl.InsertItem(0, CString(cur_result.c_str()));
-	m_listCtrl.SetItem(0, 1, LVIF_TEXT, CString(vib_result.c_str()), 0, 0, 0, NULL);
 }
 
 
@@ -572,3 +583,51 @@ UINT CSF5MFCAIPOPDlg::Thread_DB_Get_Vib(LPVOID _method)
 	return 0;
 }
 
+
+
+void CSF5MFCAIPOPDlg::OnBnClickedButton3()
+{
+	// TODO: Add your control notification handler code here
+
+	CWinThread* p1 = NULL;
+	p1 = AfxBeginThread(ThreadTest2, this);
+	//새 스레드 시작 - 현재 객체를 스레드 함수에 전달
+
+	if (p1 == NULL) //스레드 생성 실패 시
+	{
+		AfxMessageBox(L"Error");
+	}
+}
+
+UINT CSF5MFCAIPOPDlg::ThreadTest2(LPVOID _mothod)
+{
+	// pParam을 CSF5MFCAIPOPDlg 객체로 변환
+	CSF5MFCAIPOPDlg* pDlg = (CSF5MFCAIPOPDlg*)_mothod;
+
+	// MySQLConnector 객체 생성
+	MySQL_Connector* mysql = new MySQL_Connector();
+	int i = 0;
+
+	// 데이터베이스 서버 연결
+	if (mysql->connect("tcp://127.0.0.1:3306", "user", "1234", "chatting_project")) // 수정
+	{
+		while (mysql->getData(i)) // db에 다음행이 있을 때까지
+		{
+			CString message = mysql->getMessage();
+			CString strIndex;
+			strIndex.Format(_T("%d"), i);  // i 값을 문자열로 변환
+
+			pDlg->m_listCtrl.InsertItem(0, strIndex);
+			pDlg->m_listCtrl.SetItem(0, 1, LVIF_TEXT, message, 0, 0, 0, NULL);
+
+			Sleep(1000); //1초 대기
+			i++;
+		}
+	}
+	else {
+		pDlg->MessageBox(_T("데이터베이스 연결 실패"), _T("오류"), MB_OK | MB_ICONERROR);
+	}
+
+	//스레드 함수 종료 시
+	return 0;
+}

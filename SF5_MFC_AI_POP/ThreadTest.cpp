@@ -16,7 +16,7 @@ void CThreadTest::Thread_DB_Get_Cur()
     int i = 0;
     string output;
 
-    if (mysql->connect("tcp://192.168.1.241:3306", "Nia", "0000", "pop"))
+    if (mysql->connect("tcp://192.168.1.245:3306", "Nia", "0000", "pop"))
     {
         vector<double> cur = mysql->fetchDataFromTable("current", offsetCur++);
 
@@ -47,7 +47,7 @@ void CThreadTest::Thread_DB_Get_Vib()
     int i = 0;
     string output;
 
-    if (mysql->connect("tcp://192.168.1.241:3306", "Nia", "0000", "pop"))
+    if (mysql->connect("tcp://192.168.1.245:3306", "Nia", "0000", "pop"))
     {
         vector<double> vib = mysql->fetchDataFromTable("vibration", offsetVib++);
 

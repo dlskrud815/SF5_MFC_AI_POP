@@ -47,31 +47,49 @@ void SIGNINDlg::OnBnClickedOk()
 	
 	CString code = _T("0000");
 	
+	if (m_userCode == "")
+	{
+		MessageBox(_T("관리자 코드를 입력해주세요."), _T("오류"), MB_OK | MB_ICONERROR);
+	}
+	else if (m_userCode != code)
+	{
+		MessageBox(_T("관리자 코드가 아닙니다."), _T("오류"), MB_OK | MB_ICONERROR);
+	}
+	else if (m_userID_sign == "")
+	{
+		MessageBox(_T("아이디를 입력해주세요."), _T("오류"), MB_OK | MB_ICONERROR);
+	}
+	else if (m_userPW_sign == "")
+	{
+		MessageBox(_T("비밀번호를 입력해주세요."), _T("오류"), MB_OK | MB_ICONERROR);
+	}
+	else if (m_userRePW_sign != m_userPW_sign)
+	{
+		MessageBox(_T("비밀번호가 일치하지 않습니다."), _T("오류"), MB_OK | MB_ICONERROR);
+	}
+	else
+	{
+		// MySQLConnector 객체 생성
+		MySQL_Connector mysql;
 
-	//CStringA strIdA(m_userID), strPwA(m_userPW);
-	//string stdID(strIdA.GetBuffer()), stdPW(strPwA.GetBuffer());
+		string id = string(CT2CA(m_userID_sign));
+		string pw = string(CT2CA(m_userPW_sign));
 
-	//// MySQLConnector 객체 생성
-	//MySQL_Connector mysql;
-
-	//// 데이터베이스 서버 연결
-	//if (mysql.connect("tcp://192.168.1.245", "Nia", "0000", "pop"))
-	//	//if (mysql.connect("tcp://127.0.0.1:3306", "user", "1234", "chatting_project")) // 수정
-	//{
-	//	// 로그인 처리
-	//	if (mysql.login(stdID, stdPW)) {
-	//		MessageBox(_T("로그인 성공"), _T("알림"), MB_OK | MB_ICONINFORMATION);
-	//		// 로그인 성공 후 다음 작업 수행
-
-	//		CDialogEx::OnOK();
-	//	}
-	//	else {
-	//		MessageBox(_T("아이디 또는 비밀번호가 틀렸습니다."), _T("오류"), MB_OK | MB_ICONERROR);
-	//	}
-	//}
-	//else {
-	//	MessageBox(_T("데이터베이스 연결 실패"), _T("오류"), MB_OK | MB_ICONERROR);
-	//}
-
-	CDialogEx::OnOK();
+		// 데이터베이스 서버 연결
+		if (mysql.connect("tcp://192.168.1.245:3306", "Nia", "0000", "pop"))
+		{
+			// 로그인 처리
+			if (mysql.newAdmin(id, pw)) 
+			{
+				MessageBox(_T("새로운 관리자님을 환영합니다:)"), _T("알림"), MB_OK | MB_ICONINFORMATION);
+				CDialogEx::OnOK();
+			}
+			else {
+				MessageBox(_T("관리자 계정 생성 실패"), _T("오류"), MB_OK | MB_ICONERROR);
+			}
+		}
+		else {
+			MessageBox(_T("데이터베이스 연결 실패"), _T("오류"), MB_OK | MB_ICONERROR);
+		}
+	}
 }

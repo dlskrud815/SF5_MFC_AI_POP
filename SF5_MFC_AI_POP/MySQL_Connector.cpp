@@ -134,3 +134,17 @@ void MySQL_Connector::getTable(vector<double> dataset)
     this->data2 = output.c_str();
 }
 
+bool MySQL_Connector::newAdmin(string id, string pw)
+{
+    try {
+        pstmt = con->prepareStatement("INSERT INTO user (id, pw) VALUES (?, ?)");
+        pstmt->setString(1, id);
+        pstmt->setString(2, pw);
+        pstmt->executeUpdate();
+
+        return true;
+    }
+    catch (sql::SQLException& e) {
+        return false;
+    }
+}

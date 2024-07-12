@@ -45,6 +45,7 @@ protected:
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
 
 	static UINT ThreadTest(LPVOID _mothod);
+	static UINT ThreadTest2(LPVOID _mothod);
 
 
 	CStringA winHttp(CStringA vib, CStringA cur);
@@ -68,4 +69,5 @@ public:
 	afx_msg void OnBnClickedButton2();
 
 	CStatic m_test1, m_test2, m_result;
+	afx_msg void OnBnClickedButton3();
 };
