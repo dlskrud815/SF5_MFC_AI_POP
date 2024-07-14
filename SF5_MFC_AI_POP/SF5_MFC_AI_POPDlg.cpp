@@ -683,46 +683,56 @@ LRESULT CSF5MFCAIPOPDlg::OnNoticeRobotError(WPARAM wParam, LPARAM lParam)
 
 LRESULT CSF5MFCAIPOPDlg::OnNoticeList(WPARAM wParam, LPARAM lParam)
 {
-	CString* pNotice = (CString*)wParam;
+	const CString& notice = *((CString*)wParam);
 
-	CString strIndex, result1, result2, result3;
+	CString strIndex;
 	strIndex.Format(_T("%d"), listIndex++);
 
 	CTime currentTime = CTime::GetCurrentTime();
 	CString strTime = currentTime.Format(L"%Y-%m-%d %H:%M:%S");
 
-	if (*pNotice == L"플라스틱 이상")
+	CString result1, result2, result3;
+
+	if (notice.Compare(L"플라스틱 이상") == 0)
 	{
 		result1 = L"경보 발생";
 		result2 = L"소성가공";
 		result3 = L"설비 이상";
 	}
-	else if (*pNotice == L"전류 이상")
+	//else if (notice.Compare(L"플라스틱 API 에러") == 0)
+	//{
+	//	result1 = L"API 에러";
+	//	result2 = L"소성가공";
+	//	result3 = L"서버 이상";
+	//}
+	else if (notice.Compare(L"전류 이상") == 0)
 	{
 		result1 = L"경보 발생";
 		result2 = L"로봇 용접";
 		result3 = L"전류 이상";
 	}
-	else if (*pNotice == L"진동 이상")
+	else if (notice.Compare(L"진동 이상") == 0)
 	{
 		result1 = L"경보 발생";
 		result2 = L"로봇 용접";
 		result3 = L"진동 이상";
 	}
-	else if (*pNotice == L"열처리 이상")
+	else if (notice.Compare(L"열처리 이상") == 0)
 	{
 		result1 = L"경보 발생";
 		result2 = L"소성가공";
 		result3 = L"설비 이상";
 	}
 
-	delete pNotice; // 메모리 해제
+	if (!result1.IsEmpty() && !result2.IsEmpty() && !result3.IsEmpty())
+	{
+		m_listCtrl.InsertItem(0, CString(strIndex));
+		m_listCtrl.SetItem(0, 1, LVIF_TEXT, CString(strTime), 0, 0, 0, NULL);
+		m_listCtrl.SetItem(0, 2, LVIF_TEXT, CString(result1), 0, 0, 0, NULL);
+		m_listCtrl.SetItem(0, 3, LVIF_TEXT, CString(result2), 0, 0, 0, NULL);
+		m_listCtrl.SetItem(0, 4, LVIF_TEXT, CString(result3), 0, 0, 0, NULL);
+	}
 
-	m_listCtrl.InsertItem(0, CString(strIndex));
-	m_listCtrl.SetItem(0, 1, LVIF_TEXT, CString(strTime), 0, 0, 0, NULL);
-	m_listCtrl.SetItem(0, 2, LVIF_TEXT, CString(result1), 0, 0, 0, NULL);
-	m_listCtrl.SetItem(0, 3, LVIF_TEXT, CString(result2), 0, 0, 0, NULL);
-	m_listCtrl.SetItem(0, 4, LVIF_TEXT, CString(result3), 0, 0, 0, NULL);
-
+	delete (CString*)wParam; // 메모리 해제
 	return 0;
 }
