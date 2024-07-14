@@ -9,6 +9,8 @@
 #include "afxdialogex.h"
 #include "LOGINDlg.h"
 #include "PROCESSDlg.h"
+#include <string>
+#include <iostream>
 
 #include <winhttp.h>
 #pragma comment(lib, "winhttp.lib")
@@ -18,10 +20,10 @@
 #endif
 
 
-CString CSF5MFCAIPOPDlg::strCur;
-CString CSF5MFCAIPOPDlg::strVib;
-int CSF5MFCAIPOPDlg::offsetCur = 10;
-int CSF5MFCAIPOPDlg::offsetVib = 10;
+//CString CSF5MFCAIPOPDlg::strCur;
+//CString CSF5MFCAIPOPDlg::strVib;
+//int CSF5MFCAIPOPDlg::offsetCur = 10;
+//int CSF5MFCAIPOPDlg::offsetVib = 10;
 CCriticalSection CSF5MFCAIPOPDlg::critSect;
 
 // CAboutDlg dialog used for App About
@@ -84,7 +86,6 @@ BEGIN_MESSAGE_MAP(CSF5MFCAIPOPDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON1, &CSF5MFCAIPOPDlg::OnBnClickedButton1)
 	ON_BN_CLICKED(IDC_BUTTON2, &CSF5MFCAIPOPDlg::OnBnClickedButton2)
 	ON_WM_TIMER()
-	ON_BN_CLICKED(IDC_BUTTON3, &CSF5MFCAIPOPDlg::OnBnClickedButton3)
 END_MESSAGE_MAP()
 
 
@@ -144,6 +145,11 @@ BOOL CSF5MFCAIPOPDlg::OnInitDialog()
 	m_listCtrl.InsertColumn(0, L"상태", LVCFMT_LEFT, 100, -1);
 	m_listCtrl.InsertColumn(0, L"시간", LVCFMT_LEFT, 200, -1);
 	m_listCtrl.InsertColumn(0, L"순번", LVCFMT_LEFT, 100, -1);
+
+
+	
+
+
 
 	//CWinThread* p1 = NULL;
 	//p1 = AfxBeginThread(ThreadTest, this);
@@ -263,44 +269,39 @@ void CSF5MFCAIPOPDlg::OnSize(UINT nType, int cx, int cy)
 }
 
 
-UINT CSF5MFCAIPOPDlg::ThreadTest(LPVOID _mothod)
-{
-	// pParam을 CSF5MFCAIPOPDlg 객체로 변환
-	CSF5MFCAIPOPDlg* pDlg = (CSF5MFCAIPOPDlg*)_mothod;
+//UINT CSF5MFCAIPOPDlg::ThreadTest(LPVOID _mothod)
+//{
+//	// pParam을 CSF5MFCAIPOPDlg 객체로 변환
+//	CSF5MFCAIPOPDlg* pDlg = (CSF5MFCAIPOPDlg*)_mothod;
+//
+//	// MySQLConnector 객체 생성
+//	MySQL_Connector* mysql = new MySQL_Connector();
+//	int i = 0;
+//
+//	// 데이터베이스 서버 연결
+//	if (mysql->connect("tcp://127.0.0.1:3306", "user", "1234", "chatting_project")) // 수정
+//	{
+//		while (mysql->getData(i)) // db에 다음행이 있을 때까지
+//		{
+//			CString message = mysql->getMessage();
+//			CString strIndex;
+//			strIndex.Format(_T("%d"), i);  // i 값을 문자열로 변환
+//
+//			pDlg->m_listCtrl.InsertItem(0, strIndex);
+//			pDlg->m_listCtrl.SetItem(0, 1, LVIF_TEXT, message, 0, 0, 0, NULL);
+//
+//			Sleep(1000); //1초 대기
+//			i++;
+//		}
+//	}
+//	else {
+//		pDlg->MessageBox(_T("데이터베이스 연결 실패"), _T("오류"), MB_OK | MB_ICONERROR);
+//	}
+//
+//	//스레드 함수 종료 시
+//	return 0;
+//}
 
-	// MySQLConnector 객체 생성
-	MySQL_Connector* mysql = new MySQL_Connector();
-	int i = 0;
-
-	// 데이터베이스 서버 연결
-	if (mysql->connect("tcp://127.0.0.1:3306", "user", "1234", "chatting_project")) // 수정
-	{
-		while (mysql->getData(i)) // db에 다음행이 있을 때까지
-		{
-			CString message = mysql->getMessage();
-			CString strIndex;
-			strIndex.Format(_T("%d"), i);  // i 값을 문자열로 변환
-
-			pDlg->m_listCtrl.InsertItem(0, strIndex);
-			pDlg->m_listCtrl.SetItem(0, 1, LVIF_TEXT, message, 0, 0, 0, NULL);
-
-			Sleep(1000); //1초 대기
-			i++;
-		}
-	}
-	else {
-		pDlg->MessageBox(_T("데이터베이스 연결 실패"), _T("오류"), MB_OK | MB_ICONERROR);
-	}
-
-	//스레드 함수 종료 시
-	return 0;
-}
-
-void CSF5MFCAIPOPDlg::OnBnClickedButton2()
-{
-	PROCESSDlg proDlg;
-	proDlg.DoModal();
-}
 
 void CSF5MFCAIPOPDlg::OnTimer(UINT_PTR nIDEvent)
 {
@@ -341,55 +342,76 @@ void CSF5MFCAIPOPDlg::OnBnClickedButton1()
 	//HANDLE hThreads[2] = { pThreadCur->m_hThread, pThreadVib->m_hThread };
 	//WaitForMultipleObjects(2, hThreads, TRUE, INFINITE);
 
-	while (1)
-	{
-		CThreadTest::Thread_DB_Wait();
+	CThreadTest::Thread_DB_Wait();
 
-		string cur = CThreadTest::strCur;
-		string vib = CThreadTest::strVib;
+	CStringA jsonData;
+	jsonData = prepareData(ROBOT);
 
-		CString C_cur(cur.c_str());
-		CString C_vib(vib.c_str());
+	wstring endpoint = SendPostRequest(ROBOT);
 
-		CStringA A_cur(cur.c_str());
-		CStringA A_vib(vib.c_str());
+	CStringA result = winHttp(jsonData, endpoint, 5001);
 
-		//AfxMessageBox(C_cur);
-		//AfxMessageBox(C_vib);
+	vector<int> parse = parsing_robot(result);
 
-		CStringA result = winHttp(A_vib, A_cur);
+	string cur_result, vib_result;
 
-		vector<int> parse = parsing(result);
-
-		string cur_result, vib_result;
-
-		if (parse.size() >= 2) {
-			if (parse[0] == 1)
-			{
-				cur_result = "전류 이상";
-			}
-			else
-			{
-				cur_result = "전류 정상";
-			}
-
-			if (parse[1] == 1)
-			{
-				vib_result = "진동 이상";
-			}
-			else
-			{
-				vib_result = "진동 정상";
-			}
+	if (parse.size() >= 2) {
+		if (parse[0] == 1)
+		{
+			cur_result = "전류 이상";
+		}
+		else
+		{
+			cur_result = "전류 정상";
 		}
 
-		m_listCtrl.InsertItem(0, CString(cur_result.c_str()));
-		m_listCtrl.SetItem(0, 1, LVIF_TEXT, CString(vib_result.c_str()), 0, 0, 0, NULL);
+		if (parse[1] == 1)
+		{
+			vib_result = "진동 이상";
+		}
+		else
+		{
+			vib_result = "진동 정상";
+		}
 	}
+
+	m_listCtrl.InsertItem(0, CString(cur_result.c_str()));
+	m_listCtrl.SetItem(0, 1, LVIF_TEXT, CString(vib_result.c_str()), 0, 0, 0, NULL);
 }
 
+void CSF5MFCAIPOPDlg::OnBnClickedButton2()
+{
+	//PROCESSDlg proDlg;
+	//proDlg.DoModal();
 
-vector<int> CSF5MFCAIPOPDlg::parsing(CStringA response)
+	CThreadTest::Thread_DB_Wait_Plastic();
+
+	CStringA jsonData;
+	jsonData = prepareData(PLASTIC);
+
+	wstring endpoint = SendPostRequest(PLASTIC);
+
+	CStringA result = winHttp(jsonData, endpoint, 5002);
+
+	vector<int> parse = parsing_plastic(result);
+
+	string v0Result, v1Result, c1Result;
+
+	if (parse.size() >= 3) {
+		if (parse[0] == 1)
+		{
+			v0Result = "prediction 0";
+		}
+		else
+		{
+			v0Result = "prediction 1";
+		}
+	}
+
+	m_listCtrl.InsertItem(0, CString(v0Result.c_str()));
+}
+
+vector<int> CSF5MFCAIPOPDlg::parsing_robot(CStringA response)
 {
 	// JSON 파싱을 위한 간단한 문자열 처리
 	CStringA vibToken = "\"vib_result\":";
@@ -418,8 +440,85 @@ vector<int> CSF5MFCAIPOPDlg::parsing(CStringA response)
 	return { vibResult, curResult };
 }
 
+vector<int> CSF5MFCAIPOPDlg::parsing_plastic(CStringA response) {
 
-CStringA CSF5MFCAIPOPDlg::winHttp(CStringA vib, CStringA cur)
+	// JSON 파싱을 위한 간단한 문자열 처리
+	CStringA v0Token = "\"prediction_result\":";
+
+	// v0_Result  추출
+	int v0Result = 0;
+	int posV0 = response.Find(v0Token);
+	if (posV0 >= 0)
+	{
+		posV0 += v0Token.GetLength();
+		CStringA v0ValueStr = response.Mid(posV0);
+		v0Result = atoi(v0ValueStr); // atoi 함수를 사용하여 문자열을 정수로 변환
+	}
+
+	return { v0Result };
+}
+
+CStringA CSF5MFCAIPOPDlg::prepareData(tName process) {
+	CStringA jsonData;
+	switch (process) {
+	case ROBOT: {
+		string cur = CThreadTest::strCur;
+		string vib = CThreadTest::strVib;
+
+		CStringA A_cur(cur.c_str());
+		CStringA A_vib(vib.c_str());
+
+		jsonData.Format("{\"vibration\": [%s], \"current\": [%s]}", A_vib, A_cur);
+		break;
+	}
+	case PLASTIC: {
+		string v0 = CThreadTest::strV0;
+		string v1 = CThreadTest::strV1;
+		string c1 = CThreadTest::strC1;
+
+		CStringA A_v0(v0.c_str());
+		CStringA A_v1(v1.c_str());
+		CStringA A_c1(c1.c_str());
+
+		jsonData.Format("{\"V0\": [%s], \"V1\": [%s], \"C1\": [%s]}", A_v0, A_v1, A_c1);
+		break;
+	}
+	default:
+		AfxMessageBox(_T("Unknown process"));
+		return CStringA("");
+	}
+
+	return jsonData;
+}
+
+wstring CSF5MFCAIPOPDlg::StringToWideString(const string& str) {
+	int size_needed = MultiByteToWideChar(CP_UTF8, 0, str.c_str(), (int)str.size(), NULL, 0);
+	wstring wstrTo(size_needed, 0);
+	MultiByteToWideChar(CP_UTF8, 0, str.c_str(), (int)str.size(), &wstrTo[0], size_needed);
+	return wstrTo;
+}
+
+
+wstring CSF5MFCAIPOPDlg::SendPostRequest(tName process)
+{
+	wstring endpoint;
+	switch (process) {
+	case ROBOT:
+		endpoint = L"/api/robot_welding_predicitive_maintenance";
+		break;
+	case PLASTIC:
+		endpoint = L"/api/plastic_working_predicitive_maintenance";
+		break;
+	default:
+		AfxMessageBox(_T("Unknown process"));
+		return  L" ";
+	}
+
+
+	return endpoint;
+}
+
+CStringA CSF5MFCAIPOPDlg::winHttp(CStringA jsonData, wstring endpoint, int port)
 {
 	CStringA response;
 
@@ -430,17 +529,12 @@ CStringA CSF5MFCAIPOPDlg::winHttp(CStringA vib, CStringA cur)
 
 	if (hSession)
 	{
-		HINTERNET hConnect = WinHttpConnect(hSession, L"127.0.0.1", 5000, 0);
+		HINTERNET hConnect = WinHttpConnect(hSession, L"127.0.0.1", port, 0);
 
 		if (hConnect)
 		{
-			CStringA jsonData;
-			jsonData.Format("{\"vibration\": [%s], \"current\": [%s]}", vib, cur);
-
-			HINTERNET hRequest = WinHttpOpenRequest(hConnect, L"POST", L"/api/robot_welding_predicitive_maintenance",
-				NULL, WINHTTP_NO_REFERER,
-				WINHTTP_DEFAULT_ACCEPT_TYPES,
-				0);
+			HINTERNET hRequest = WinHttpOpenRequest(hConnect, L"POST", endpoint.c_str(),
+				NULL, WINHTTP_NO_REFERER, WINHTTP_DEFAULT_ACCEPT_TYPES, 0);
 
 			if (hRequest)
 			{
@@ -462,7 +556,7 @@ CStringA CSF5MFCAIPOPDlg::winHttp(CStringA vib, CStringA cur)
 						DWORD dwSize = 0;
 						DWORD dwDownloaded = 0;
 						LPSTR pszOutBuffer;
-						
+
 						do
 						{
 							dwSize = 0;
@@ -514,120 +608,72 @@ CStringA CSF5MFCAIPOPDlg::winHttp(CStringA vib, CStringA cur)
 }
 
 
-UINT CSF5MFCAIPOPDlg::Thread_DB_Get_Cur(LPVOID _method)
-{
-	MySQL_Connector* mysql = new MySQL_Connector();
-	int i = 0;
-	string output;
 
-	if (mysql->connect("tcp://192.168.1.241:3306", "Nia", "0000", "pop"))
-	{
-		vector<double> cur = mysql->fetchDataFromTable("current", offsetCur);
-
-		// 크리티컬 영역 지정
-		critSect.Lock();
-
-		for (double num : cur)
-		{
-			i++;
-			if (i >= cur.size())
-			{
-				output += to_string(num);
-			}
-			else
-			{
-				output += to_string(num) + ", ";
-			}
-		}
-
-		strCur = output.c_str();
-		critSect.Unlock();
-	}
-
-	delete mysql;
-	return 0;
-}
-
-
-UINT CSF5MFCAIPOPDlg::Thread_DB_Get_Vib(LPVOID _method)
-{
-	MySQL_Connector* mysql = new MySQL_Connector();
-	int i = 0;
-	string output;
-
-	if (mysql->connect("tcp://192.168.1.241:3306", "Nia", "0000", "pop"))
-	{
-		vector<double> vib = mysql->fetchDataFromTable("vibration", offsetVib);
-
-		// 크리티컬 영역 지정
-		critSect.Lock();
-
-		for (double num : vib)
-		{
-			i++;
-			if (i >= vib.size())
-			{
-				output += to_string(num);
-			}
-			else
-			{
-				output += to_string(num) + ", ";
-			}
-		}
-
-		strVib = output.c_str();
-		critSect.Unlock();
-	}
-
-	delete mysql;
-	return 0;
-}
-
-
-
-void CSF5MFCAIPOPDlg::OnBnClickedButton3()
-{
-	// TODO: Add your control notification handler code here
-
-	CWinThread* p1 = NULL;
-	p1 = AfxBeginThread(ThreadTest2, this);
-	//새 스레드 시작 - 현재 객체를 스레드 함수에 전달
-
-	if (p1 == NULL) //스레드 생성 실패 시
-	{
-		AfxMessageBox(L"Error");
-	}
-}
-
-UINT CSF5MFCAIPOPDlg::ThreadTest2(LPVOID _mothod)
-{
-	// pParam을 CSF5MFCAIPOPDlg 객체로 변환
-	CSF5MFCAIPOPDlg* pDlg = (CSF5MFCAIPOPDlg*)_mothod;
-
-	// MySQLConnector 객체 생성
-	MySQL_Connector* mysql = new MySQL_Connector();
-	int i = 0;
-
-	// 데이터베이스 서버 연결
-	if (mysql->connect("tcp://127.0.0.1:3306", "user", "1234", "chatting_project")) // 수정
-	{
-		while (mysql->getData(i)) // db에 다음행이 있을 때까지
-		{
-			CString message = mysql->getMessage();
-			CString strIndex;
-			strIndex.Format(_T("%d"), i);  // i 값을 문자열로 변환
-
-			pDlg->m_listCtrl.InsertItem(0, strIndex);
-			pDlg->m_listCtrl.SetItem(0, 1, LVIF_TEXT, message, 0, 0, 0, NULL);
-
-			Sleep(1000); //1초 대기
-			i++;
-		}
-	}
-	else {
-		pDlg->MessageBox(_T("데이터베이스 연결 실패"), _T("오류"), MB_OK | MB_ICONERROR);
-	}
-
-	//스레드 함수 종료 시
-	return 0;
-}
+//UINT CSF5MFCAIPOPDlg::Thread_DB_Get_Cur(LPVOID _method)
+//{
+//	MySQL_Connector* mysql = new MySQL_Connector();
+//	int i = 0;
+//	string output;
+//
+//	if (mysql->connect("tcp://192.168.1.241:3306", "Nia", "0000", "pop"))
+//	{
+//		vector<double> cur = mysql->fetchDataFromTable("current", offsetCur);
+//
+//		// 크리티컬 영역 지정
+//		critSect.Lock();
+//
+//		for (double num : cur)
+//		{
+//			i++;
+//			if (i >= cur.size())
+//			{
+//				output += to_string(num);
+//			}
+//			else
+//			{
+//				output += to_string(num) + ", ";
+//			}
+//		}
+//
+//		strCur = output.c_str();
+//		critSect.Unlock();
+//	}
+//
+//	delete mysql;
+//	return 0;
+//}
+//
+//
+//UINT CSF5MFCAIPOPDlg::Thread_DB_Get_Vib(LPVOID _method)
+//{
+//	MySQL_Connector* mysql = new MySQL_Connector();
+//	int i = 0;
+//	string output;
+//
+//	if (mysql->connect("tcp://192.168.1.241:3306", "Nia", "0000", "pop"))
+//	{
+//		vector<double> vib = mysql->fetchDataFromTable("vibration", offsetVib);
+//
+//		// 크리티컬 영역 지정
+//		critSect.Lock();
+//
+//		for (double num : vib)
+//		{
+//			i++;
+//			if (i >= vib.size())
+//			{
+//				output += to_string(num);
+//			}
+//			else
+//			{
+//				output += to_string(num) + ", ";
+//			}
+//		}
+//
+//		strVib = output.c_str();
+//		critSect.Unlock();
+//	}
+//
+//	delete mysql;
+//	return 0;
+//}

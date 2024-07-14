@@ -45,21 +45,26 @@ protected:
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
 
 	static UINT ThreadTest(LPVOID _mothod);
-	static UINT ThreadTest2(LPVOID _mothod);
 
 
-	CStringA winHttp(CStringA vib, CStringA cur);
-	vector<int> parsing(CStringA response);
-	static UINT Thread_DB_Get_Cur(LPVOID _method);
-	static UINT Thread_DB_Get_Vib(LPVOID _method);
-	
-	static CString strCur;
-	static CString strVib;
+	CStringA winHttp(CStringA jsonData, wstring endpoint, int port);
+	vector<int> parsing_robot(CStringA response);
+	vector<int> parsing_plastic(CStringA response);
+
+	static wstring StringToWideString(const string& str);
+	static CStringA prepareData(tName process);
+	static wstring SendPostRequest(tName process);
+
+	//static UINT Thread_DB_Get_Cur(LPVOID _method);
+	//static UINT Thread_DB_Get_Vib(LPVOID _method);
+
+	//static CString strCur;
+	//static CString strVib;
 	static CCriticalSection critSect;
 	static int offsetCur;
 	static int offsetVib;
 
-	
+
 	CListCtrl m_listCtrl;
 
 	DECLARE_MESSAGE_MAP()
@@ -69,5 +74,4 @@ public:
 	afx_msg void OnBnClickedButton2();
 
 	CStatic m_test1, m_test2, m_result;
-	afx_msg void OnBnClickedButton3();
 };

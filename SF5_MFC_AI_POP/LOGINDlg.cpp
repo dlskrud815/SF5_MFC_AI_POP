@@ -54,7 +54,7 @@ void LOGINDlg::OnBnClickedOk()
 	MySQL_Connector mysql;
 
 	// 데이터베이스 서버 연결
-	if (mysql.connect("tcp://192.168.1.245:3306", "Nia", "0000", "pop"))
+	if (mysql.connect("tcp://127.0.0.1:3306", "Nia", "0000", "pop"))
 	//if (mysql.connect("tcp://127.0.0.1:3306", "user", "1234", "chatting_project")) // 수정
 	{ 
 		// 로그인 처리

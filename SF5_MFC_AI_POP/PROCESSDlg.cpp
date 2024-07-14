@@ -40,7 +40,7 @@ void PROCESSDlg::DoDataExchange(CDataExchange* pDX)
 
 BEGIN_MESSAGE_MAP(PROCESSDlg, CDialogEx)
 	ON_WM_TIMER()
-	ON_BN_CLICKED(IDC_BUTTON1, &PROCESSDlg::OnBnClickedButton1)
+	//ON_BN_CLICKED(IDC_BUTTON1, &PROCESSDlg::OnBnClickedButton1)
 END_MESSAGE_MAP()
 
 
@@ -53,7 +53,7 @@ BOOL PROCESSDlg::OnInitDialog()
 
 	// TODO:  Add extra initialization here
 	//ShowWindow(SW_SHOWMAXIMIZED); // 최대화
-	
+
 	SetTimer(1, 1000, NULL);
 	updateChart();
 
@@ -107,7 +107,7 @@ void PROCESSDlg::updateChart()
 	delete[] yArray;
 }
 
-
+/*
 void PROCESSDlg::OnBnClickedButton1()
 {
 	// TODO: Add your control notification handler code here
@@ -145,12 +145,12 @@ UINT PROCESSDlg::Thread_DB_Wait(LPVOID _mothod)
 
 	// Display the message box after both threads are done
 	AfxMessageBox(_T("데이터베이스 양측 수신 완료"));
-	
+
 	if (pDlg != nullptr)
 	{
 		pDlg->winHttp(mysql1, mysql2);
 	}
-	
+
 	return 0;
 }
 
@@ -182,7 +182,7 @@ UINT PROCESSDlg::Thread_DB_Get_Vib(LPVOID _mothod)
 	MySQL_Connector* mysql = data->mysql;
 
 	// 데이터베이스 서버 연결
-	if (mysql->connect("tcp://192.168.1.241:3306", "Nia", "0000", "pop")) // 수정
+	if (mysql->connect("tcp://127.0.0.1:3306", "Nia", "0000", "pop")) // 수정
 	{
 		mysql->getTable(mysql->fetchDataFromTable("vibration", 10));
 	}
@@ -287,3 +287,4 @@ void PROCESSDlg::winHttp(MySQL_Connector* mysql1, MySQL_Connector* mysql2)
 		WinHttpCloseHandle(hSession);
 	}
 }
+*/

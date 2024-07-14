@@ -27,7 +27,7 @@ public:
 
     bool newAdmin(string id, string pw);
 
-    vector<double> fetchDataFromTable(string tableName, int offset);
+    vector<double> fetchDataFromTable(tNum tableName, int offset);
     void getTable(vector<double> dataset);
 
     CString data2;
@@ -42,6 +42,5 @@ private:
     sql::Connection* con;
     sql::Statement* stmt;
     sql::PreparedStatement* pstmt;
-    sql::ResultSet* result; // 추후 스레드별 result 변수 추가
+    sql::ResultSet* result;  // 추후 스레드별 result 변수 추가
 };
-

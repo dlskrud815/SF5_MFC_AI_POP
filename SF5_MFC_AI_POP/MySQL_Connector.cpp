@@ -85,31 +85,121 @@ bool MySQL_Connector::getFrom()
     }
 }
 
-vector<double> MySQL_Connector::fetchDataFromTable(string tableName, int offset)
+vector<double> MySQL_Connector::fetchDataFromTable(tNum process, int offset)
 {
-    string col, data, column_name;
-    vector<double> data_set;
-    try {
-        pstmt = con->prepareStatement("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '" + tableName + "' ORDER BY ORDINAL_POSITION LIMIT 1 OFFSET ?");
-        pstmt->setString(1, to_string(offset));
-        result = pstmt->executeQuery();
+    switch (process) {
 
-        if (result->next()) {
-            col = result->getString(1).c_str();
+    case ROBOT_CUR:
+        try {
+            string col, data;
+            vector<double> data_set;
+
+            pstmt = con->prepareStatement("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'current' ORDER BY ORDINAL_POSITION LIMIT 1 OFFSET ?");
+            pstmt->setString(1, to_string(offset));
+            result = pstmt->executeQuery();
+
+            if (result->next()) {
+                col = result->getString(1).c_str();
+            }
+            pstmt = con->prepareStatement("select " + col + " from pop.current");
+            result = pstmt->executeQuery();
+
+            while (result->next()) {
+                data = result->getString(1).c_str();
+                data_set.push_back(stod(data));
+            }
+
+            return data_set;
         }
-        pstmt = con->prepareStatement("select " + col + " from pop." + tableName);
-        result = pstmt->executeQuery();
-
-        while (result->next()) {
-            data = result->getString(1).c_str();
-            data_set.push_back(stod(data));
+        catch (sql::SQLException& e) {
+            cerr << "SQLException: " << e.what() << endl;
         }
+    case ROBOT_VIB:
+        try {
+            string col, data;
+            vector<double> data_set;
 
-        return data_set;
+            pstmt = con->prepareStatement("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'vibration' ORDER BY ORDINAL_POSITION LIMIT 1 OFFSET ?");
+            pstmt->setString(1, to_string(offset));
+            result = pstmt->executeQuery();
+
+            if (result->next()) {
+                col = result->getString(1).c_str();
+            }
+            pstmt = con->prepareStatement("select " + col + " from pop.vibration");
+            result = pstmt->executeQuery();
+
+            while (result->next()) {
+                data = result->getString(1).c_str();
+                data_set.push_back(stod(data));
+            }
+
+            return data_set;
+        }
+        catch (sql::SQLException& e) {
+            cerr << "SQLException: " << e.what() << endl;
+        }
+    case PLASTIC_V0:
+        try {
+            string data;
+            vector<double> data_set;
+
+            pstmt = con->prepareStatement("SELECT AI0_Vibration FROM pop.plastic LIMIT 20 OFFSET ?");
+            pstmt->setString(1, to_string(offset - 1));
+            result = pstmt->executeQuery();
+
+            while (result->next()) {
+                data = result->getString(1).c_str();
+                data_set.push_back(stod(data));
+            }
+
+            return data_set;
+        }
+        catch (sql::SQLException& e) {
+            cerr << "SQLException: " << e.what() << endl;
+        }
+    case PLASTIC_V1:
+        try {
+            string data;
+            vector<double> data_set;
+
+            pstmt = con->prepareStatement("SELECT AI1_Vibration FROM pop.plastic LIMIT 20 OFFSET ?");
+            pstmt->setString(1, to_string(offset - 1));
+            result = pstmt->executeQuery();
+
+            while (result->next()) {
+                data = result->getString(1).c_str();
+                data_set.push_back(stod(data));
+            }
+
+            return data_set;
+        }
+        catch (sql::SQLException& e) {
+            cerr << "SQLException: " << e.what() << endl;
+        }
+    case PLASTIC_C1:
+        try {
+            string data;
+            vector<double> data_set;
+
+            pstmt = con->prepareStatement("SELECT AI2_Current FROM pop.plastic LIMIT 20 OFFSET ?");
+            pstmt->setString(1, to_string(offset - 1));
+            result = pstmt->executeQuery();
+
+            while (result->next()) {
+                data = result->getString(1).c_str();
+                data_set.push_back(stod(data));
+            }
+
+            return data_set;
+        }
+        catch (sql::SQLException& e) {
+            cerr << "SQLException: " << e.what() << endl;
+        }
+        //case HEAT_NUM:
+
     }
-    catch (sql::SQLException& e) {
-        cerr << "SQLException: " << e.what() << endl;
-    }
+
 }
 
 void MySQL_Connector::getTable(vector<double> dataset)

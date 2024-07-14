@@ -10,4 +10,7 @@
 // add headers that you want to pre-compile here
 #include "framework.h"
 
+enum tName { ROBOT, PLASTIC, HEAT };
+enum tNum { ROBOT_CUR, ROBOT_VIB, PLASTIC_V0, PLASTIC_V1, PLASTIC_C1, HEAT_NUM };
+
 #endif //PCH_H

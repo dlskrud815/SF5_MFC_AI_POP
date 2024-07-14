@@ -32,7 +32,7 @@ protected:
 	void updateChart();
 	void OnTimer(UINT_PTR nIDEvent);
 
-	void winHttp(MySQL_Connector* mysql1, MySQL_Connector* mysql2);
+	//void winHttp(MySQL_Connector* mysql1, MySQL_Connector* mysql2);
 	CCriticalSection cs; // 동기화 객체
 
 	DECLARE_MESSAGE_MAP()
@@ -41,13 +41,13 @@ public:
 	CChartViewer m_chartView;
 	vector<int> xData, yData;
 
-	// sync 맞추기
-	static UINT Thread_DB_Wait(LPVOID _mothod);
-	static UINT Thread_DB_Get_Cur(LPVOID _mothod);
-	static UINT Thread_DB_Get_Vib(LPVOID _mothod);
+	//// sync 맞추기
+	//static UINT Thread_DB_Wait(LPVOID _mothod);
+	//static UINT Thread_DB_Get_Cur(LPVOID _mothod);
+	//static UINT Thread_DB_Get_Vib(LPVOID _mothod);
 
 	virtual BOOL OnInitDialog();
-	afx_msg void OnBnClickedButton1();
+	//afx_msg void OnBnClickedButton1();
 };
 
 struct ThreadData
