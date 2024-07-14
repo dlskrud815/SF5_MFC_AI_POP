@@ -25,6 +25,6 @@ public:
     static void Thread_DB_Get_Vib();
     static void Thread_DB_Get_Plastic();
 
-    static int Thread_DB_Wait();
+    static int Thread_DB_Wait_Robot();
     static int Thread_DB_Wait_Plastic();
 };

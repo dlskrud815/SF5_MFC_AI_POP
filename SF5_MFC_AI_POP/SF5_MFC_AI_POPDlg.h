@@ -68,18 +68,30 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 public:
-	afx_msg void OnBnClickedButton1();
+	afx_msg void OnBnClickedButtonRobot();
 	afx_msg void OnBnClickedButtonPlastic();
 
-	CStatic m_test1, m_test2, m_result;
+	static int listIndex;
+	afx_msg LRESULT OnNoticeList(WPARAM wParam, LPARAM lParam);
 
 
 	static UINT MainThread(LPVOID _mothod);
 
+
 	static UINT TimeUpdateThread(LPVOID _mothod);
 	afx_msg LRESULT OnUpdateTime(WPARAM wParam, LPARAM lParam);
 
-	afx_msg LRESULT OnNoticePlasticError(WPARAM wParam, LPARAM lParam);
+
+	HANDLE m_hPlasticThread = nullptr; // 소성가공 스레드 핸들 추가
+	HANDLE m_hRobotThread = nullptr; // 로봇용접 스레드 핸들 추가
+
+	
 	CEvent m_eventPlasticThread; // 이벤트 객체 선언
 	static UINT PlasticThread(LPVOID pParam); // 대기 스레드 함수 선언
+	afx_msg LRESULT OnNoticePlasticError(WPARAM wParam, LPARAM lParam);
+
+
+	CEvent m_eventRobotThread; // 이벤트 객체 선언
+	static UINT RobotThread(LPVOID pParam); // 대기 스레드 함수 선언
+	afx_msg LRESULT OnNoticeRobotError(WPARAM wParam, LPARAM lParam);
 };

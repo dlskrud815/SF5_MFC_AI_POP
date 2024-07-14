@@ -93,7 +93,7 @@ int CThreadTest::Thread_DB_Wait_Plastic() {
     return 0;
 }
 
-int CThreadTest::Thread_DB_Wait()
+int CThreadTest::Thread_DB_Wait_Robot()
 {
     thread t1(Thread_DB_Get_Cur);
     thread t2(Thread_DB_Get_Vib);

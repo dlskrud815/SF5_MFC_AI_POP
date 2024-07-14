@@ -20,13 +20,18 @@
 #endif
 
 #define WM_UPDATE_TIME (WM_APP + 1)
-#define WM_NOTICE_PLASTIC (WM_APP + 2)
+#define WM_NOTICE_ROBOT (WM_APP + 2)
+#define WM_NOTICE_PLASTIC (WM_APP + 3)
+#define WM_NOTICE_LIST (WM_APP + 4)
 
 //CString CSF5MFCAIPOPDlg::strCur;
 //CString CSF5MFCAIPOPDlg::strVib;
 //int CSF5MFCAIPOPDlg::offsetCur = 10;
 //int CSF5MFCAIPOPDlg::offsetVib = 10;
 CCriticalSection CSF5MFCAIPOPDlg::critSect;
+
+
+int CSF5MFCAIPOPDlg::listIndex = 1;
 
 // CAboutDlg dialog used for App About
 
@@ -73,9 +78,6 @@ void CSF5MFCAIPOPDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_LIST_ERROR, m_listCtrl);
-	DDX_Control(pDX, IDC_STATIC_Test1, m_test1);
-	DDX_Control(pDX, IDC_STATIC_Test2, m_test2);
-	DDX_Control(pDX, IDC_STATIC_PLSTICE_NOTICE, m_result);
 }
 
 BEGIN_MESSAGE_MAP(CSF5MFCAIPOPDlg, CDialogEx)
@@ -83,10 +85,12 @@ BEGIN_MESSAGE_MAP(CSF5MFCAIPOPDlg, CDialogEx)
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
 	ON_WM_SIZE()
-	ON_BN_CLICKED(IDC_BUTTON1, &CSF5MFCAIPOPDlg::OnBnClickedButton1)
+	ON_BN_CLICKED(IDC_BUTTON_ROBOT, &CSF5MFCAIPOPDlg::OnBnClickedButtonRobot)
 	ON_BN_CLICKED(IDC_BUTTON_PLASTIC, &CSF5MFCAIPOPDlg::OnBnClickedButtonPlastic)
 	ON_MESSAGE(WM_UPDATE_TIME, &CSF5MFCAIPOPDlg::OnUpdateTime)
+	ON_MESSAGE(WM_NOTICE_ROBOT, &CSF5MFCAIPOPDlg::OnNoticeRobotError)
 	ON_MESSAGE(WM_NOTICE_PLASTIC, &CSF5MFCAIPOPDlg::OnNoticePlasticError)
+	ON_MESSAGE(WM_NOTICE_LIST, &CSF5MFCAIPOPDlg::OnNoticeList)
 	//ON_WM_TIMER()
 END_MESSAGE_MAP()
 
@@ -137,15 +141,12 @@ BOOL CSF5MFCAIPOPDlg::OnInitDialog()
 	ShowWindow(SW_SHOWMAXIMIZED); // 최대화
 	//back.Load(_T("res\\img\\BACK1.png"));
 
-	// 타이머를 설정하여 1초마다 시간을 업데이트합니다.
-	//SetTimer(m_nTimerID, 1000, nullptr);
-
 
 	// 리스트 칼럼 넣기
 	m_listCtrl.InsertColumn(0, L"메시지", LVCFMT_LEFT, 400, -1);
 	m_listCtrl.InsertColumn(0, L"설비", LVCFMT_LEFT, 200, -1);
-	m_listCtrl.InsertColumn(0, L"상태", LVCFMT_LEFT, 100, -1);
-	m_listCtrl.InsertColumn(0, L"시간", LVCFMT_LEFT, 200, -1);
+	m_listCtrl.InsertColumn(0, L"상태", LVCFMT_LEFT, 200, -1);
+	m_listCtrl.InsertColumn(0, L"시간", LVCFMT_LEFT, 300, -1);
 	m_listCtrl.InsertColumn(0, L"순번", LVCFMT_LEFT, 100, -1);
 
 	// 메인 스레드 생성
@@ -261,83 +262,6 @@ void CSF5MFCAIPOPDlg::OnSize(UINT nType, int cx, int cy)
 }
 
 
-//void CSF5MFCAIPOPDlg::OnTimer(UINT_PTR nIDEvent)
-//{
-//	// 타이머가 발생하면 현재 시각을 업데이트합니다.
-//	if (nIDEvent == m_nTimerID)
-//	{
-//		UpdateCurrentTime();
-//	}
-//
-//	CDialogEx::OnTimer(nIDEvent);
-//}
-//
-//void CSF5MFCAIPOPDlg::UpdateCurrentTime()
-//{
-//	// 현재 시간을 가져옵니다.
-//	CTime currentTime = CTime::GetCurrentTime();
-//
-//	// 포맷을 설정하고 문자열로 변환합니다.
-//	CString strTime = currentTime.Format(_T("%Y-%m-%d %H:%M:%S"));
-//
-//	// IDC_STATIC_TIME은 다이얼로그 디자이너에서 생성된 스태틱 텍스트 컨트롤의 ID입니다.
-//	CWnd* pWnd = GetDlgItem(IDC_STATIC_CURRENT_TIME);
-//
-//	if (pWnd)
-//	{
-//		pWnd->SetWindowText(strTime);
-//	}
-//}
-
-
-void CSF5MFCAIPOPDlg::OnBnClickedButton1()
-{
-	//CWinThread* p1 = AfxBeginThread(ThreadTest, this);
-
-	//CWinThread* pThreadCur = AfxBeginThread(Thread_DB_Get_Cur, this);
-	//CWinThread* pThreadVib = AfxBeginThread(Thread_DB_Get_Vib, this);
-
-	//HANDLE hThreads[2] = { pThreadCur->m_hThread, pThreadVib->m_hThread };
-	//WaitForMultipleObjects(2, hThreads, TRUE, INFINITE);
-
-	CThreadTest::Thread_DB_Wait();
-
-	CStringA jsonData;
-	jsonData = prepareData(ROBOT);
-
-	wstring endpoint = SendPostRequest(ROBOT);
-
-	CStringA result = winHttp(jsonData, endpoint, 5001);
-
-	vector<int> parse = parsing_robot(result);
-
-	string cur_result, vib_result;
-
-	if (parse.size() >= 2) {
-		if (parse[0] == 1)
-		{
-			cur_result = "전류 이상";
-		}
-		else
-		{
-			cur_result = "전류 정상";
-		}
-
-		if (parse[1] == 1)
-		{
-			vib_result = "진동 이상";
-		}
-		else
-		{
-			vib_result = "진동 정상";
-		}
-	}
-
-	m_listCtrl.InsertItem(0, CString(cur_result.c_str()));
-	m_listCtrl.SetItem(0, 1, LVIF_TEXT, CString(vib_result.c_str()), 0, 0, 0, NULL);
-}
-
-
 vector<int> CSF5MFCAIPOPDlg::parsing_robot(CStringA response)
 {
 	// JSON 파싱을 위한 간단한 문자열 처리
@@ -424,7 +348,6 @@ wstring CSF5MFCAIPOPDlg::StringToWideString(const string& str) {
 	MultiByteToWideChar(CP_UTF8, 0, str.c_str(), (int)str.size(), &wstrTo[0], size_needed);
 	return wstrTo;
 }
-
 
 wstring CSF5MFCAIPOPDlg::SendPostRequest(tName process)
 {
@@ -544,10 +467,6 @@ UINT CSF5MFCAIPOPDlg::MainThread(LPVOID _method)
 	CWinThread* pTimeThread = AfxBeginThread(TimeUpdateThread, (LPVOID)pDlg);
 	if (pTimeThread == NULL) AfxMessageBox(L"TimeUpdateThread Create Error");
 
-	CWinThread* pPlasticThread = AfxBeginThread(PlasticThread, (LPVOID)pDlg);
-	if (pPlasticThread == NULL) AfxMessageBox(L"TimeUpdateThread Create Error");
-
-
 	return 0;
 }
 
@@ -590,20 +509,6 @@ LRESULT CSF5MFCAIPOPDlg::OnUpdateTime(WPARAM wParam, LPARAM lParam)
 }
 
 
-LRESULT CSF5MFCAIPOPDlg::OnNoticePlasticError(WPARAM wParam, LPARAM lParam)
-{
-	CString* pNotice = (CString*)wParam;
-
-	if (pNotice)
-	{
-		SetDlgItemText(IDC_STATIC_PLSTICE_NOTICE, *pNotice); // IDC_STATIC_PLSTICE_NOTICE로 변경
-		delete pNotice; // 메모리 해제
-	}
-
-	return 0;
-}
-
-
 UINT CSF5MFCAIPOPDlg::PlasticThread(LPVOID pParam)
 {
 	CSF5MFCAIPOPDlg* pDlg = (CSF5MFCAIPOPDlg*)pParam;
@@ -630,16 +535,72 @@ UINT CSF5MFCAIPOPDlg::PlasticThread(LPVOID pParam)
 		if (parse.size() >= 1) {
 			if (parse[0] == 1)
 			{
-				notice = L"플라스틱 정상";
+				notice = L"플라스틱 이상";
 			}
 			else
 			{
-				notice = L"플라스틱 이상";
+				notice = L"플라스틱 정상";
+				pDlg->PostMessage(WM_NOTICE_LIST, (WPARAM)new CString(notice));
 			}
 		}
 
 		pDlg->PostMessage(WM_NOTICE_PLASTIC, (WPARAM)new CString(notice)); // CString 동적 할당 없이 수정
 	}
+
+	// 스레드 종료 후 이벤트 초기화
+	pDlg->m_eventPlasticThread.ResetEvent();
+
+	return 0;
+}
+
+UINT CSF5MFCAIPOPDlg::RobotThread(LPVOID pParam)
+{
+	CSF5MFCAIPOPDlg* pDlg = (CSF5MFCAIPOPDlg*)pParam;
+
+	// 대기 상태에서 이벤트를 기다립니다.
+	DWORD dwWaitResult = WaitForSingleObject(pDlg->m_eventRobotThread, INFINITE);
+
+	// 이벤트가 설정되면 다음 작업을 수행합니다.
+	if (dwWaitResult == WAIT_OBJECT_0)
+	{
+		CThreadTest::Thread_DB_Wait_Robot();
+
+		CStringA jsonData;
+		jsonData = prepareData(ROBOT);
+
+		wstring endpoint = SendPostRequest(ROBOT);
+
+		CStringA result = pDlg->winHttp(jsonData, endpoint, 5001);
+
+		vector<int> parse = pDlg->parsing_robot(result);
+
+		CString notice;
+
+		if (parse.size() >= 2) {
+			if (parse[0] == 1)
+			{
+				notice = L"전류 이상";
+			}
+			else
+			{
+				notice = L"전류 정상";
+			}
+
+			if (parse[1] == 1)
+			{
+				notice = L"진동 이상";
+			}
+			else
+			{
+				notice = L"진동 정상";
+			}
+		}
+
+		pDlg->PostMessage(WM_NOTICE_ROBOT, (WPARAM)new CString(notice)); // CString 동적 할당 없이 수정
+	}
+
+	// 스레드 종료 후 이벤트 초기화
+	pDlg->m_eventRobotThread.ResetEvent();
 
 	return 0;
 }
@@ -649,6 +610,119 @@ void CSF5MFCAIPOPDlg::OnBnClickedButtonPlastic()
 	//PROCESSDlg proDlg;
 	//proDlg.DoModal();
 
-	// 버튼 클릭 시 이벤트를 설정하여 대기 중인 스레드를 깨웁니다.
+	// 이전 스레드 핸들이 있는 경우 종료
+	if (m_hPlasticThread != nullptr)
+	{
+		::CloseHandle(m_hPlasticThread);
+		m_hPlasticThread = nullptr;
+	}
+
+	// 스레드 핸들 초기화
+	m_hPlasticThread = (HANDLE)_beginthreadex(NULL, 0, &PlasticThread, this, 0, NULL);
+	if (m_hPlasticThread == nullptr)
+	{
+		AfxMessageBox(_T("Error creating plastic thread."));
+		return;
+	}
+
+	// 이벤트 설정하여 스레드를 깨움
 	m_eventPlasticThread.SetEvent();
+}
+
+void CSF5MFCAIPOPDlg::OnBnClickedButtonRobot()
+{
+	//PROCESSDlg proDlg;
+	//proDlg.DoModal();
+
+	// 이전 스레드 핸들이 있는 경우 종료
+	if (m_hRobotThread != nullptr)
+	{
+		::CloseHandle(m_hRobotThread);
+		m_hRobotThread = nullptr;
+	}
+
+	// 스레드 핸들 초기화
+	m_hRobotThread = (HANDLE)_beginthreadex(NULL, 0, &RobotThread, this, 0, NULL);
+	if (m_hRobotThread == nullptr)
+	{
+		AfxMessageBox(_T("Error creating robot thread."));
+		return;
+	}
+
+	// 이벤트 설정하여 스레드를 깨움
+	m_eventRobotThread.SetEvent();
+}
+
+
+LRESULT CSF5MFCAIPOPDlg::OnNoticePlasticError(WPARAM wParam, LPARAM lParam)
+{
+	CString* pNotice = (CString*)wParam;
+
+	if (pNotice)
+	{
+		SetDlgItemText(IDC_STATIC_PLASTIC_NOTICE, *pNotice);
+		delete pNotice; // 메모리 해제
+	}
+
+	return 0;
+}
+
+LRESULT CSF5MFCAIPOPDlg::OnNoticeRobotError(WPARAM wParam, LPARAM lParam)
+{
+	CString* pNotice = (CString*)wParam;
+
+	if (pNotice)
+	{
+		SetDlgItemText(IDC_STATIC_ROBOT_NOTICE, *pNotice);
+		delete pNotice; // 메모리 해제
+	}
+
+	return 0;
+}
+
+
+LRESULT CSF5MFCAIPOPDlg::OnNoticeList(WPARAM wParam, LPARAM lParam)
+{
+	CString* pNotice = (CString*)wParam;
+
+	CString strIndex, result1, result2, result3;
+	strIndex.Format(_T("%d"), listIndex++);
+
+	CTime currentTime = CTime::GetCurrentTime();
+	CString strTime = currentTime.Format(L"%Y-%m-%d %H:%M:%S");
+
+	if (*pNotice == L"플라스틱 이상")
+	{
+		result1 = L"경보 발생";
+		result2 = L"소성가공";
+		result3 = L"설비 이상";
+	}
+	else if (*pNotice == L"전류 이상")
+	{
+		result1 = L"경보 발생";
+		result2 = L"로봇 용접";
+		result3 = L"전류 이상";
+	}
+	else if (*pNotice == L"진동 이상")
+	{
+		result1 = L"경보 발생";
+		result2 = L"로봇 용접";
+		result3 = L"진동 이상";
+	}
+	else if (*pNotice == L"열처리 이상")
+	{
+		result1 = L"경보 발생";
+		result2 = L"소성가공";
+		result3 = L"설비 이상";
+	}
+
+	delete pNotice; // 메모리 해제
+
+	m_listCtrl.InsertItem(0, CString(strIndex));
+	m_listCtrl.SetItem(0, 1, LVIF_TEXT, CString(strTime), 0, 0, 0, NULL);
+	m_listCtrl.SetItem(0, 2, LVIF_TEXT, CString(result1), 0, 0, 0, NULL);
+	m_listCtrl.SetItem(0, 3, LVIF_TEXT, CString(result2), 0, 0, 0, NULL);
+	m_listCtrl.SetItem(0, 4, LVIF_TEXT, CString(result3), 0, 0, 0, NULL);
+
+	return 0;
 }
