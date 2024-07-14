@@ -20,6 +20,7 @@
 #endif
 
 #define WM_UPDATE_TIME (WM_APP + 1)
+#define WM_NOTICE_PLASTIC (WM_APP + 2)
 
 //CString CSF5MFCAIPOPDlg::strCur;
 //CString CSF5MFCAIPOPDlg::strVib;
@@ -74,7 +75,7 @@ void CSF5MFCAIPOPDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_LIST_ERROR, m_listCtrl);
 	DDX_Control(pDX, IDC_STATIC_Test1, m_test1);
 	DDX_Control(pDX, IDC_STATIC_Test2, m_test2);
-	DDX_Control(pDX, IDC_STATIC_RESULT, m_result);
+	DDX_Control(pDX, IDC_STATIC_PLSTICE_NOTICE, m_result);
 }
 
 BEGIN_MESSAGE_MAP(CSF5MFCAIPOPDlg, CDialogEx)
@@ -83,8 +84,9 @@ BEGIN_MESSAGE_MAP(CSF5MFCAIPOPDlg, CDialogEx)
 	ON_WM_QUERYDRAGICON()
 	ON_WM_SIZE()
 	ON_BN_CLICKED(IDC_BUTTON1, &CSF5MFCAIPOPDlg::OnBnClickedButton1)
-	ON_BN_CLICKED(IDC_BUTTON2, &CSF5MFCAIPOPDlg::OnBnClickedButton2)
+	ON_BN_CLICKED(IDC_BUTTON_PLASTIC, &CSF5MFCAIPOPDlg::OnBnClickedButtonPlastic)
 	ON_MESSAGE(WM_UPDATE_TIME, &CSF5MFCAIPOPDlg::OnUpdateTime)
+	ON_MESSAGE(WM_NOTICE_PLASTIC, &CSF5MFCAIPOPDlg::OnNoticePlasticError)
 	//ON_WM_TIMER()
 END_MESSAGE_MAP()
 
@@ -335,37 +337,6 @@ void CSF5MFCAIPOPDlg::OnBnClickedButton1()
 	m_listCtrl.SetItem(0, 1, LVIF_TEXT, CString(vib_result.c_str()), 0, 0, 0, NULL);
 }
 
-void CSF5MFCAIPOPDlg::OnBnClickedButton2()
-{
-	//PROCESSDlg proDlg;
-	//proDlg.DoModal();
-
-	CThreadTest::Thread_DB_Wait_Plastic();
-
-	CStringA jsonData;
-	jsonData = prepareData(PLASTIC);
-
-	wstring endpoint = SendPostRequest(PLASTIC);
-
-	CStringA result = winHttp(jsonData, endpoint, 5002);
-
-	vector<int> parse = parsing_plastic(result);
-
-	string v0Result, v1Result, c1Result;
-
-	if (parse.size() >= 3) {
-		if (parse[0] == 1)
-		{
-			v0Result = "prediction 0";
-		}
-		else
-		{
-			v0Result = "prediction 1";
-		}
-	}
-
-	m_listCtrl.InsertItem(0, CString(v0Result.c_str()));
-}
 
 vector<int> CSF5MFCAIPOPDlg::parsing_robot(CStringA response)
 {
@@ -547,7 +518,7 @@ CStringA CSF5MFCAIPOPDlg::winHttp(CStringA jsonData, wstring endpoint, int port)
 							}
 						} while (dwSize > 0);
 
-						AfxMessageBox(CString(response));
+						//AfxMessageBox(CString(response));
 					}
 				}
 
@@ -564,76 +535,6 @@ CStringA CSF5MFCAIPOPDlg::winHttp(CStringA jsonData, wstring endpoint, int port)
 }
 
 
-
-//UINT CSF5MFCAIPOPDlg::Thread_DB_Get_Cur(LPVOID _method)
-//{
-//	MySQL_Connector* mysql = new MySQL_Connector();
-//	int i = 0;
-//	string output;
-//
-//	if (mysql->connect("tcp://192.168.1.241:3306", "Nia", "0000", "pop"))
-//	{
-//		vector<double> cur = mysql->fetchDataFromTable("current", offsetCur);
-//
-//		// 크리티컬 영역 지정
-//		critSect.Lock();
-//
-//		for (double num : cur)
-//		{
-//			i++;
-//			if (i >= cur.size())
-//			{
-//				output += to_string(num);
-//			}
-//			else
-//			{
-//				output += to_string(num) + ", ";
-//			}
-//		}
-//
-//		strCur = output.c_str();
-//		critSect.Unlock();
-//	}
-//
-//	delete mysql;
-//	return 0;
-//}
-//
-//
-//UINT CSF5MFCAIPOPDlg::Thread_DB_Get_Vib(LPVOID _method)
-//{
-//	MySQL_Connector* mysql = new MySQL_Connector();
-//	int i = 0;
-//	string output;
-//
-//	if (mysql->connect("tcp://192.168.1.241:3306", "Nia", "0000", "pop"))
-//	{
-//		vector<double> vib = mysql->fetchDataFromTable("vibration", offsetVib);
-//
-//		// 크리티컬 영역 지정
-//		critSect.Lock();
-//
-//		for (double num : vib)
-//		{
-//			i++;
-//			if (i >= vib.size())
-//			{
-//				output += to_string(num);
-//			}
-//			else
-//			{
-//				output += to_string(num) + ", ";
-//			}
-//		}
-//
-//		strVib = output.c_str();
-//		critSect.Unlock();
-//	}
-//
-//	delete mysql;
-//	return 0;
-//}
-
 UINT CSF5MFCAIPOPDlg::MainThread(LPVOID _method)
 {
 	CSF5MFCAIPOPDlg* pDlg = (CSF5MFCAIPOPDlg*)_method;
@@ -641,10 +542,11 @@ UINT CSF5MFCAIPOPDlg::MainThread(LPVOID _method)
 
 	// Create the time update thread
 	CWinThread* pTimeThread = AfxBeginThread(TimeUpdateThread, (LPVOID)pDlg);
-	if (pTimeThread == NULL)
-	{
-		AfxMessageBox(L"TimeUpdateThread Create Error");
-	}
+	if (pTimeThread == NULL) AfxMessageBox(L"TimeUpdateThread Create Error");
+
+	CWinThread* pPlasticThread = AfxBeginThread(PlasticThread, (LPVOID)pDlg);
+	if (pPlasticThread == NULL) AfxMessageBox(L"TimeUpdateThread Create Error");
+
 
 	return 0;
 }
@@ -685,4 +587,68 @@ LRESULT CSF5MFCAIPOPDlg::OnUpdateTime(WPARAM wParam, LPARAM lParam)
 	}
 
 	return 0;
+}
+
+
+LRESULT CSF5MFCAIPOPDlg::OnNoticePlasticError(WPARAM wParam, LPARAM lParam)
+{
+	CString* pNotice = (CString*)wParam;
+
+	if (pNotice)
+	{
+		SetDlgItemText(IDC_STATIC_PLSTICE_NOTICE, *pNotice); // IDC_STATIC_PLSTICE_NOTICE로 변경
+		delete pNotice; // 메모리 해제
+	}
+
+	return 0;
+}
+
+
+UINT CSF5MFCAIPOPDlg::PlasticThread(LPVOID pParam)
+{
+	CSF5MFCAIPOPDlg* pDlg = (CSF5MFCAIPOPDlg*)pParam;
+
+	// 대기 상태에서 이벤트를 기다립니다.
+	DWORD dwWaitResult = WaitForSingleObject(pDlg->m_eventPlasticThread, INFINITE);
+
+	// 이벤트가 설정되면 다음 작업을 수행합니다.
+	if (dwWaitResult == WAIT_OBJECT_0)
+	{
+		CThreadTest::Thread_DB_Wait_Plastic();
+
+		CStringA jsonData;
+		jsonData = prepareData(PLASTIC);
+
+		wstring endpoint = SendPostRequest(PLASTIC);
+
+		CStringA result = pDlg->winHttp(jsonData, endpoint, 5002);
+
+		vector<int> parse = pDlg->parsing_plastic(result);
+
+		CString notice;
+
+		if (parse.size() >= 1) {
+			if (parse[0] == 1)
+			{
+				notice = L"플라스틱 정상";
+			}
+			else
+			{
+				notice = L"플라스틱 이상";
+			}
+		}
+
+		pDlg->PostMessage(WM_NOTICE_PLASTIC, (WPARAM)new CString(notice)); // CString 동적 할당 없이 수정
+	}
+
+	return 0;
+}
+
+void CSF5MFCAIPOPDlg::OnBnClickedButtonPlastic()
+{
+	//PROCESSDlg proDlg;
+	//proDlg.DoModal();
+
+	// 버튼 클릭 시 이벤트를 설정하여 대기 중인 스레드를 깨웁니다.
+	m_eventPlasticThread.SetEvent();
 }

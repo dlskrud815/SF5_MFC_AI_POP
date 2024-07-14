@@ -17,16 +17,15 @@
 #define IDC_LIST_ERROR                  1004
 #define IDC_STATIC_Test1                1005
 #define IDC_STATIC_Test2                1006
-#define IDC_BUTTON2                     1007
+#define IDC_BUTTON_PLASTIC              1007
 #define IDC_CHART1                      1008
 #define IDC_STATIC_CURRENT_TIME         1009
 #define IDC_BUTTON_SIGNIN               1010
 #define IDC_EDIT_CODE                   1011
 #define IDC_EDIT_ID_SIGN                1012
-#define IDC_STATIC_RESULT               1012
 #define IDC_EDIT_PW_SIGN                1013
-#define IDC_BUTTON3                     1013
 #define IDC_EDIT_RE_PW_SIGN             1014
+#define IDC_STATIC_PLSTICE_NOTICE       1015
 
 // Next default values for new objects
 // 

@@ -69,12 +69,17 @@ protected:
 
 public:
 	afx_msg void OnBnClickedButton1();
-	afx_msg void OnBnClickedButton2();
+	afx_msg void OnBnClickedButtonPlastic();
 
 	CStatic m_test1, m_test2, m_result;
 
 
 	static UINT MainThread(LPVOID _mothod);
+
 	static UINT TimeUpdateThread(LPVOID _mothod);
 	afx_msg LRESULT OnUpdateTime(WPARAM wParam, LPARAM lParam);
+
+	afx_msg LRESULT OnNoticePlasticError(WPARAM wParam, LPARAM lParam);
+	CEvent m_eventPlasticThread; // 이벤트 객체 선언
+	static UINT PlasticThread(LPVOID pParam); // 대기 스레드 함수 선언
 };
