@@ -28,4 +28,5 @@ protected:
 public:
 	afx_msg void OnBnClickedOk();
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
+	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 };

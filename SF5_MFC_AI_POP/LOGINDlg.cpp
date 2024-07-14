@@ -99,7 +99,7 @@ BOOL LOGINDlg::OnEraseBkgnd(CDC* pDC)
 	CRect rect;
 	GetClientRect(rect);
 
-	pDC->FillSolidRect(rect, RGB(67, 76, 84));	// 변경하고 싶은 색상 RGB색
+	pDC->FillSolidRect(rect, RGB(53, 58, 64));
 	return TRUE;
 
 	return CDialogEx::OnEraseBkgnd(pDC);

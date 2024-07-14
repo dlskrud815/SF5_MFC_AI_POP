@@ -187,6 +187,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="ChartViewer.h" />
+    <ClInclude Include="CustomStatic.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="LOGINDlg.h" />
     <ClInclude Include="MySQL_Connector.h" />
@@ -201,6 +202,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ChartViewer.cpp" />
+    <ClCompile Include="CustomStatic.cpp" />
     <ClCompile Include="LOGINDlg.cpp" />
     <ClCompile Include="MySQL_Connector.cpp" />
     <ClCompile Include="pch.cpp">
@@ -222,6 +224,7 @@
     <None Include="res\SF5MFCAIPOP.rc2" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="res\img\facility.png" />
     <Image Include="res\SF5_MFC_AI_POP.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

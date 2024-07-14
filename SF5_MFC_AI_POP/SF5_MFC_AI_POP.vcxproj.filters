@@ -51,6 +51,9 @@
     <ClInclude Include="ThreadTest.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="CustomStatic.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="SF5_MFC_AI_POP.cpp">
@@ -80,6 +83,9 @@
     <ClCompile Include="ThreadTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="CustomStatic.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="SF5MFCAIPOP.rc">
@@ -93,6 +99,9 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\SF5_MFC_AI_POP.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\img\facility.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

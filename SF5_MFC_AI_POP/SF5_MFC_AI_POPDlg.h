@@ -6,6 +6,7 @@
 
 #include "MySQL_Connector.h"
 #include "ThreadTest.h"
+#include "CustomStatic.h" // CCustomStatic 클래스 포함
 
 using namespace std;
 
@@ -62,7 +63,7 @@ protected:
 	static int offsetCur;
 	static int offsetVib;
 
-
+	CCustomStatic m_staticHeader, m_staticNotice1, m_staticNotice2, m_staticNotice3;
 	CListCtrl m_listCtrl;
 
 	DECLARE_MESSAGE_MAP()

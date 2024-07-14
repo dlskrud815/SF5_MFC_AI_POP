@@ -142,6 +142,22 @@ BOOL CSF5MFCAIPOPDlg::OnInitDialog()
 	ShowWindow(SW_SHOWMAXIMIZED); // 최대화
 	//back.Load(_T("res\\img\\BACK1.png"));
 
+		// 사용자 정의 스태틱 컨트롤 초기화
+	CRect rectHeader, rectNotice1, rectNotice2, rectNotice3;
+	GetDlgItem(IDC_STATIC_HEADER)->GetWindowRect(&rectHeader);
+	ScreenToClient(&rectHeader);
+	m_staticHeader.Create(_T(""), WS_VISIBLE | WS_CHILD | SS_NOTIFY, rectHeader, this);
+
+	GetDlgItem(IDC_STATIC_NOTICE1)->GetWindowRect(&rectNotice1);
+	ScreenToClient(&rectNotice1);
+	GetDlgItem(IDC_STATIC_NOTICE2)->GetWindowRect(&rectNotice2);
+	ScreenToClient(&rectNotice2);
+	GetDlgItem(IDC_STATIC_NOTICE3)->GetWindowRect(&rectNotice3);
+	ScreenToClient(&rectNotice3);
+
+	m_staticNotice1.Create(_T(""), WS_VISIBLE | WS_CHILD | SS_NOTIFY, rectNotice1, this);
+	m_staticNotice2.Create(_T(""), WS_VISIBLE | WS_CHILD | SS_NOTIFY, rectNotice2, this);
+	m_staticNotice3.Create(_T(""), WS_VISIBLE | WS_CHILD | SS_NOTIFY, rectNotice3, this);
 
 	// 리스트 칼럼 넣기
 	m_listCtrl.InsertColumn(0, L"메시지", LVCFMT_LEFT, 400, -1);
@@ -149,6 +165,27 @@ BOOL CSF5MFCAIPOPDlg::OnInitDialog()
 	m_listCtrl.InsertColumn(0, L"상태", LVCFMT_LEFT, 200, -1);
 	m_listCtrl.InsertColumn(0, L"시간", LVCFMT_LEFT, 300, -1);
 	m_listCtrl.InsertColumn(0, L"순번", LVCFMT_LEFT, 100, -1);
+
+	CStatic* pPictureControl = (CStatic*)GetDlgItem(IDC_STATIC_FACILITY);
+	if (pPictureControl != nullptr)
+	{
+		// PNG 이미지의 절대 경로 설정
+		CString absolutePath = L"res/img/facility.png";
+
+		// 이미지 객체 생성
+		CImage image;
+		HRESULT hr = image.Load(absolutePath);
+		if (SUCCEEDED(hr))
+		{
+			// 픽처 컨트롤에 이미지 설정
+			pPictureControl->SetBitmap(image.Detach());
+		}
+		else
+		{
+			// 이미지 로드 실패 처리
+			MessageBox(L"이미지를 로드할 수 없습니다.");
+		}
+	}
 
 	// 메인 스레드 생성
 	CWinThread* pMainThread = AfxBeginThread(MainThread, this);
@@ -218,44 +255,57 @@ void CSF5MFCAIPOPDlg::OnSize(UINT nType, int cx, int cy)
 {
 	CDialogEx::OnSize(nType, cx, cy);
 
-	// TODO: Add your message handler code here
 	const int buttonWidth = 150;
 	const int buttonHeight = 40;
 	const int margin = 20;
+	const int headerHeight = 100; // 헤더의 높이
+	const int headerMargin = 5; // 헤더의 상하좌우 여백 크기
 
-	const int timeWidth = 300;
-	const int timeHeight = 40;
-
-	const int listHeight = 500;
-
+	// 버튼 위치 계산
 	int xPosCancel = cx - buttonWidth - margin;
 	int xPosOK = xPosCancel - buttonWidth - margin;
-	int yPos = timeHeight + 2 * margin;
+	int yPosButtons = headerHeight + margin;
+
+	// 리스트 컨트롤 위치 계산
+	const int listHeight = 500;
 	int yPosListControl = cy - listHeight - margin;
 
+	// 현재 시간 텍스트 위치 계산
+	const int timeWidth = 300;
+	const int timeHeight = 40;
 	int xPosTime = cx - timeWidth - margin;
-	int yPosTime = margin;
+	int yPosTime = headerHeight - timeHeight - margin;
 
+	// 헤더 컨트롤 위치 계산
+	CWnd* pHeader = GetDlgItem(IDC_STATIC_HEADER);
+	if (pHeader != nullptr)
+	{
+		pHeader->SetWindowPos(nullptr, headerMargin, headerMargin, cx - 2 * headerMargin, headerHeight - 2 * headerMargin, SWP_NOZORDER);
+	}
+
+	// OK 버튼 위치 설정
 	CWnd* pOKButton = GetDlgItem(IDOK);
-	CWnd* pCancelButton = GetDlgItem(IDCANCEL);
-	CWnd* pListControl = GetDlgItem(IDC_LIST_ERROR);
-	CWnd* pCurTime = GetDlgItem(IDC_STATIC_CURRENT_TIME);
-
 	if (pOKButton != nullptr)
 	{
-		pOKButton->SetWindowPos(nullptr, xPosOK, yPos, buttonWidth, buttonHeight, SWP_NOZORDER);
+		pOKButton->SetWindowPos(nullptr, xPosOK, yPosButtons, buttonWidth, buttonHeight, SWP_NOZORDER);
 	}
 
+	// Cancel 버튼 위치 설정
+	CWnd* pCancelButton = GetDlgItem(IDCANCEL);
 	if (pCancelButton != nullptr)
 	{
-		pCancelButton->SetWindowPos(nullptr, xPosCancel, yPos, buttonWidth, buttonHeight, SWP_NOZORDER);
+		pCancelButton->SetWindowPos(nullptr, xPosCancel, yPosButtons, buttonWidth, buttonHeight, SWP_NOZORDER);
 	}
 
+	// 리스트 컨트롤 위치 설정
+	CWnd* pListControl = GetDlgItem(IDC_LIST_ERROR);
 	if (pListControl != nullptr)
 	{
 		pListControl->SetWindowPos(nullptr, margin, yPosListControl, cx - 2 * margin, listHeight, SWP_NOZORDER);
 	}
 
+	// 현재 시간 텍스트 위치 설정
+	CWnd* pCurTime = GetDlgItem(IDC_STATIC_CURRENT_TIME);
 	if (pCurTime != nullptr)
 	{
 		pCurTime->SetWindowPos(nullptr, xPosTime, yPosTime, timeWidth, timeHeight, SWP_NOZORDER);
@@ -761,7 +811,7 @@ BOOL CSF5MFCAIPOPDlg::OnEraseBkgnd(CDC* pDC)
 	CRect rect;
 	GetClientRect(rect);
 
-	pDC->FillSolidRect(rect, RGB(67, 76, 84));	// 변경하고 싶은 색상 RGB색
+	pDC->FillSolidRect(rect, RGB(53, 58, 64));
 	return TRUE;
 
 	return CDialogEx::OnEraseBkgnd(pDC);

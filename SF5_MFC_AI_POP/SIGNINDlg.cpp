@@ -34,6 +34,7 @@ void SIGNINDlg::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(SIGNINDlg, CDialogEx)
 	ON_BN_CLICKED(IDOK, &SIGNINDlg::OnBnClickedOk)
 	ON_WM_ERASEBKGND()
+	ON_WM_LBUTTONDOWN()
 END_MESSAGE_MAP()
 
 
@@ -101,8 +102,17 @@ BOOL SIGNINDlg::OnEraseBkgnd(CDC* pDC)
 	CRect rect;
 	GetClientRect(rect);
 
-	pDC->FillSolidRect(rect, RGB(67, 76, 84));	// 변경하고 싶은 색상 RGB색
+	pDC->FillSolidRect(rect, RGB(53, 58, 64));
 	return TRUE;
 
 	return CDialogEx::OnEraseBkgnd(pDC);
+}
+
+
+void SIGNINDlg::OnLButtonDown(UINT nFlags, CPoint point)
+{
+	// TODO: Add your message handler code here and/or call default
+	SendMessage(WM_NCLBUTTONDOWN, HTCAPTION, MAKELPARAM(point.x, point.y));
+
+	CDialogEx::OnLButtonDown(nFlags, point);
 }
