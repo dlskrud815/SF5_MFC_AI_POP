@@ -19,6 +19,7 @@
 #define new DEBUG_NEW
 #endif
 
+#define WM_UPDATE_TIME (WM_APP + 1)
 
 //CString CSF5MFCAIPOPDlg::strCur;
 //CString CSF5MFCAIPOPDlg::strVib;
@@ -61,8 +62,6 @@ END_MESSAGE_MAP()
 
 // CSF5MFCAIPOPDlg dialog
 
-
-
 CSF5MFCAIPOPDlg::CSF5MFCAIPOPDlg(CWnd* pParent /*=nullptr*/)
 	: CDialogEx(IDD_SF5_MFC_AI_POP_DIALOG, pParent)
 {
@@ -85,7 +84,8 @@ BEGIN_MESSAGE_MAP(CSF5MFCAIPOPDlg, CDialogEx)
 	ON_WM_SIZE()
 	ON_BN_CLICKED(IDC_BUTTON1, &CSF5MFCAIPOPDlg::OnBnClickedButton1)
 	ON_BN_CLICKED(IDC_BUTTON2, &CSF5MFCAIPOPDlg::OnBnClickedButton2)
-	ON_WM_TIMER()
+	ON_MESSAGE(WM_UPDATE_TIME, &CSF5MFCAIPOPDlg::OnUpdateTime)
+	//ON_WM_TIMER()
 END_MESSAGE_MAP()
 
 
@@ -136,29 +136,19 @@ BOOL CSF5MFCAIPOPDlg::OnInitDialog()
 	//back.Load(_T("res\\img\\BACK1.png"));
 
 	// 타이머를 설정하여 1초마다 시간을 업데이트합니다.
-	SetTimer(m_nTimerID, 1000, nullptr);
+	//SetTimer(m_nTimerID, 1000, nullptr);
 
 
-	//리스트 칼럼 넣기
+	// 리스트 칼럼 넣기
 	m_listCtrl.InsertColumn(0, L"메시지", LVCFMT_LEFT, 400, -1);
 	m_listCtrl.InsertColumn(0, L"설비", LVCFMT_LEFT, 200, -1);
 	m_listCtrl.InsertColumn(0, L"상태", LVCFMT_LEFT, 100, -1);
 	m_listCtrl.InsertColumn(0, L"시간", LVCFMT_LEFT, 200, -1);
 	m_listCtrl.InsertColumn(0, L"순번", LVCFMT_LEFT, 100, -1);
 
-
-	
-
-
-
-	//CWinThread* p1 = NULL;
-	//p1 = AfxBeginThread(ThreadTest, this);
-	////새 스레드 시작 - 현재 객체를 스레드 함수에 전달
-
-	//if (p1 == NULL) //스레드 생성 실패 시
-	//{
-	//	AfxMessageBox(L"Error");
-	//}
+	// 메인 스레드 생성
+	CWinThread* pMainThread = AfxBeginThread(MainThread, this);
+	if (pMainThread == NULL) AfxMessageBox(L"MainThread Create Error");
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
@@ -269,67 +259,33 @@ void CSF5MFCAIPOPDlg::OnSize(UINT nType, int cx, int cy)
 }
 
 
-//UINT CSF5MFCAIPOPDlg::ThreadTest(LPVOID _mothod)
+//void CSF5MFCAIPOPDlg::OnTimer(UINT_PTR nIDEvent)
 //{
-//	// pParam을 CSF5MFCAIPOPDlg 객체로 변환
-//	CSF5MFCAIPOPDlg* pDlg = (CSF5MFCAIPOPDlg*)_mothod;
-//
-//	// MySQLConnector 객체 생성
-//	MySQL_Connector* mysql = new MySQL_Connector();
-//	int i = 0;
-//
-//	// 데이터베이스 서버 연결
-//	if (mysql->connect("tcp://127.0.0.1:3306", "user", "1234", "chatting_project")) // 수정
+//	// 타이머가 발생하면 현재 시각을 업데이트합니다.
+//	if (nIDEvent == m_nTimerID)
 //	{
-//		while (mysql->getData(i)) // db에 다음행이 있을 때까지
-//		{
-//			CString message = mysql->getMessage();
-//			CString strIndex;
-//			strIndex.Format(_T("%d"), i);  // i 값을 문자열로 변환
-//
-//			pDlg->m_listCtrl.InsertItem(0, strIndex);
-//			pDlg->m_listCtrl.SetItem(0, 1, LVIF_TEXT, message, 0, 0, 0, NULL);
-//
-//			Sleep(1000); //1초 대기
-//			i++;
-//		}
-//	}
-//	else {
-//		pDlg->MessageBox(_T("데이터베이스 연결 실패"), _T("오류"), MB_OK | MB_ICONERROR);
+//		UpdateCurrentTime();
 //	}
 //
-//	//스레드 함수 종료 시
-//	return 0;
+//	CDialogEx::OnTimer(nIDEvent);
 //}
-
-
-void CSF5MFCAIPOPDlg::OnTimer(UINT_PTR nIDEvent)
-{
-	// 타이머가 발생하면 현재 시각을 업데이트합니다.
-	if (nIDEvent == m_nTimerID)
-	{
-		UpdateCurrentTime();
-	}
-
-	CDialogEx::OnTimer(nIDEvent);
-}
-
-void CSF5MFCAIPOPDlg::UpdateCurrentTime()
-{
-	// 현재 시간을 가져옵니다.
-	CTime currentTime = CTime::GetCurrentTime();
-
-	// 포맷을 설정하고 문자열로 변환합니다.
-	CString strTime = currentTime.Format(_T("%Y-%m-%d %H:%M:%S"));
-
-	// IDC_STATIC_TIME은 다이얼로그 디자이너에서 생성된 스태틱 텍스트 컨트롤의 ID입니다.
-	CWnd* pWnd = GetDlgItem(IDC_STATIC_CURRENT_TIME);
-
-	if (pWnd)
-	{
-		pWnd->SetWindowText(strTime);
-	}
-}
+//
+//void CSF5MFCAIPOPDlg::UpdateCurrentTime()
+//{
+//	// 현재 시간을 가져옵니다.
+//	CTime currentTime = CTime::GetCurrentTime();
+//
+//	// 포맷을 설정하고 문자열로 변환합니다.
+//	CString strTime = currentTime.Format(_T("%Y-%m-%d %H:%M:%S"));
+//
+//	// IDC_STATIC_TIME은 다이얼로그 디자이너에서 생성된 스태틱 텍스트 컨트롤의 ID입니다.
+//	CWnd* pWnd = GetDlgItem(IDC_STATIC_CURRENT_TIME);
+//
+//	if (pWnd)
+//	{
+//		pWnd->SetWindowText(strTime);
+//	}
+//}
 
 
 void CSF5MFCAIPOPDlg::OnBnClickedButton1()
@@ -677,3 +633,56 @@ CStringA CSF5MFCAIPOPDlg::winHttp(CStringA jsonData, wstring endpoint, int port)
 //	delete mysql;
 //	return 0;
 //}
+
+UINT CSF5MFCAIPOPDlg::MainThread(LPVOID _method)
+{
+	CSF5MFCAIPOPDlg* pDlg = (CSF5MFCAIPOPDlg*)_method;
+	MySQL_Connector* mysql = new MySQL_Connector();
+
+	// Create the time update thread
+	CWinThread* pTimeThread = AfxBeginThread(TimeUpdateThread, (LPVOID)pDlg);
+	if (pTimeThread == NULL)
+	{
+		AfxMessageBox(L"TimeUpdateThread Create Error");
+	}
+
+	return 0;
+}
+
+UINT CSF5MFCAIPOPDlg::TimeUpdateThread(LPVOID pParam)
+{
+	CSF5MFCAIPOPDlg* pDlg = (CSF5MFCAIPOPDlg*)pParam;
+
+	// AfxMessageBox(L"진입");
+
+	while (true)
+	{
+		// Get the current time
+		CTime currentTime = CTime::GetCurrentTime();
+		CString strTime = currentTime.Format(L"%Y-%m-%d %H:%M:%S");
+
+		//AfxMessageBox(L"Current Time: " + strTime);
+
+		pDlg->PostMessage(WM_UPDATE_TIME, (WPARAM)new CString(strTime));
+
+		Sleep(1000);
+	}
+
+	return 0;
+}
+
+
+LRESULT CSF5MFCAIPOPDlg::OnUpdateTime(WPARAM wParam, LPARAM lParam)
+{
+	CString* pStrTime = (CString*)wParam;
+
+	if (pStrTime)
+	{
+		//AfxMessageBox(L"Received Time: " + *pStrTime);
+
+		SetDlgItemText(IDC_STATIC_CURRENT_TIME, *pStrTime); // Update the static text control with ID IDC_STATIC_TIME
+		delete pStrTime; // Clean up the allocated memory
+	}
+
+	return 0;
+}

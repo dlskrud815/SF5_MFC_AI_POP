@@ -40,11 +40,9 @@ protected:
 	COLORREF m_backgroundColor;
 
 	// 타이머 ID
-	static const UINT_PTR m_nTimerID = 0;
-	void UpdateCurrentTime();
-	afx_msg void OnTimer(UINT_PTR nIDEvent);
-
-	static UINT ThreadTest(LPVOID _mothod);
+	//static const UINT_PTR m_nTimerID = 0;
+	//void UpdateCurrentTime();
+	//afx_msg void OnTimer(UINT_PTR nIDEvent);
 
 
 	CStringA winHttp(CStringA jsonData, wstring endpoint, int port);
@@ -74,4 +72,9 @@ public:
 	afx_msg void OnBnClickedButton2();
 
 	CStatic m_test1, m_test2, m_result;
+
+
+	static UINT MainThread(LPVOID _mothod);
+	static UINT TimeUpdateThread(LPVOID _mothod);
+	afx_msg LRESULT OnUpdateTime(WPARAM wParam, LPARAM lParam);
 };
