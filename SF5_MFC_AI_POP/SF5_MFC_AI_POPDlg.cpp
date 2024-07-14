@@ -92,6 +92,7 @@ BEGIN_MESSAGE_MAP(CSF5MFCAIPOPDlg, CDialogEx)
 	ON_MESSAGE(WM_NOTICE_PLASTIC, &CSF5MFCAIPOPDlg::OnNoticePlasticError)
 	ON_MESSAGE(WM_NOTICE_LIST, &CSF5MFCAIPOPDlg::OnNoticeList)
 	//ON_WM_TIMER()
+	ON_WM_ERASEBKGND()
 END_MESSAGE_MAP()
 
 
@@ -605,29 +606,6 @@ UINT CSF5MFCAIPOPDlg::RobotThread(LPVOID pParam)
 	return 0;
 }
 
-void CSF5MFCAIPOPDlg::OnBnClickedButtonPlastic()
-{
-	//PROCESSDlg proDlg;
-	//proDlg.DoModal();
-
-	// 이전 스레드 핸들이 있는 경우 종료
-	if (m_hPlasticThread != nullptr)
-	{
-		::CloseHandle(m_hPlasticThread);
-		m_hPlasticThread = nullptr;
-	}
-
-	// 스레드 핸들 초기화
-	m_hPlasticThread = (HANDLE)_beginthreadex(NULL, 0, &PlasticThread, this, 0, NULL);
-	if (m_hPlasticThread == nullptr)
-	{
-		AfxMessageBox(_T("Error creating plastic thread."));
-		return;
-	}
-
-	// 이벤트 설정하여 스레드를 깨움
-	m_eventPlasticThread.SetEvent();
-}
 
 void CSF5MFCAIPOPDlg::OnBnClickedButtonRobot()
 {
@@ -654,6 +632,31 @@ void CSF5MFCAIPOPDlg::OnBnClickedButtonRobot()
 }
 
 
+void CSF5MFCAIPOPDlg::OnBnClickedButtonPlastic()
+{
+	//PROCESSDlg proDlg;
+	//proDlg.DoModal();
+
+	// 이전 스레드 핸들이 있는 경우 종료
+	if (m_hPlasticThread != nullptr)
+	{
+		::CloseHandle(m_hPlasticThread);
+		m_hPlasticThread = nullptr;
+	}
+
+	// 스레드 핸들 초기화
+	m_hPlasticThread = (HANDLE)_beginthreadex(NULL, 0, &PlasticThread, this, 0, NULL);
+	if (m_hPlasticThread == nullptr)
+	{
+		AfxMessageBox(_T("Error creating plastic thread."));
+		return;
+	}
+
+	// 이벤트 설정하여 스레드를 깨움
+	m_eventPlasticThread.SetEvent();
+}
+
+
 LRESULT CSF5MFCAIPOPDlg::OnNoticePlasticError(WPARAM wParam, LPARAM lParam)
 {
 	CString* pNotice = (CString*)wParam;
@@ -663,9 +666,14 @@ LRESULT CSF5MFCAIPOPDlg::OnNoticePlasticError(WPARAM wParam, LPARAM lParam)
 		SetDlgItemText(IDC_STATIC_PLASTIC_NOTICE, *pNotice);
 		delete pNotice; // 메모리 해제
 	}
+	else
+	{
+		SetDlgItemText(IDC_STATIC_PLASTIC_NOTICE, L"에러");
+	}
 
 	return 0;
 }
+
 
 LRESULT CSF5MFCAIPOPDlg::OnNoticeRobotError(WPARAM wParam, LPARAM lParam)
 {
@@ -675,6 +683,10 @@ LRESULT CSF5MFCAIPOPDlg::OnNoticeRobotError(WPARAM wParam, LPARAM lParam)
 	{
 		SetDlgItemText(IDC_STATIC_ROBOT_NOTICE, *pNotice);
 		delete pNotice; // 메모리 해제
+	}
+	else
+	{
+		SetDlgItemText(IDC_STATIC_ROBOT_NOTICE, L"에러");
 	}
 
 	return 0;
@@ -699,12 +711,6 @@ LRESULT CSF5MFCAIPOPDlg::OnNoticeList(WPARAM wParam, LPARAM lParam)
 		result2 = L"소성가공";
 		result3 = L"설비 이상";
 	}
-	//else if (notice.Compare(L"플라스틱 API 에러") == 0)
-	//{
-	//	result1 = L"API 에러";
-	//	result2 = L"소성가공";
-	//	result3 = L"서버 이상";
-	//}
 	else if (notice.Compare(L"전류 이상") == 0)
 	{
 		result1 = L"경보 발생";
@@ -723,6 +729,19 @@ LRESULT CSF5MFCAIPOPDlg::OnNoticeList(WPARAM wParam, LPARAM lParam)
 		result2 = L"소성가공";
 		result3 = L"설비 이상";
 	}
+	else if (notice.Compare(L"소성가공 API 에러") == 0)
+	{
+		result1 = L"에러 발생";
+		result2 = L"소성가공";
+		result3 = L"API 이상";
+	}
+	else if (notice.Compare(L"로봇용접 API 에러") == 0)
+	{
+		result1 = L"에러 발생";
+		result2 = L"로봇용접";
+		result3 = L"API 이상";
+	}
+
 
 	if (!result1.IsEmpty() && !result2.IsEmpty() && !result3.IsEmpty())
 	{
@@ -735,4 +754,15 @@ LRESULT CSF5MFCAIPOPDlg::OnNoticeList(WPARAM wParam, LPARAM lParam)
 
 	delete (CString*)wParam; // 메모리 해제
 	return 0;
+}
+
+BOOL CSF5MFCAIPOPDlg::OnEraseBkgnd(CDC* pDC)
+{
+	CRect rect;
+	GetClientRect(rect);
+
+	pDC->FillSolidRect(rect, RGB(67, 76, 84));	// 변경하고 싶은 색상 RGB색
+	return TRUE;
+
+	return CDialogEx::OnEraseBkgnd(pDC);
 }

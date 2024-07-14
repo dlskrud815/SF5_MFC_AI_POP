@@ -34,6 +34,7 @@ BEGIN_MESSAGE_MAP(LOGINDlg, CDialogEx)
 	ON_BN_CLICKED(IDOK, &LOGINDlg::OnBnClickedOk)
 	ON_WM_LBUTTONDOWN()
 	ON_BN_CLICKED(IDC_BUTTON_SIGNIN, &LOGINDlg::OnBnClickedButtonSignin)
+	ON_WM_ERASEBKGND()
 END_MESSAGE_MAP()
 
 
@@ -89,4 +90,17 @@ void LOGINDlg::OnBnClickedButtonSignin()
 	// TODO: Add your control notification handler code here
 	SIGNINDlg signDlg;
 	signDlg.DoModal();
+}
+
+
+BOOL LOGINDlg::OnEraseBkgnd(CDC* pDC)
+{
+	// TODO: Add your message handler code here and/or call default
+	CRect rect;
+	GetClientRect(rect);
+
+	pDC->FillSolidRect(rect, RGB(67, 76, 84));	// 변경하고 싶은 색상 RGB색
+	return TRUE;
+
+	return CDialogEx::OnEraseBkgnd(pDC);
 }

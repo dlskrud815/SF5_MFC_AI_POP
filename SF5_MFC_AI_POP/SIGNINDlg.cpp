@@ -33,6 +33,7 @@ void SIGNINDlg::DoDataExchange(CDataExchange* pDX)
 
 BEGIN_MESSAGE_MAP(SIGNINDlg, CDialogEx)
 	ON_BN_CLICKED(IDOK, &SIGNINDlg::OnBnClickedOk)
+	ON_WM_ERASEBKGND()
 END_MESSAGE_MAP()
 
 
@@ -92,4 +93,16 @@ void SIGNINDlg::OnBnClickedOk()
 			MessageBox(_T("데이터베이스 연결 실패"), _T("오류"), MB_OK | MB_ICONERROR);
 		}
 	}
+}
+
+
+BOOL SIGNINDlg::OnEraseBkgnd(CDC* pDC)
+{
+	CRect rect;
+	GetClientRect(rect);
+
+	pDC->FillSolidRect(rect, RGB(67, 76, 84));	// 변경하고 싶은 색상 RGB색
+	return TRUE;
+
+	return CDialogEx::OnEraseBkgnd(pDC);
 }
