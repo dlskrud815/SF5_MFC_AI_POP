@@ -141,13 +141,15 @@ BOOL CSF5MFCAIPOPDlg::OnInitDialog()
 	//back.Load(_T("res\\img\\BACK1.png"));
 
 		// 사용자 정의 스태틱 컨트롤 초기화
-	CRect rectHeader, rectNotice1, rectNotice2, rectNotice3;
+	CRect rectHeader, rectNotice1, rectNotice2, rectNotice3, rectTitle;
 	GetDlgItem(IDC_STATIC_HEADER)->GetWindowRect(&rectHeader);
 	ScreenToClient(&rectHeader);
 	m_staticHeader.Create(_T(""), WS_VISIBLE | WS_CHILD | SS_NOTIFY, rectHeader, this);
 
-	//pStaticText = new CStatic;
-	//pStaticText->Create(_T("통합관제시스템"), WS_CHILD | WS_VISIBLE | SS_LEFT, CRect(0, 0, 0, 0), this);
+	GetDlgItem(IDC_STATIC_TITLE)->GetWindowRect(&rectTitle);
+	ScreenToClient(&rectTitle);
+	m_staticTitle.Create(_T("통합관제시스템"), WS_VISIBLE | WS_CHILD | SS_CENTER, rectTitle, this);
+
 
 	GetDlgItem(IDC_STATIC_NOTICE1)->GetWindowRect(&rectNotice1);
 	ScreenToClient(&rectNotice1);
@@ -277,12 +279,40 @@ void CSF5MFCAIPOPDlg::OnSize(UINT nType, int cx, int cy)
 	int xPosTime = cx - timeWidth - margin;
 	int yPosTime = headerHeight - timeHeight - margin;
 
+	int titleWidth = 200; // Title 컨트롤의 너비
+	int titleHeight = 50; // Title 컨트롤의 높이
+
+	int xPosTitle = (cx - titleWidth) / 2; // 창의 너비를 기준으로 중앙 위치 계산
+	int yPosTitle = headerMargin + (headerHeight - titleHeight) / 2; // 헤더의 높이를 기준으로 중앙 위치 계산
+
 	// 헤더 컨트롤 위치 계산
 	CWnd* pHeader = GetDlgItem(IDC_STATIC_HEADER);
 	if (pHeader != nullptr)
 	{
-		pHeader->SetWindowPos(nullptr, headerMargin, headerMargin, cx - 2 * headerMargin, headerHeight - 2 * headerMargin, SWP_NOZORDER);
+		pHeader->SetWindowPos(nullptr, headerMargin, headerMargin, cx - 2 * headerMargin, headerHeight - 2 * headerMargin, 0);
 	}
+
+	CWnd* pTitle = GetDlgItem(IDC_STATIC_TITLE);
+	if (pTitle != nullptr)
+	{
+		pTitle->SetWindowPos(nullptr, xPosTitle, yPosTitle, titleWidth, titleHeight, 0);
+	}
+
+	//// m_staticHeader 위치 계산 및 설정
+	//if (m_staticHeader.GetSafeHwnd())
+	//{
+	//	int headerWidth = cx - 2 * headerMargin;
+	//	int headerTop = headerMargin;
+	//	int headerBottom = headerMargin + headerHeight;
+
+	//	int textWidth = headerWidth - 2 * margin;
+	//	int textHeight = 30;
+
+	//	int xPosText = margin;
+	//	int yPosText = (headerHeight - textHeight) / 2;
+
+	//	m_staticHeader.SetWindowPos(nullptr, xPosText, yPosText, textWidth, textHeight, SWP_NOZORDER);
+	//}
 
 	// OK 버튼 위치 설정
 	CWnd* pOKButton = GetDlgItem(IDOK);
