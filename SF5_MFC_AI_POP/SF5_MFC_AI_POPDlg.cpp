@@ -74,6 +74,8 @@ void CSF5MFCAIPOPDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_LIST_ERROR, m_listCtrl);
+	DDX_Control(pDX, IDC_LIST_ERROR2, m_listCtrl2);
+	DDX_Control(pDX, IDC_LIST_ERROR3, m_listCtrl3);
 }
 
 BEGIN_MESSAGE_MAP(CSF5MFCAIPOPDlg, CDialogEx)
@@ -161,33 +163,16 @@ BOOL CSF5MFCAIPOPDlg::OnInitDialog()
 	//m_staticNotice3.Create(_T(""), WS_VISIBLE | WS_CHILD | SS_NOTIFY, rectNotice3, this);
 
 	// 리스트 칼럼 넣기
-	m_listCtrl.InsertColumn(0, L"메시지", LVCFMT_LEFT, 400, -1);
-	m_listCtrl.InsertColumn(0, L"설비", LVCFMT_LEFT, 200, -1);
-	m_listCtrl.InsertColumn(0, L"상태", LVCFMT_LEFT, 200, -1);
-	m_listCtrl.InsertColumn(0, L"시간", LVCFMT_LEFT, 300, -1);
-	m_listCtrl.InsertColumn(0, L"순번", LVCFMT_LEFT, 100, -1);
+	CListCtrl* listCtrls[] = { &m_listCtrl, &m_listCtrl2, &m_listCtrl3 };
 
-	CStatic* pPictureControl = (CStatic*)GetDlgItem(IDC_STATIC_FACILITY);
-	if (pPictureControl != nullptr)
+	for (CListCtrl* list : listCtrls)
 	{
-		// PNG 이미지의 절대 경로 설정
-		CString absolutePath = L"res/img/facility.png";
-
-		// 이미지 객체 생성
-		CImage image;
-		HRESULT hr = image.Load(absolutePath);
-		if (SUCCEEDED(hr))
-		{
-			// 픽처 컨트롤에 이미지 설정
-			pPictureControl->SetBitmap(image.Detach());
-		}
-		else
-		{
-			// 이미지 로드 실패 처리
-			MessageBox(L"이미지를 로드할 수 없습니다.");
-		}
+		list->InsertColumn(0, L"메시지", LVCFMT_LEFT, 400, -1);
+		list->InsertColumn(0, L"설비", LVCFMT_LEFT, 200, -1);
+		list->InsertColumn(0, L"상태", LVCFMT_LEFT, 200, -1);
+		list->InsertColumn(0, L"시간", LVCFMT_LEFT, 300, -1);
+		list->InsertColumn(0, L"순번", LVCFMT_LEFT, 100, -1);
 	}
-
 
 	// 메인 스레드 생성
 	CWinThread* pMainThread = AfxBeginThread(MainThread, this);
@@ -234,14 +219,9 @@ void CSF5MFCAIPOPDlg::OnPaint()
 	}
 	else
 	{
-		//CPaintDC dc(this); // device context for painting
-
-		//CRect rect;//픽쳐 컨트롤의 크기를 저장할 CRect 객체
-		//GetClientRect(&rect);
-
-		//back.StretchBlt(dc.m_hDC, 0, 0, rect.Width(), rect.Height(), SRCCOPY);//이미지를 픽쳐 컨트롤 크기로 조정
-
 		CDialogEx::OnPaint();
+
+
 	}
 }
 
@@ -257,6 +237,51 @@ void CSF5MFCAIPOPDlg::OnSize(UINT nType, int cx, int cy)
 {
 	CDialogEx::OnSize(nType, cx, cy);
 
+	// 헤더 컨트롤 위치 계산
+	CWnd* pHeader = GetDlgItem(IDC_STATIC_HEADER);
+	if (pHeader != nullptr)
+	{
+		pHeader->SetWindowPos(nullptr, 10, 10, cx - 2 * 10, 10 + 110 , 0);
+	}
+	 
+	// 현재 시간 텍스트 위치 설정
+	CWnd* pCurTime = GetDlgItem(IDC_STATIC_CURRENT_TIME);
+	if (pCurTime != nullptr)
+	{
+		pCurTime->SetWindowPos(nullptr, cx - 2 * 10 - 400, 2 * 10, 400, 90, 0);
+	}
+	 
+	const int listHeight = (cy - 4 * 50 - 110 - 10) / 3;
+
+	// 리스트 컨트롤 위치 설정
+	CWnd* pListControl = GetDlgItem(IDC_LIST_ERROR);
+	if (pListControl != nullptr)
+	{
+		pListControl->SetWindowPos(nullptr, cx - 800 - 50, 2 * 10 + 110 + 50, 800, listHeight, 0);
+	}
+	 
+	// 리스트 컨트롤 위치 설정
+	CWnd* pListControl2 = GetDlgItem(IDC_LIST_ERROR2);
+	if (pListControl2 != nullptr)
+	{
+		pListControl2->SetWindowPos(nullptr, cx - 800 - 50, 2 * 10 + 110 + 2 * 50 + listHeight, 800, listHeight, 0);
+	}
+
+	// 리스트 컨트롤 위치 설정
+	CWnd* pListControl3 = GetDlgItem(IDC_LIST_ERROR3);
+	if (pListControl3 != nullptr)
+	{
+		pListControl3->SetWindowPos(nullptr, cx - 800 - 50, 2 * 10 + 110 + 3 * 50 + 2 * listHeight, 800, listHeight, 0);
+	}
+	 
+	// Cancel 버튼 위치 설정
+	CWnd* pCancelButton = GetDlgItem(IDCANCEL);
+	if (pCancelButton != nullptr)
+	{
+		pCancelButton->SetWindowPos(nullptr, 10, cy - 10 - 50, 100, 50, 0);
+	}
+	 
+	 
 	//const int buttonWidth = 150;
 	//const int buttonHeight = 40;
 	//const int margin = 20;
@@ -284,12 +309,6 @@ void CSF5MFCAIPOPDlg::OnSize(UINT nType, int cx, int cy)
 	//int xPosTitle = (cx - titleWidth) / 2; // 창의 너비를 기준으로 중앙 위치 계산
 	//int yPosTitle = headerMargin + (headerHeight - titleHeight) / 2; // 헤더의 높이를 기준으로 중앙 위치 계산
 
-	//// 헤더 컨트롤 위치 계산
-	//CWnd* pHeader = GetDlgItem(IDC_STATIC_HEADER);
-	//if (pHeader != nullptr)
-	//{
-	//	pHeader->SetWindowPos(nullptr, headerMargin, headerMargin, cx - 2 * headerMargin, headerHeight - 2 * headerMargin, 0);
-	//}
 
 	////CWnd* pTitle = GetDlgItem(IDC_STATIC_TITLE);
 	////if (pTitle != nullptr)
@@ -327,19 +346,7 @@ void CSF5MFCAIPOPDlg::OnSize(UINT nType, int cx, int cy)
 	//	pCancelButton->SetWindowPos(nullptr, xPosCancel, yPosButtons, buttonWidth, buttonHeight, SWP_NOZORDER);
 	//}
 
-	//// 리스트 컨트롤 위치 설정
-	//CWnd* pListControl = GetDlgItem(IDC_LIST_ERROR);
-	//if (pListControl != nullptr)
-	//{
-	//	pListControl->SetWindowPos(nullptr, margin, yPosListControl, cx - 2 * margin, listHeight, SWP_NOZORDER);
-	//}
 
-	//// 현재 시간 텍스트 위치 설정
-	//CWnd* pCurTime = GetDlgItem(IDC_STATIC_CURRENT_TIME);
-	//if (pCurTime != nullptr)
-	//{
-	//	pCurTime->SetWindowPos(nullptr, xPosTime, yPosTime, timeWidth, timeHeight, SWP_NOZORDER);
-	//}
 
 }
 

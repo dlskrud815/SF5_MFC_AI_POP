@@ -10,7 +10,8 @@
 #define IDD_PROCESS_DIALOG              104
 #define IDD_SIGNIN_DIALOG               105
 #define IDR_MAINFRAME                   128
-#define IDB_PNG1                        133
+#define IDB_IMG_FACILITY                133
+#define IDB_IMG_LOGO                    134
 #define IDC_STATIC_TEXT1                1000
 #define IDC_EDIT_ID                     1001
 #define IDC_EDIT_PW                     1002
@@ -42,14 +43,16 @@
 #define IDC_STATIC_IN_ID                1027
 #define IDC_STATIC_IN_PW                1028
 #define IDC_STATIC_IN_PW_RE             1029
+#define IDC_LIST_ERROR2                 1030
+#define IDC_LIST_ERROR3                 1031
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        134
+#define _APS_NEXT_RESOURCE_VALUE        135
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1030
+#define _APS_NEXT_CONTROL_VALUE         1031
 #define _APS_NEXT_SYMED_VALUE           106
 #endif
 #endif
