@@ -17,6 +17,7 @@
 #define IDC_BUTTON1                     1003
 #define IDC_LIST_ERROR                  1004
 #define IDC_STATIC_Test1                1005
+#define IDC_STATIC_HEAT_NOTICE          1005
 #define IDC_STATIC_ROBOT_NOTICE         1006
 #define IDC_BUTTON_PLASTIC              1007
 #define IDC_CHART1                      1008
@@ -34,6 +35,7 @@
 #define IDC_STATIC_NOTICE2              1020
 #define IDC_STATIC_NOTICE3              1021
 #define IDC_STATIC_FACILITY             1022
+#define IDC_BUTTON_HEAT                 1023
 
 // Next default values for new objects
 // 

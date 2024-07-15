@@ -34,56 +34,6 @@ bool MySQL_Connector::login(string id, string pw)
     }
 }
 
-bool MySQL_Connector::getData(int i)
-{
-    try {
-        pstmt = con->prepareStatement("SELECT message FROM chat LIMIT ?, 1"); // 수정
-        pstmt->setInt(1, i);
-        result = pstmt->executeQuery();
-
-        return result->next();  // 결과가 있는지 여부를 반환
-    }
-    catch (sql::SQLException& e) {
-        return false;
-    }
-}
-
-CString MySQL_Connector::getMessage()
-{
-    try {
-        string message = result->getString("message"); //수정
-        return CString(message.c_str());
-    }
-    catch (sql::SQLException& e) {
-        return _T("");
-    }
-}
-
-bool MySQL_Connector::getID()
-{
-    try {
-        pstmt = con->prepareStatement("SELECT message FROM chat LIMIT 1, 1"); // 수정
-        result = pstmt->executeQuery();
-
-        return result->next();  // 결과가 있는지 여부를 반환
-    }
-    catch (sql::SQLException& e) {
-        return false;
-    }
-}
-
-bool MySQL_Connector::getFrom()
-{
-    try {
-        pstmt = con->prepareStatement("SELECT message FROM chat LIMIT 2, 1"); // 수정
-        result = pstmt->executeQuery();
-
-        return result->next();  // 결과가 있는지 여부를 반환
-    }
-    catch (sql::SQLException& e) {
-        return false;
-    }
-}
 
 vector<double> MySQL_Connector::fetchDataFromTable(tNum process, int offset)
 {
@@ -93,6 +43,8 @@ vector<double> MySQL_Connector::fetchDataFromTable(tNum process, int offset)
         try {
             string col, data;
             vector<double> data_set;
+
+            //data_set.clear();
 
             pstmt = con->prepareStatement("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'current' ORDER BY ORDINAL_POSITION LIMIT 1 OFFSET ?");
             pstmt->setString(1, to_string(offset));
@@ -118,6 +70,8 @@ vector<double> MySQL_Connector::fetchDataFromTable(tNum process, int offset)
         try {
             string col, data;
             vector<double> data_set;
+
+            //data_set.clear();
 
             pstmt = con->prepareStatement("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'vibration' ORDER BY ORDINAL_POSITION LIMIT 1 OFFSET ?");
             pstmt->setString(1, to_string(offset));
@@ -196,8 +150,29 @@ vector<double> MySQL_Connector::fetchDataFromTable(tNum process, int offset)
         catch (sql::SQLException& e) {
             cerr << "SQLException: " << e.what() << endl;
         }
-        //case HEAT_NUM:
+    case HEAT_NUM:
+        try {
+            string data;
+            vector<double> data_set;
 
+            data_set.clear();
+
+            pstmt = con->prepareStatement("SELECT * FROM pop.heat LIMIT 1 OFFSET ?");
+            pstmt->setString(1, to_string(offset - 1));
+            result = pstmt->executeQuery();
+
+            if (result->next()) {
+                for (int i = 1; i < 21; ++i) {
+                    data = result->getString(i).c_str();
+                    data_set.push_back(stod(data));
+                }
+            }
+
+            return data_set;
+        }
+        catch (sql::SQLException& e) {
+            cerr << "SQLException: " << e.what() << endl;
+        }
     }
 
 }

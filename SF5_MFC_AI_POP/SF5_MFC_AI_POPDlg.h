@@ -47,8 +47,10 @@ protected:
 
 
 	CStringA winHttp(CStringA jsonData, wstring endpoint, int port);
+
 	vector<int> parsing_robot(CStringA response);
 	vector<int> parsing_plastic(CStringA response);
+	vector<int> parsing_heat(CStringA response);
 
 	static wstring StringToWideString(const string& str);
 	static CStringA prepareData(tName process);
@@ -71,6 +73,7 @@ protected:
 public:
 	afx_msg void OnBnClickedButtonRobot();
 	afx_msg void OnBnClickedButtonPlastic();
+	afx_msg void OnBnClickedButtonHeat();
 
 	static int listIndex;
 	afx_msg LRESULT OnNoticeList(WPARAM wParam, LPARAM lParam);
@@ -78,15 +81,15 @@ public:
 
 	static UINT MainThread(LPVOID _mothod);
 
-
 	static UINT TimeUpdateThread(LPVOID _mothod);
 	afx_msg LRESULT OnUpdateTime(WPARAM wParam, LPARAM lParam);
 
 
 	HANDLE m_hPlasticThread = nullptr; // 소성가공 스레드 핸들 추가
 	HANDLE m_hRobotThread = nullptr; // 로봇용접 스레드 핸들 추가
-
+	HANDLE m_hHeatThread = nullptr; // 열처리 스레드 핸들 추가
 	
+
 	CEvent m_eventPlasticThread; // 이벤트 객체 선언
 	static UINT PlasticThread(LPVOID pParam); // 대기 스레드 함수 선언
 	afx_msg LRESULT OnNoticePlasticError(WPARAM wParam, LPARAM lParam);
@@ -95,5 +98,11 @@ public:
 	CEvent m_eventRobotThread; // 이벤트 객체 선언
 	static UINT RobotThread(LPVOID pParam); // 대기 스레드 함수 선언
 	afx_msg LRESULT OnNoticeRobotError(WPARAM wParam, LPARAM lParam);
+
+	CEvent m_eventHeatThread; // 이벤트 객체 선언
+	static UINT HeatThread(LPVOID pParam); // 대기 스레드 함수 선언
+	afx_msg LRESULT OnNoticeHeatError(WPARAM wParam, LPARAM lParam);
+	
+	
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 };

@@ -22,14 +22,10 @@
 #define WM_UPDATE_TIME (WM_APP + 1)
 #define WM_NOTICE_ROBOT (WM_APP + 2)
 #define WM_NOTICE_PLASTIC (WM_APP + 3)
-#define WM_NOTICE_LIST (WM_APP + 4)
+#define WM_NOTICE_HEAT (WM_APP + 4)
+#define WM_NOTICE_LIST (WM_APP + 5)
 
-//CString CSF5MFCAIPOPDlg::strCur;
-//CString CSF5MFCAIPOPDlg::strVib;
-//int CSF5MFCAIPOPDlg::offsetCur = 10;
-//int CSF5MFCAIPOPDlg::offsetVib = 10;
 CCriticalSection CSF5MFCAIPOPDlg::critSect;
-
 
 int CSF5MFCAIPOPDlg::listIndex = 1;
 
@@ -87,9 +83,11 @@ BEGIN_MESSAGE_MAP(CSF5MFCAIPOPDlg, CDialogEx)
 	ON_WM_SIZE()
 	ON_BN_CLICKED(IDC_BUTTON_ROBOT, &CSF5MFCAIPOPDlg::OnBnClickedButtonRobot)
 	ON_BN_CLICKED(IDC_BUTTON_PLASTIC, &CSF5MFCAIPOPDlg::OnBnClickedButtonPlastic)
+	ON_BN_CLICKED(IDC_BUTTON_HEAT, &CSF5MFCAIPOPDlg::OnBnClickedButtonHeat)
 	ON_MESSAGE(WM_UPDATE_TIME, &CSF5MFCAIPOPDlg::OnUpdateTime)
 	ON_MESSAGE(WM_NOTICE_ROBOT, &CSF5MFCAIPOPDlg::OnNoticeRobotError)
 	ON_MESSAGE(WM_NOTICE_PLASTIC, &CSF5MFCAIPOPDlg::OnNoticePlasticError)
+	ON_MESSAGE(WM_NOTICE_HEAT, &CSF5MFCAIPOPDlg::OnNoticeHeatError)
 	ON_MESSAGE(WM_NOTICE_LIST, &CSF5MFCAIPOPDlg::OnNoticeList)
 	//ON_WM_TIMER()
 	ON_WM_ERASEBKGND()
@@ -360,6 +358,24 @@ vector<int> CSF5MFCAIPOPDlg::parsing_plastic(CStringA response) {
 	return { v0Result };
 }
 
+vector<int> CSF5MFCAIPOPDlg::parsing_heat(CStringA response) {
+
+	// JSON 파싱을 위한 간단한 문자열 처리
+	CStringA heatToken = "\"prediction_result\":";
+
+	// v0_Result  추출
+	int heatResult = 0;
+	int posHeat = response.Find(heatToken);
+	if (posHeat >= 0)
+	{
+		posHeat += heatToken.GetLength();
+		CStringA heatValueStr = response.Mid(posHeat);
+		heatResult = atoi(heatValueStr); // atoi 함수를 사용하여 문자열을 정수로 변환
+	}
+
+	return { heatResult };
+}
+
 CStringA CSF5MFCAIPOPDlg::prepareData(tName process) {
 	CStringA jsonData;
 	switch (process) {
@@ -385,6 +401,36 @@ CStringA CSF5MFCAIPOPDlg::prepareData(tName process) {
 		jsonData.Format("{\"V0\": [%s], \"V1\": [%s], \"C1\": [%s]}", A_v0, A_v1, A_c1);
 		break;
 	}
+	case HEAT: {
+		vector<string> colHeat = CThreadTest::strHeat;
+
+		vector<CStringA> A_colHeat;
+		for (string colH : colHeat) {
+
+			A_colHeat.push_back(colH.c_str());
+		}
+
+		/*
+		vector<vector<CStringA>> A_colHeat;
+		for (string colH : colHeat) {
+			vec.clear();
+			vec.push_back(colH.c_str());
+			A_colHeat.push_back(vec);
+		}*/
+		// 튜플의 값이 20개 모두 들어왔는지 확인.
+		/*int i = 0;
+		vector<CStringA> A_colHeat;
+		for (string colH : colHeat) {
+			A_colHeat.push_back(colH.c_str());
+			i++;
+		}
+		CA2CT s = to_string(i).c_str();
+		AfxMessageBox(s);*/
+
+		jsonData.Format("{\"Drying_2_Zone_OP\": %s, \"Drying_Path_Tmp_1_Zone\": %s, \"Drying_Path_Tmp_2_Zone\": %s, \"Cleaner\": %s, \"Quenching_2_Zone_OP\": %s, \"Quenching_3_Zone_OP\": %s, \"Quenching_4_Zone_OP\": %s, \"Quenching_Path_CP_Value\": %s, \"Quenching_Path_Tmp_1_Zone\": %s, \"Quenching_Path_Tmp_2_Zone\": %s, \"Quenching_Path_Tmp_3_Zone\": %s, \"Quenching_Path_Tmp_4_Zone\": %s, \"Salt_1_Zone_OP\": %s, \"Salt_2_Zone_OP\": %s, \"Removing_Salt_Sludge\": %s, \"Salt_Conveyor_Tmp_1_Zone\": %s, \"Salt_Conveyor_Tmp_2_Zone\": %s, \"Salt_Bath_Tmp_1_Zone\": %s, \"Salt_Bath_Tmp_2_Zone\": %s, \"Abnormal_Num\": %s}", A_colHeat[0], A_colHeat[1], A_colHeat[2], A_colHeat[3], A_colHeat[4], A_colHeat[5], A_colHeat[6], A_colHeat[7], A_colHeat[8], A_colHeat[9], A_colHeat[10], A_colHeat[11], A_colHeat[12], A_colHeat[13], A_colHeat[14], A_colHeat[15], A_colHeat[16], A_colHeat[17], A_colHeat[18], A_colHeat[19]);
+		break;
+	}
+
 	default:
 		AfxMessageBox(_T("Unknown process"));
 		return CStringA("");
@@ -409,6 +455,9 @@ wstring CSF5MFCAIPOPDlg::SendPostRequest(tName process)
 		break;
 	case PLASTIC:
 		endpoint = L"/api/plastic_working_predicitive_maintenance";
+		break;
+	case HEAT:
+		endpoint = L"/api/heat_treatment_predicitive_maintenance";
 		break;
 	default:
 		AfxMessageBox(_T("Unknown process"));
@@ -521,6 +570,7 @@ UINT CSF5MFCAIPOPDlg::MainThread(LPVOID _method)
 	return 0;
 }
 
+
 UINT CSF5MFCAIPOPDlg::TimeUpdateThread(LPVOID pParam)
 {
 	CSF5MFCAIPOPDlg* pDlg = (CSF5MFCAIPOPDlg*)pParam;
@@ -543,7 +593,6 @@ UINT CSF5MFCAIPOPDlg::TimeUpdateThread(LPVOID pParam)
 	return 0;
 }
 
-
 LRESULT CSF5MFCAIPOPDlg::OnUpdateTime(WPARAM wParam, LPARAM lParam)
 {
 	CString* pStrTime = (CString*)wParam;
@@ -560,49 +609,6 @@ LRESULT CSF5MFCAIPOPDlg::OnUpdateTime(WPARAM wParam, LPARAM lParam)
 }
 
 
-UINT CSF5MFCAIPOPDlg::PlasticThread(LPVOID pParam)
-{
-	CSF5MFCAIPOPDlg* pDlg = (CSF5MFCAIPOPDlg*)pParam;
-
-	// 대기 상태에서 이벤트를 기다립니다.
-	DWORD dwWaitResult = WaitForSingleObject(pDlg->m_eventPlasticThread, INFINITE);
-
-	// 이벤트가 설정되면 다음 작업을 수행합니다.
-	if (dwWaitResult == WAIT_OBJECT_0)
-	{
-		CThreadTest::Thread_DB_Wait_Plastic();
-
-		CStringA jsonData;
-		jsonData = prepareData(PLASTIC);
-
-		wstring endpoint = SendPostRequest(PLASTIC);
-
-		CStringA result = pDlg->winHttp(jsonData, endpoint, 5002);
-
-		vector<int> parse = pDlg->parsing_plastic(result);
-
-		CString notice;
-
-		if (parse.size() >= 1) {
-			if (parse[0] == 1)
-			{
-				notice = L"플라스틱 이상";
-			}
-			else
-			{
-				notice = L"플라스틱 정상";
-				pDlg->PostMessage(WM_NOTICE_LIST, (WPARAM)new CString(notice));
-			}
-		}
-
-		pDlg->PostMessage(WM_NOTICE_PLASTIC, (WPARAM)new CString(notice)); // CString 동적 할당 없이 수정
-	}
-
-	// 스레드 종료 후 이벤트 초기화
-	pDlg->m_eventPlasticThread.ResetEvent();
-
-	return 0;
-}
 
 UINT CSF5MFCAIPOPDlg::RobotThread(LPVOID pParam)
 {
@@ -631,19 +637,23 @@ UINT CSF5MFCAIPOPDlg::RobotThread(LPVOID pParam)
 			if (parse[0] == 1)
 			{
 				notice = L"전류 이상";
+				pDlg->PostMessage(WM_NOTICE_LIST, (WPARAM)new CString(notice));
 			}
 			else
 			{
 				notice = L"전류 정상";
+				pDlg->PostMessage(WM_NOTICE_LIST, (WPARAM)new CString(notice));
 			}
 
 			if (parse[1] == 1)
 			{
 				notice = L"진동 이상";
+				pDlg->PostMessage(WM_NOTICE_LIST, (WPARAM)new CString(notice));
 			}
 			else
 			{
 				notice = L"진동 정상";
+				pDlg->PostMessage(WM_NOTICE_LIST, (WPARAM)new CString(notice));
 			}
 		}
 
@@ -655,6 +665,97 @@ UINT CSF5MFCAIPOPDlg::RobotThread(LPVOID pParam)
 
 	return 0;
 }
+
+UINT CSF5MFCAIPOPDlg::PlasticThread(LPVOID pParam)
+{
+	CSF5MFCAIPOPDlg* pDlg = (CSF5MFCAIPOPDlg*)pParam;
+
+	// 대기 상태에서 이벤트를 기다립니다.
+	DWORD dwWaitResult = WaitForSingleObject(pDlg->m_eventPlasticThread, INFINITE);
+
+	// 이벤트가 설정되면 다음 작업을 수행합니다.
+	if (dwWaitResult == WAIT_OBJECT_0)
+	{
+		CThreadTest::Thread_DB_Wait_Plastic();
+
+		CStringA jsonData;
+		jsonData = prepareData(PLASTIC);
+
+		wstring endpoint = SendPostRequest(PLASTIC);
+
+		CStringA result = pDlg->winHttp(jsonData, endpoint, 5002);
+
+		vector<int> parse = pDlg->parsing_plastic(result);
+
+		CString notice;
+
+		if (parse.size() >= 1) {
+			if (parse[0] == 1)
+			{
+				notice = L"플라스틱 이상";
+				pDlg->PostMessage(WM_NOTICE_LIST, (WPARAM)new CString(notice));
+			}
+			else
+			{
+				notice = L"플라스틱 정상";
+				pDlg->PostMessage(WM_NOTICE_LIST, (WPARAM)new CString(notice));
+			}
+		}
+
+		pDlg->PostMessage(WM_NOTICE_PLASTIC, (WPARAM)new CString(notice)); // CString 동적 할당 없이 수정
+	}
+
+	// 스레드 종료 후 이벤트 초기화
+	pDlg->m_eventPlasticThread.ResetEvent();
+
+	return 0;
+}
+
+UINT CSF5MFCAIPOPDlg::HeatThread(LPVOID pParam)
+{
+	CSF5MFCAIPOPDlg* pDlg = (CSF5MFCAIPOPDlg*)pParam;
+
+	// 대기 상태에서 이벤트를 기다립니다.
+	DWORD dwWaitResult = WaitForSingleObject(pDlg->m_eventHeatThread, INFINITE);
+
+	// 이벤트가 설정되면 다음 작업을 수행합니다.
+	if (dwWaitResult == WAIT_OBJECT_0)
+	{
+		CThreadTest::Thread_DB_Wait_Heat();
+
+		CStringA jsonData;
+		jsonData = prepareData(HEAT);
+
+		wstring endpoint = SendPostRequest(HEAT);
+
+		CStringA result = pDlg->winHttp(jsonData, endpoint, 5003);
+
+		vector<int> parse = pDlg->parsing_heat(result);
+
+		CString notice;
+
+		if (parse.size() >= 1) {
+			if (parse[0] == 1)
+			{
+				notice = L"열처리 이상";
+				pDlg->PostMessage(WM_NOTICE_LIST, (WPARAM)new CString(notice));
+			}
+			else
+			{
+				notice = L"열처리 정상";
+				pDlg->PostMessage(WM_NOTICE_LIST, (WPARAM)new CString(notice));
+			}
+		}
+
+		pDlg->PostMessage(WM_NOTICE_HEAT, (WPARAM)new CString(notice)); // CString 동적 할당 없이 수정
+	}
+
+	// 스레드 종료 후 이벤트 초기화
+	pDlg->m_eventHeatThread.ResetEvent();
+
+	return 0;
+}
+
 
 
 void CSF5MFCAIPOPDlg::OnBnClickedButtonRobot()
@@ -681,7 +782,6 @@ void CSF5MFCAIPOPDlg::OnBnClickedButtonRobot()
 	m_eventRobotThread.SetEvent();
 }
 
-
 void CSF5MFCAIPOPDlg::OnBnClickedButtonPlastic()
 {
 	//PROCESSDlg proDlg;
@@ -706,23 +806,30 @@ void CSF5MFCAIPOPDlg::OnBnClickedButtonPlastic()
 	m_eventPlasticThread.SetEvent();
 }
 
-
-LRESULT CSF5MFCAIPOPDlg::OnNoticePlasticError(WPARAM wParam, LPARAM lParam)
+void CSF5MFCAIPOPDlg::OnBnClickedButtonHeat()
 {
-	CString* pNotice = (CString*)wParam;
+	//PROCESSDlg proDlg;
+	//proDlg.DoModal();
 
-	if (pNotice)
+	// 이전 스레드 핸들이 있는 경우 종료
+	if (m_hHeatThread != nullptr)
 	{
-		SetDlgItemText(IDC_STATIC_PLASTIC_NOTICE, *pNotice);
-		delete pNotice; // 메모리 해제
-	}
-	else
-	{
-		SetDlgItemText(IDC_STATIC_PLASTIC_NOTICE, L"에러");
+		::CloseHandle(m_hHeatThread);
+		m_hHeatThread = nullptr;
 	}
 
-	return 0;
+	// 스레드 핸들 초기화
+	m_hHeatThread = (HANDLE)_beginthreadex(NULL, 0, &HeatThread, this, 0, NULL);
+	if (m_hHeatThread == nullptr)
+	{
+		AfxMessageBox(_T("Error creating heat thread."));
+		return;
+	}
+
+	// 이벤트 설정하여 스레드를 깨움
+	m_eventHeatThread.SetEvent();
 }
+
 
 
 LRESULT CSF5MFCAIPOPDlg::OnNoticeRobotError(WPARAM wParam, LPARAM lParam)
@@ -741,6 +848,41 @@ LRESULT CSF5MFCAIPOPDlg::OnNoticeRobotError(WPARAM wParam, LPARAM lParam)
 
 	return 0;
 }
+
+LRESULT CSF5MFCAIPOPDlg::OnNoticePlasticError(WPARAM wParam, LPARAM lParam)
+{
+	CString* pNotice = (CString*)wParam;
+
+	if (pNotice)
+	{
+		SetDlgItemText(IDC_STATIC_PLASTIC_NOTICE, *pNotice);
+		delete pNotice; // 메모리 해제
+	}
+	else
+	{
+		SetDlgItemText(IDC_STATIC_PLASTIC_NOTICE, L"에러");
+	}
+
+	return 0;
+}
+
+LRESULT CSF5MFCAIPOPDlg::OnNoticeHeatError(WPARAM wParam, LPARAM lParam)
+{
+	CString* pNotice = (CString*)wParam;
+
+	if (pNotice)
+	{
+		SetDlgItemText(IDC_STATIC_HEAT_NOTICE, *pNotice);
+		delete pNotice; // 메모리 해제
+	}
+	else
+	{
+		SetDlgItemText(IDC_STATIC_HEAT_NOTICE, L"에러");
+	}
+
+	return 0;
+}
+
 
 
 LRESULT CSF5MFCAIPOPDlg::OnNoticeList(WPARAM wParam, LPARAM lParam)
@@ -761,6 +903,12 @@ LRESULT CSF5MFCAIPOPDlg::OnNoticeList(WPARAM wParam, LPARAM lParam)
 		result2 = L"소성가공";
 		result3 = L"설비 이상";
 	}
+	else if (notice.Compare(L"플라스틱 정상") == 0)
+	{
+		result1 = L"정상";
+		result2 = L"소성가공";
+		result3 = L"설비 정상";
+	}
 	else if (notice.Compare(L"전류 이상") == 0)
 	{
 		result1 = L"경보 발생";
@@ -773,23 +921,29 @@ LRESULT CSF5MFCAIPOPDlg::OnNoticeList(WPARAM wParam, LPARAM lParam)
 		result2 = L"로봇 용접";
 		result3 = L"진동 이상";
 	}
+	else if (notice.Compare(L"전류 정상") == 0)
+	{
+		result1 = L"정상";
+		result2 = L"로봇 용접";
+		result3 = L"전류 정상";
+	}
+	else if (notice.Compare(L"진동 정상") == 0)
+	{
+		result1 = L"정상";
+		result2 = L"로봇 용접";
+		result3 = L"전류 정상";
+	}
 	else if (notice.Compare(L"열처리 이상") == 0)
 	{
 		result1 = L"경보 발생";
-		result2 = L"소성가공";
+		result2 = L"열처리";
 		result3 = L"설비 이상";
 	}
-	else if (notice.Compare(L"소성가공 API 에러") == 0)
+	else if (notice.Compare(L"열처리 정상") == 0)
 	{
-		result1 = L"에러 발생";
-		result2 = L"소성가공";
-		result3 = L"API 이상";
-	}
-	else if (notice.Compare(L"로봇용접 API 에러") == 0)
-	{
-		result1 = L"에러 발생";
-		result2 = L"로봇용접";
-		result3 = L"API 이상";
+		result1 = L"정상";
+		result2 = L"열처리";
+		result3 = L"설비 정상";
 	}
 
 
@@ -805,6 +959,8 @@ LRESULT CSF5MFCAIPOPDlg::OnNoticeList(WPARAM wParam, LPARAM lParam)
 	delete (CString*)wParam; // 메모리 해제
 	return 0;
 }
+
+
 
 BOOL CSF5MFCAIPOPDlg::OnEraseBkgnd(CDC* pDC)
 {
