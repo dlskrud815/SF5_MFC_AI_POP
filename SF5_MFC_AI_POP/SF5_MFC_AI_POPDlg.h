@@ -111,5 +111,8 @@ public:
 
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 
-
+	// Picture Control을 위한 멤버 변수 선언
+	CStatic m_staticFacility;
+	// 이미지 리소스를 저장할 멤버 변수
+	CImage m_imageFacility;
 };

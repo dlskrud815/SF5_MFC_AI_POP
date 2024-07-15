@@ -142,8 +142,30 @@ BOOL CSF5MFCAIPOPDlg::OnInitDialog()
 	ShowWindow(SW_SHOWMAXIMIZED); // 최대화
 	//back.Load(_T("res\\img\\BACK1.png"));
 
+	// Picture Control 초기화
+	m_staticFacility.SubclassDlgItem(IDC_STATIC_FACILITY, this);
 
-	CRect rectHeader, rectNotice1, rectNotice2, rectNotice3;
+	// 이미지 로드 (파일 경로로 로드합니다)
+	HRESULT hResult = m_imageFacility.Load(_T("res/img/facility.png"));
+	if (FAILED(hResult))
+	{
+		AfxMessageBox(_T("이미지를 로드할 수 없습니다."));
+		return FALSE;
+	}
+
+	CRect rect;
+	GetClientRect(&rect);
+
+
+	const int imgWidth = (rect.Width() - 3 * 50 - 800);
+	const int imgHeight = (rect.Height() - 2 * 10 - 110 - 2 * 50) * 2 / 3;
+
+	const int gap = ((rect.Height() - 2 * 10 - 110 - 2 * 50) - imgHeight) / 2;
+
+	m_staticFacility.SetWindowPos(NULL, 50, rect.Height() - 50 - gap - imgHeight, imgWidth, imgHeight, 0);
+
+
+	CRect rectHeader; //, rectNotice1, rectNotice2, rectNotice3;
 	GetDlgItem(IDC_STATIC_HEADER)->GetWindowRect(&rectHeader);
 	ScreenToClient(&rectHeader);
 	m_staticHeader.Create(_T(""), WS_VISIBLE | WS_CHILD | SS_NOTIFY, rectHeader, this, IDC_STATIC_HEADER);
@@ -221,7 +243,22 @@ void CSF5MFCAIPOPDlg::OnPaint()
 	{
 		CDialogEx::OnPaint();
 
+		// Picture Control에 이미지를 그림
+		CStatic* pStaticFacility = (CStatic*)GetDlgItem(IDC_STATIC_FACILITY);
+		if (pStaticFacility != nullptr)
+		{
+			CRect rect;
+			pStaticFacility->GetClientRect(&rect);
 
+			// 클라이언트 DC 가져오기
+			CDC* pDC = pStaticFacility->GetDC();
+
+			// 이미지를 Picture Control 크기에 맞게 스케일링하여 그리기
+			m_imageFacility.Draw(pDC->m_hDC, rect);
+
+			// DC 해제
+			pStaticFacility->ReleaseDC(pDC);
+		}
 	}
 }
 
@@ -280,8 +317,8 @@ void CSF5MFCAIPOPDlg::OnSize(UINT nType, int cx, int cy)
 	{
 		pCancelButton->SetWindowPos(nullptr, 10, cy - 10 - 50, 100, 50, 0);
 	}
-	 
-	 
+
+
 	//const int buttonWidth = 150;
 	//const int buttonHeight = 40;
 	//const int margin = 20;
