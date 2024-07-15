@@ -20,6 +20,8 @@ LOGINDlg::LOGINDlg(CWnd* pParent /*=nullptr*/)
 
 LOGINDlg::~LOGINDlg()
 {
+	if (m_hCursor != nullptr)
+		::DestroyCursor(m_hCursor);
 }
 
 void LOGINDlg::DoDataExchange(CDataExchange* pDX)
@@ -36,6 +38,7 @@ BEGIN_MESSAGE_MAP(LOGINDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON_SIGNIN, &LOGINDlg::OnBnClickedButtonSignin)
 	ON_WM_ERASEBKGND()
 	ON_WM_CTLCOLOR()
+	ON_WM_SETCURSOR()
 END_MESSAGE_MAP()
 
 
@@ -112,35 +115,38 @@ BOOL LOGINDlg::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
 
+	m_hCursor = ::LoadCursor(NULL, IDC_HAND);  // Example: IDC_HAND is a standard hand cursor
+
 	m_font.CreatePointFont(170, L"나눔스퀘어");
 	GetDlgItem(IDC_STATIC_TEXT1)->SetFont(&m_font);
 
 	// 버튼 서브클래스화
-	CMyButton* pBtnSignin = new CMyButton();
-	CMyButton* pBtnLogin = new CMyButton();
+	pBtnSignin = new CMyButton();
+	pBtnLogin = new CMyButton();
+	pBtnCancel = new CMyButton();
 
-
-	CRect rect1, rect2;
+	CRect rect1, rect2, rect3;
 	GetDlgItem(IDC_BUTTON_SIGNIN)->GetWindowRect(&rect1);
 	GetDlgItem(IDOK)->GetWindowRect(&rect2);
+	GetDlgItem(IDCANCEL)->GetWindowRect(&rect3);
+	
 
 	ScreenToClient(&rect1);
 	ScreenToClient(&rect2);
+	ScreenToClient(&rect3);
 
-	pBtnSignin->Create(_T("Sign In"), WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON | BS_CENTER | BS_VCENTER,
+	pBtnSignin->Create(_T("회원가입"), WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON | BS_CENTER | BS_VCENTER,
 		rect1, this, IDC_BUTTON_SIGNIN);
-	pBtnLogin->Create(_T("Log In"), WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON | BS_CENTER | BS_VCENTER,
+	pBtnLogin->Create(_T("로그인"), WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON | BS_CENTER | BS_VCENTER,
 		rect2, this, IDOK);
+	pBtnCancel->Create(_T("X"), WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON | BS_CENTER | BS_VCENTER,
+		rect3, this, IDCANCEL);
 
-	pBtnSignin->ModifyStyle(0, BS_OWNERDRAW); // 버튼 스타일을 owner-draw로 변경
-	pBtnSignin->SetBackgroundColor(RGB(41, 128, 238)); // 주황색 배경 설정
-
-	pBtnLogin->ModifyStyle(0, BS_OWNERDRAW); // 버튼 스타일을 owner-draw로 변경
-	pBtnLogin->SetBackgroundColor(RGB(238, 182, 41)); // 파란색 배경 설정
 
 	// 기존 버튼 숨기기
 	GetDlgItem(IDC_BUTTON_SIGNIN)->ShowWindow(SW_HIDE);
 	GetDlgItem(IDOK)->ShowWindow(SW_HIDE);
+	GetDlgItem(IDCANCEL)->ShowWindow(SW_HIDE);
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// EXCEPTION: OCX Property Pages should return FALSE
@@ -163,4 +169,16 @@ HBRUSH LOGINDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 
 	// TODO:  Return a different brush if the default is not desired
 	return hbr;
+}
+
+BOOL LOGINDlg::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
+{
+	// TODO: Add your message handler code here and/or call default
+	if (pWnd == pBtnSignin || pWnd == pBtnLogin || pWnd == pBtnCancel)
+	{
+		::SetCursor(m_hCursor);
+		return TRUE;
+	}
+
+	return CDialogEx::OnSetCursor(pWnd, nHitTest, message);
 }

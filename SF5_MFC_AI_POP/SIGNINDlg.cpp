@@ -19,6 +19,8 @@ SIGNINDlg::SIGNINDlg(CWnd* pParent /*=nullptr*/)
 
 SIGNINDlg::~SIGNINDlg()
 {
+	if (m_hCursor != nullptr)
+		::DestroyCursor(m_hCursor);
 }
 
 void SIGNINDlg::DoDataExchange(CDataExchange* pDX)
@@ -35,6 +37,8 @@ BEGIN_MESSAGE_MAP(SIGNINDlg, CDialogEx)
 	ON_BN_CLICKED(IDOK, &SIGNINDlg::OnBnClickedOk)
 	ON_WM_ERASEBKGND()
 	ON_WM_LBUTTONDOWN()
+	ON_WM_CTLCOLOR()
+	ON_WM_SETCURSOR()
 END_MESSAGE_MAP()
 
 
@@ -115,4 +119,72 @@ void SIGNINDlg::OnLButtonDown(UINT nFlags, CPoint point)
 	SendMessage(WM_NCLBUTTONDOWN, HTCAPTION, MAKELPARAM(point.x, point.y));
 
 	CDialogEx::OnLButtonDown(nFlags, point);
+}
+
+
+BOOL SIGNINDlg::OnInitDialog()
+{
+	CDialogEx::OnInitDialog();
+
+	// TODO:  Add extra initialization here
+	m_hCursor = ::LoadCursor(NULL, IDC_HAND);  // Example: IDC_HAND is a standard hand cursor
+
+	m_font.CreatePointFont(170, L"나눔스퀘어");
+	GetDlgItem(IDC_STATIC_TEXT2)->SetFont(&m_font);
+
+	pBtnConfirm = new CMyButton();
+	pBtnCancel = new CMyButton();
+
+	CRect rect1, rect2;
+	GetDlgItem(IDOK)->GetWindowRect(&rect1);
+	GetDlgItem(IDCANCEL)->GetWindowRect(&rect2);
+
+	ScreenToClient(&rect1);
+	ScreenToClient(&rect2);
+
+
+	pBtnConfirm->Create(_T("확인"), WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON | BS_CENTER | BS_VCENTER,
+		rect1, this, IDOK);
+	pBtnCancel->Create(_T("X"), WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON | BS_CENTER | BS_VCENTER,
+		rect2, this, IDCANCEL);
+
+	GetDlgItem(IDOK)->ShowWindow(SW_HIDE);
+	GetDlgItem(IDCANCEL)->ShowWindow(SW_HIDE);
+
+	return TRUE;  // return TRUE unless you set the focus to a control
+	// EXCEPTION: OCX Property Pages should return FALSE
+}
+
+
+HBRUSH SIGNINDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
+{
+	HBRUSH hbr = CDialogEx::OnCtlColor(pDC, pWnd, nCtlColor);
+
+	// IDC_STATIC_TEXT1에 대해 배경을 투명하게 설정
+	if (pWnd->GetDlgCtrlID() == IDC_STATIC_TEXT2
+		|| pWnd->GetDlgCtrlID() == IDC_STATIC_ADMIN_CODE
+		|| pWnd->GetDlgCtrlID() == IDC_STATIC_IN_ID
+		|| pWnd->GetDlgCtrlID() == IDC_STATIC_IN_PW
+		|| pWnd->GetDlgCtrlID() == IDC_STATIC_IN_PW_RE)
+	{
+		pDC->SetBkMode(TRANSPARENT);
+		pDC->SetTextColor(RGB(255, 255, 255));  // 흰색으로 글자 색 설정
+		return (HBRUSH)GetStockObject(NULL_BRUSH);  // 배경 브러시를 NULL로 설정하여 투명하게 만듦
+	}
+
+	// TODO:  Return a different brush if the default is not desired
+	return hbr;
+}
+
+
+BOOL SIGNINDlg::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
+{
+	// TODO: Add your message handler code here and/or call default
+	if (pWnd == pBtnConfirm || pWnd == pBtnCancel)
+	{
+		::SetCursor(m_hCursor);
+		return TRUE;
+	}
+
+	return CDialogEx::OnSetCursor(pWnd, nHitTest, message);
 }

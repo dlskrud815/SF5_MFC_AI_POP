@@ -39,4 +39,8 @@ public:
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 
 	CFont m_font;
+
+	CMyButton* pBtnSignin, *pBtnLogin, *pBtnCancel;
+	HCURSOR m_hCursor;
+	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
 };
