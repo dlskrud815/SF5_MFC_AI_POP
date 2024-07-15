@@ -913,7 +913,7 @@ LRESULT CSF5MFCAIPOPDlg::OnNoticeList(WPARAM wParam, LPARAM lParam)
 	{
 		result1 = L"경보 발생";
 		result2 = L"로봇 용접";
-		result3 = L"전류 이상";
+		result3 = L"진동 이상";
 	}
 	else if (notice.Compare(L"진동 이상") == 0)
 	{
@@ -931,7 +931,7 @@ LRESULT CSF5MFCAIPOPDlg::OnNoticeList(WPARAM wParam, LPARAM lParam)
 	{
 		result1 = L"정상";
 		result2 = L"로봇 용접";
-		result3 = L"전류 정상";
+		result3 = L"진동 정상";
 	}
 	else if (notice.Compare(L"열처리 이상") == 0)
 	{
