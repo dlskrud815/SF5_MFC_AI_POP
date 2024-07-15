@@ -2,6 +2,7 @@
 #include "afxdialogex.h"
 #include "MySQL_Connector.h"
 #include <string>
+#include "MyButton.h"
 
 using namespace std;
 
@@ -36,4 +37,6 @@ public:
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	virtual BOOL OnInitDialog();
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
+
+	CFont m_font;
 };

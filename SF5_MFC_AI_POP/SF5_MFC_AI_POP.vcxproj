@@ -190,6 +190,7 @@
     <ClInclude Include="CustomStatic.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="LOGINDlg.h" />
+    <ClInclude Include="MyButton.h" />
     <ClInclude Include="MySQL_Connector.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="PROCESSDlg.h" />
@@ -204,6 +205,7 @@
     <ClCompile Include="ChartViewer.cpp" />
     <ClCompile Include="CustomStatic.cpp" />
     <ClCompile Include="LOGINDlg.cpp" />
+    <ClCompile Include="MyButton.cpp" />
     <ClCompile Include="MySQL_Connector.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
