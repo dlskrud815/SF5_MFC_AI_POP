@@ -376,12 +376,14 @@ vector<int> CSF5MFCAIPOPDlg::parsing_heat(CStringA response) {
 	return { heatResult };
 }
 
-CStringA CSF5MFCAIPOPDlg::prepareData(tName process) {
+CStringA CSF5MFCAIPOPDlg::prepareData(tName process, LPVOID pParam) {
+	CSF5MFCAIPOPDlg* pDlg = (CSF5MFCAIPOPDlg*)pParam;
+
 	CStringA jsonData;
 	switch (process) {
 	case ROBOT: {
-		string cur = CThreadTest::strCur;
-		string vib = CThreadTest::strVib;
+		string cur = pDlg->strCur;
+		string vib = pDlg->strVib;
 
 		CStringA A_cur(cur.c_str());
 		CStringA A_vib(vib.c_str());
@@ -389,6 +391,7 @@ CStringA CSF5MFCAIPOPDlg::prepareData(tName process) {
 		jsonData.Format("{\"vibration\": [%s], \"current\": [%s]}", A_vib, A_cur);
 		break;
 	}
+
 	case PLASTIC: {
 		string v0 = CThreadTest::strV0;
 		string v1 = CThreadTest::strV1;
@@ -609,6 +612,61 @@ LRESULT CSF5MFCAIPOPDlg::OnUpdateTime(WPARAM wParam, LPARAM lParam)
 }
 
 
+string CSF5MFCAIPOPDlg::vectorToString(vector<double> vec) {
+	string output;
+	int i = 0;
+
+	for (double num : vec)
+	{
+		i++;
+
+		if (i >= vec.size())
+		{
+			output += std::to_string(num);
+		}
+		else
+		{
+			output += std::to_string(num) + ", ";
+		}
+	}
+	return output;
+}
+
+UINT CSF5MFCAIPOPDlg::Thread1(LPVOID pParam)
+{
+	CSF5MFCAIPOPDlg* pDlg = (CSF5MFCAIPOPDlg*)pParam;
+	MySQL_Connector* mysql = new MySQL_Connector();
+
+	if (mysql->connect("tcp://127.0.0.1:3306", "Nia", "0000", "pop"))
+	{
+		vector<double> cur = mysql->fetchDataFromTable(ROBOT_CUR, pDlg->offsetCur);
+
+		pDlg->strCur = pDlg->vectorToString(cur);
+	}
+
+	delete mysql;
+
+	return 0;
+}
+
+UINT CSF5MFCAIPOPDlg::Thread2(LPVOID pParam)
+{
+	CSF5MFCAIPOPDlg* pDlg = (CSF5MFCAIPOPDlg*)pParam;
+	MySQL_Connector* mysql = new MySQL_Connector();
+
+	if (mysql->connect("tcp://127.0.0.1:3306", "Nia", "0000", "pop"))
+	{
+		vector<double> vib = mysql->fetchDataFromTable(ROBOT_VIB, pDlg->offsetVib);
+
+		pDlg->strVib = pDlg->vectorToString(vib);
+	}
+
+	delete mysql;
+
+	return 0;
+}
+
+
 
 UINT CSF5MFCAIPOPDlg::RobotThread(LPVOID pParam)
 {
@@ -620,44 +678,77 @@ UINT CSF5MFCAIPOPDlg::RobotThread(LPVOID pParam)
 	// 이벤트가 설정되면 다음 작업을 수행합니다.
 	if (dwWaitResult == WAIT_OBJECT_0)
 	{
-		CThreadTest::Thread_DB_Wait_Robot();
+		int outlier = 0;
+		bool outCur, outVib;
+		while (outlier < 5)
+		{
+			// Create the thread
+			CWinThread* pThread1 = AfxBeginThread(Thread1, pDlg);
+			if (pThread1 == NULL) AfxMessageBox(L"pThread1 Create Error");
 
-		CStringA jsonData;
-		jsonData = prepareData(ROBOT);
+			CWinThread* pThread2 = AfxBeginThread(Thread2, pDlg);
+			if (pThread2 == NULL) AfxMessageBox(L"pThread2 Create Error");
 
-		wstring endpoint = SendPostRequest(ROBOT);
+			HANDLE hThreads[2] = { pThread1->m_hThread, pThread2->m_hThread };
 
-		CStringA result = pDlg->winHttp(jsonData, endpoint, 5001);
-
-		vector<int> parse = pDlg->parsing_robot(result);
-
-		CString notice;
-
-		if (parse.size() >= 2) {
-			if (parse[0] == 1)
+			// Wait for both threads to complete
+			DWORD dwThreadResult = WaitForMultipleObjects(2, hThreads, TRUE, INFINITE);
+			if (dwThreadResult == WAIT_FAILED)
 			{
-				notice = L"전류 이상";
-				pDlg->PostMessage(WM_NOTICE_LIST, (WPARAM)new CString(notice));
-			}
-			else
-			{
-				notice = L"전류 정상";
-				pDlg->PostMessage(WM_NOTICE_LIST, (WPARAM)new CString(notice));
+				AfxMessageBox(L"Error waiting for threads to complete");
 			}
 
-			if (parse[1] == 1)
-			{
-				notice = L"진동 이상";
-				pDlg->PostMessage(WM_NOTICE_LIST, (WPARAM)new CString(notice));
+			// Close the thread handles
+			CloseHandle(pThread1->m_hThread);
+			CloseHandle(pThread2->m_hThread);
+			
+			pDlg->offsetCur++;
+			pDlg->offsetVib++;
+
+
+			CStringA jsonData;
+			jsonData = prepareData(ROBOT, pDlg);
+			wstring endpoint = SendPostRequest(ROBOT);
+			CStringA result = pDlg->winHttp(jsonData, endpoint, 5001);
+			vector<int> parse = pDlg->parsing_robot(result);
+			 
+			CString notice;
+
+			if (parse.size() >= 2) {
+				outCur = false, outVib = false;
+
+				if (parse[0] == 1)
+				{
+					notice = L"전류 이상";
+					outCur = true;
+					pDlg->PostMessage(WM_NOTICE_LIST, (WPARAM)new CString(notice));
+				}
+				else
+				{
+					notice = L"전류 정상";
+					//outlier++;
+					pDlg->PostMessage(WM_NOTICE_LIST, (WPARAM)new CString(notice));
+				}
+
+				if (parse[1] == 1)
+				{
+					notice = L"진동 이상";
+					outVib = true;
+					pDlg->PostMessage(WM_NOTICE_LIST, (WPARAM)new CString(notice));
+				}
+				else
+				{
+					notice = L"진동 정상";
+					//outlier++;
+					pDlg->PostMessage(WM_NOTICE_LIST, (WPARAM)new CString(notice));
+				}
+				if (outCur == true || outVib == true) {
+					outlier++;
+				}
 			}
-			else
-			{
-				notice = L"진동 정상";
-				pDlg->PostMessage(WM_NOTICE_LIST, (WPARAM)new CString(notice));
-			}
+
+			pDlg->PostMessage(WM_NOTICE_ROBOT, (WPARAM)new CString(notice)); // CString 동적 할당 없이 수정
 		}
-
-		pDlg->PostMessage(WM_NOTICE_ROBOT, (WPARAM)new CString(notice)); // CString 동적 할당 없이 수정
 	}
 
 	// 스레드 종료 후 이벤트 초기화
@@ -668,90 +759,90 @@ UINT CSF5MFCAIPOPDlg::RobotThread(LPVOID pParam)
 
 UINT CSF5MFCAIPOPDlg::PlasticThread(LPVOID pParam)
 {
-	CSF5MFCAIPOPDlg* pDlg = (CSF5MFCAIPOPDlg*)pParam;
+	//CSF5MFCAIPOPDlg* pDlg = (CSF5MFCAIPOPDlg*)pParam;
 
-	// 대기 상태에서 이벤트를 기다립니다.
-	DWORD dwWaitResult = WaitForSingleObject(pDlg->m_eventPlasticThread, INFINITE);
+	//// 대기 상태에서 이벤트를 기다립니다.
+	//DWORD dwWaitResult = WaitForSingleObject(pDlg->m_eventPlasticThread, INFINITE);
 
-	// 이벤트가 설정되면 다음 작업을 수행합니다.
-	if (dwWaitResult == WAIT_OBJECT_0)
-	{
-		CThreadTest::Thread_DB_Wait_Plastic();
+	//// 이벤트가 설정되면 다음 작업을 수행합니다.
+	//if (dwWaitResult == WAIT_OBJECT_0)
+	//{
+	//	CThreadTest::Thread_DB_Wait_Plastic();
 
-		CStringA jsonData;
-		jsonData = prepareData(PLASTIC);
+	//	CStringA jsonData;
+	//	jsonData = prepareData(PLASTIC);
 
-		wstring endpoint = SendPostRequest(PLASTIC);
+	//	wstring endpoint = SendPostRequest(PLASTIC);
 
-		CStringA result = pDlg->winHttp(jsonData, endpoint, 5002);
+	//	CStringA result = pDlg->winHttp(jsonData, endpoint, 5002);
 
-		vector<int> parse = pDlg->parsing_plastic(result);
+	//	vector<int> parse = pDlg->parsing_plastic(result);
 
-		CString notice;
+	//	CString notice;
 
-		if (parse.size() >= 1) {
-			if (parse[0] == 1)
-			{
-				notice = L"플라스틱 이상";
-				pDlg->PostMessage(WM_NOTICE_LIST, (WPARAM)new CString(notice));
-			}
-			else
-			{
-				notice = L"플라스틱 정상";
-				pDlg->PostMessage(WM_NOTICE_LIST, (WPARAM)new CString(notice));
-			}
-		}
+	//	if (parse.size() >= 1) {
+	//		if (parse[0] == 1)
+	//		{
+	//			notice = L"플라스틱 이상";
+	//			pDlg->PostMessage(WM_NOTICE_LIST, (WPARAM)new CString(notice));
+	//		}
+	//		else
+	//		{
+	//			notice = L"플라스틱 정상";
+	//			pDlg->PostMessage(WM_NOTICE_LIST, (WPARAM)new CString(notice));
+	//		}
+	//	}
 
-		pDlg->PostMessage(WM_NOTICE_PLASTIC, (WPARAM)new CString(notice)); // CString 동적 할당 없이 수정
-	}
+	//	pDlg->PostMessage(WM_NOTICE_PLASTIC, (WPARAM)new CString(notice)); // CString 동적 할당 없이 수정
+	//}
 
-	// 스레드 종료 후 이벤트 초기화
-	pDlg->m_eventPlasticThread.ResetEvent();
+	//// 스레드 종료 후 이벤트 초기화
+	//pDlg->m_eventPlasticThread.ResetEvent();
 
 	return 0;
 }
 
 UINT CSF5MFCAIPOPDlg::HeatThread(LPVOID pParam)
 {
-	CSF5MFCAIPOPDlg* pDlg = (CSF5MFCAIPOPDlg*)pParam;
+	//CSF5MFCAIPOPDlg* pDlg = (CSF5MFCAIPOPDlg*)pParam;
 
-	// 대기 상태에서 이벤트를 기다립니다.
-	DWORD dwWaitResult = WaitForSingleObject(pDlg->m_eventHeatThread, INFINITE);
+	//// 대기 상태에서 이벤트를 기다립니다.
+	//DWORD dwWaitResult = WaitForSingleObject(pDlg->m_eventHeatThread, INFINITE);
 
-	// 이벤트가 설정되면 다음 작업을 수행합니다.
-	if (dwWaitResult == WAIT_OBJECT_0)
-	{
-		CThreadTest::Thread_DB_Wait_Heat();
+	//// 이벤트가 설정되면 다음 작업을 수행합니다.
+	//if (dwWaitResult == WAIT_OBJECT_0)
+	//{
+	//	CThreadTest::Thread_DB_Wait_Heat();
 
-		CStringA jsonData;
-		jsonData = prepareData(HEAT);
+	//	CStringA jsonData;
+	//	jsonData = prepareData(HEAT);
 
-		wstring endpoint = SendPostRequest(HEAT);
+	//	wstring endpoint = SendPostRequest(HEAT);
 
-		CStringA result = pDlg->winHttp(jsonData, endpoint, 5003);
+	//	CStringA result = pDlg->winHttp(jsonData, endpoint, 5003);
 
-		vector<int> parse = pDlg->parsing_heat(result);
+	//	vector<int> parse = pDlg->parsing_heat(result);
 
-		CString notice;
+	//	CString notice;
 
-		if (parse.size() >= 1) {
-			if (parse[0] == 1)
-			{
-				notice = L"열처리 이상";
-				pDlg->PostMessage(WM_NOTICE_LIST, (WPARAM)new CString(notice));
-			}
-			else
-			{
-				notice = L"열처리 정상";
-				pDlg->PostMessage(WM_NOTICE_LIST, (WPARAM)new CString(notice));
-			}
-		}
+	//	if (parse.size() >= 1) {
+	//		if (parse[0] == 1)
+	//		{
+	//			notice = L"열처리 이상";
+	//			pDlg->PostMessage(WM_NOTICE_LIST, (WPARAM)new CString(notice));
+	//		}
+	//		else
+	//		{
+	//			notice = L"열처리 정상";
+	//			pDlg->PostMessage(WM_NOTICE_LIST, (WPARAM)new CString(notice));
+	//		}
+	//	}
 
-		pDlg->PostMessage(WM_NOTICE_HEAT, (WPARAM)new CString(notice)); // CString 동적 할당 없이 수정
-	}
+	//	pDlg->PostMessage(WM_NOTICE_HEAT, (WPARAM)new CString(notice)); // CString 동적 할당 없이 수정
+	//}
 
-	// 스레드 종료 후 이벤트 초기화
-	pDlg->m_eventHeatThread.ResetEvent();
+	//// 스레드 종료 후 이벤트 초기화
+	//pDlg->m_eventHeatThread.ResetEvent();
 
 	return 0;
 }
@@ -959,7 +1050,6 @@ LRESULT CSF5MFCAIPOPDlg::OnNoticeList(WPARAM wParam, LPARAM lParam)
 	delete (CString*)wParam; // 메모리 해제
 	return 0;
 }
-
 
 
 BOOL CSF5MFCAIPOPDlg::OnEraseBkgnd(CDC* pDC)

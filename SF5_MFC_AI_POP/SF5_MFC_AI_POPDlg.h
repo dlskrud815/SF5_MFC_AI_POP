@@ -53,17 +53,10 @@ protected:
 	vector<int> parsing_heat(CStringA response);
 
 	static wstring StringToWideString(const string& str);
-	static CStringA prepareData(tName process);
+	static CStringA prepareData(tName process, LPVOID pParam);
 	static wstring SendPostRequest(tName process);
 
-	//static UINT Thread_DB_Get_Cur(LPVOID _method);
-	//static UINT Thread_DB_Get_Vib(LPVOID _method);
-
-	//static CString strCur;
-	//static CString strVib;
 	static CCriticalSection critSect;
-	static int offsetCur;
-	static int offsetVib;
 
 	CCustomStatic m_staticHeader, m_staticNotice1, m_staticNotice2, m_staticNotice3;
 	CListCtrl m_listCtrl;
@@ -83,6 +76,10 @@ public:
 
 	static UINT TimeUpdateThread(LPVOID _mothod);
 	afx_msg LRESULT OnUpdateTime(WPARAM wParam, LPARAM lParam);
+
+
+	static UINT Thread1(LPVOID pParam);
+	static UINT Thread2(LPVOID pParam);
 
 
 	HANDLE m_hPlasticThread = nullptr; // 소성가공 스레드 핸들 추가
@@ -105,4 +102,10 @@ public:
 	
 	
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
+
+
+	string vectorToString(vector<double> vec);
+
+	int offsetCur = 1, offsetVib = 1;
+	string strCur, strVib;
 };
