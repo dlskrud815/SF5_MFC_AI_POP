@@ -135,7 +135,7 @@ BOOL LOGINDlg::OnInitDialog()
 	ScreenToClient(&rect2);
 	ScreenToClient(&rect3);
 
-	pBtnSignin->Create(_T("회원가입"), WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON | BS_CENTER | BS_VCENTER,
+	pBtnSignin->Create(_T("관리자 등록"), WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON | BS_CENTER | BS_VCENTER,
 		rect1, this, IDC_BUTTON_SIGNIN);
 	pBtnLogin->Create(_T("로그인"), WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON | BS_CENTER | BS_VCENTER,
 		rect2, this, IDOK);

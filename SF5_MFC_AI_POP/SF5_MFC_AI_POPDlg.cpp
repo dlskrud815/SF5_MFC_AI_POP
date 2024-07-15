@@ -26,6 +26,7 @@
 #define WM_NOTICE_LIST (WM_APP + 5)
 
 CCriticalSection CSF5MFCAIPOPDlg::critSect;
+CFont CSF5MFCAIPOPDlg::font;  // 정적 변수 정의
 
 int CSF5MFCAIPOPDlg::listIndex = 1;
 
@@ -89,8 +90,8 @@ BEGIN_MESSAGE_MAP(CSF5MFCAIPOPDlg, CDialogEx)
 	ON_MESSAGE(WM_NOTICE_PLASTIC, &CSF5MFCAIPOPDlg::OnNoticePlasticError)
 	ON_MESSAGE(WM_NOTICE_HEAT, &CSF5MFCAIPOPDlg::OnNoticeHeatError)
 	ON_MESSAGE(WM_NOTICE_LIST, &CSF5MFCAIPOPDlg::OnNoticeList)
-	//ON_WM_TIMER()
 	ON_WM_ERASEBKGND()
+	ON_WM_CTLCOLOR()
 END_MESSAGE_MAP()
 
 
@@ -140,47 +141,32 @@ BOOL CSF5MFCAIPOPDlg::OnInitDialog()
 	ShowWindow(SW_SHOWMAXIMIZED); // 최대화
 	//back.Load(_T("res\\img\\BACK1.png"));
 
-	// 사용자 정의 스태틱 컨트롤 초기화
-	CRect rectHeader, rectNotice1, rectNotice2, rectNotice3, rectTitle;
+
+	CRect rectHeader, rectNotice1, rectNotice2, rectNotice3;
 	GetDlgItem(IDC_STATIC_HEADER)->GetWindowRect(&rectHeader);
 	ScreenToClient(&rectHeader);
-	m_staticHeader.Create(_T(""), WS_VISIBLE | WS_CHILD | SS_NOTIFY, rectHeader, this);
-
-	GetDlgItem(IDC_STATIC_TITLE)->GetWindowRect(&rectTitle);
-	ScreenToClient(&rectTitle);
-	m_staticTitle.Create(_T("통합관제시스템"), WS_VISIBLE | WS_CHILD | SS_CENTER, rectTitle, this);
+	m_staticHeader.Create(_T(""), WS_VISIBLE | WS_CHILD | SS_NOTIFY, rectHeader, this, IDC_STATIC_HEADER);
+	GetDlgItem(IDC_STATIC_HEADER)->ShowWindow(SW_HIDE);
 
 
-	//// Define the font
-	//m_font.CreateFont(
-	//	20,                        // nHeight
-	//	0,                         // nWidth
-	//	0,                         // nEscapement
-	//	0,                         // nOrientation
-	//	FW_BOLD,                   // nWeight
-	//	FALSE,                     // bItalic
-	//	FALSE,                     // bUnderline
-	//	0,                         // cStrikeOut
-	//	ANSI_CHARSET,              // nCharSet
-	//	OUT_DEFAULT_PRECIS,        // nOutPrecision
-	//	CLIP_DEFAULT_PRECIS,       // nClipPrecision
-	//	DEFAULT_QUALITY,           // nQuality
-	//	DEFAULT_PITCH | FF_SWISS,  // nPitchAndFamily
-	//	_T("Arial"));              // lpszFacename
+	GetDlgItem(IDC_STATIC_TITLE)->GetFont()->GetLogFont(&logFont);
+	logFont.lfWeight = 1000;
+	logFont.lfHeight = 30;
 
-	//// Retrieve the static control and set its font
-	//m_staticTitle.SetFont(&m_font);
+	font.CreateFontIndirect(&logFont);
+	GetDlgItem(IDC_STATIC_TITLE)->SetFont(&font);
 
-	GetDlgItem(IDC_STATIC_NOTICE1)->GetWindowRect(&rectNotice1);
-	ScreenToClient(&rectNotice1);
-	GetDlgItem(IDC_STATIC_NOTICE2)->GetWindowRect(&rectNotice2);
-	ScreenToClient(&rectNotice2);
-	GetDlgItem(IDC_STATIC_NOTICE3)->GetWindowRect(&rectNotice3);
-	ScreenToClient(&rectNotice3);
 
-	m_staticNotice1.Create(_T(""), WS_VISIBLE | WS_CHILD | SS_NOTIFY, rectNotice1, this);
-	m_staticNotice2.Create(_T(""), WS_VISIBLE | WS_CHILD | SS_NOTIFY, rectNotice2, this);
-	m_staticNotice3.Create(_T(""), WS_VISIBLE | WS_CHILD | SS_NOTIFY, rectNotice3, this);
+	//GetDlgItem(IDC_STATIC_NOTICE1)->GetWindowRect(&rectNotice1);
+	//ScreenToClient(&rectNotice1);
+	//GetDlgItem(IDC_STATIC_NOTICE2)->GetWindowRect(&rectNotice2);
+	//ScreenToClient(&rectNotice2);
+	//GetDlgItem(IDC_STATIC_NOTICE3)->GetWindowRect(&rectNotice3);
+	//ScreenToClient(&rectNotice3);
+
+	//m_staticNotice1.Create(_T(""), WS_VISIBLE | WS_CHILD | SS_NOTIFY, rectNotice1, this);
+	//m_staticNotice2.Create(_T(""), WS_VISIBLE | WS_CHILD | SS_NOTIFY, rectNotice2, this);
+	//m_staticNotice3.Create(_T(""), WS_VISIBLE | WS_CHILD | SS_NOTIFY, rectNotice3, this);
 
 	// 리스트 칼럼 넣기
 	m_listCtrl.InsertColumn(0, L"메시지", LVCFMT_LEFT, 400, -1);
@@ -209,6 +195,7 @@ BOOL CSF5MFCAIPOPDlg::OnInitDialog()
 			MessageBox(L"이미지를 로드할 수 없습니다.");
 		}
 	}
+
 
 	// 메인 스레드 생성
 	CWinThread* pMainThread = AfxBeginThread(MainThread, this);
@@ -312,11 +299,11 @@ void CSF5MFCAIPOPDlg::OnSize(UINT nType, int cx, int cy)
 		pHeader->SetWindowPos(nullptr, headerMargin, headerMargin, cx - 2 * headerMargin, headerHeight - 2 * headerMargin, 0);
 	}
 
-	CWnd* pTitle = GetDlgItem(IDC_STATIC_TITLE);
-	if (pTitle != nullptr)
-	{
-		pTitle->SetWindowPos(nullptr, xPosTitle, yPosTitle, titleWidth, titleHeight, 0);
-	}
+	//CWnd* pTitle = GetDlgItem(IDC_STATIC_TITLE);
+	//if (pTitle != nullptr)
+	//{
+	//	pTitle->SetWindowPos(nullptr, xPosTitle, yPosTitle, titleWidth, titleHeight, 0);
+	//}
 
 	//// m_staticHeader 위치 계산 및 설정
 	//if (m_staticHeader.GetSafeHwnd())
@@ -496,6 +483,8 @@ CStringA CSF5MFCAIPOPDlg::prepareData(tName process, LPVOID pParam) {
 	return jsonData;
 }
 
+
+
 wstring CSF5MFCAIPOPDlg::StringToWideString(const string& str) {
 	int size_needed = MultiByteToWideChar(CP_UTF8, 0, str.c_str(), (int)str.size(), NULL, 0);
 	wstring wstrTo(size_needed, 0);
@@ -664,6 +653,7 @@ LRESULT CSF5MFCAIPOPDlg::OnUpdateTime(WPARAM wParam, LPARAM lParam)
 
 	return 0;
 }
+
 
 
 string CSF5MFCAIPOPDlg::vectorToString(vector<double> vec) {
@@ -1029,7 +1019,6 @@ LRESULT CSF5MFCAIPOPDlg::OnNoticeHeatError(WPARAM wParam, LPARAM lParam)
 }
 
 
-
 LRESULT CSF5MFCAIPOPDlg::OnNoticeList(WPARAM wParam, LPARAM lParam)
 {
 	const CString& notice = *((CString*)wParam);
@@ -1106,6 +1095,7 @@ LRESULT CSF5MFCAIPOPDlg::OnNoticeList(WPARAM wParam, LPARAM lParam)
 }
 
 
+
 BOOL CSF5MFCAIPOPDlg::OnEraseBkgnd(CDC* pDC)
 {
 	CRect rect;
@@ -1115,4 +1105,39 @@ BOOL CSF5MFCAIPOPDlg::OnEraseBkgnd(CDC* pDC)
 	return TRUE;
 
 	return CDialogEx::OnEraseBkgnd(pDC);
+}
+
+HBRUSH CSF5MFCAIPOPDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
+{
+	HBRUSH hbr = CDialogEx::OnCtlColor(pDC, pWnd, nCtlColor);
+
+	// TODO:  Change any attributes of the DC here
+	if (pWnd->GetDlgCtrlID() == IDC_STATIC_CURRENT_TIME
+		|| pWnd->GetDlgCtrlID() == IDC_STATIC_TITLE
+		|| pWnd->GetDlgCtrlID() == IDC_STATIC_HEAT_NOTICE
+		|| pWnd->GetDlgCtrlID() == IDC_STATIC_PLASTIC_NOTICE
+		|| pWnd->GetDlgCtrlID() == IDC_STATIC_ROBOT_NOTICE)
+	{
+		// Set text color to white
+		pDC->SetTextColor(RGB(255, 255, 255));
+
+		// Transparent background
+		pDC->SetBkMode(TRANSPARENT);
+
+		// Create a solid brush with background color
+		CBrush brush(RGB(64, 70, 76));
+
+		// Get the control's rectangle
+		CRect rect;
+		pWnd->GetClientRect(&rect);
+
+		// Fill the background with the solid brush
+		pDC->FillRect(&rect, &brush);
+
+		// Return a brush that is not used
+		return (HBRUSH)GetStockObject(NULL_BRUSH);
+	}
+
+	// TODO:  Return a different brush if the default is not desired
+	return hbr;
 }

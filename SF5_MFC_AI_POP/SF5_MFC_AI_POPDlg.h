@@ -59,7 +59,6 @@ protected:
 	static CCriticalSection critSect;
 
 	CCustomStatic m_staticHeader, m_staticNotice1, m_staticNotice2, m_staticNotice3;
-	CStatic m_staticTitle;
 	CListCtrl m_listCtrl;
 
 	DECLARE_MESSAGE_MAP()
@@ -110,5 +109,10 @@ public:
 	int offsetCur = 1, offsetVib = 1;
 	string strCur, strVib;
 
-	CFont m_font;
+	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
+
+	static CFont font;
+	LOGFONT logFont;
+
+
 };
