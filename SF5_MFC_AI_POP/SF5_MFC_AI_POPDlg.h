@@ -111,8 +111,7 @@ public:
 
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 
-	static CFont font;
-	LOGFONT logFont;
+
 
 
 };

@@ -26,7 +26,6 @@
 #define WM_NOTICE_LIST (WM_APP + 5)
 
 CCriticalSection CSF5MFCAIPOPDlg::critSect;
-CFont CSF5MFCAIPOPDlg::font;  // 정적 변수 정의
 
 int CSF5MFCAIPOPDlg::listIndex = 1;
 
@@ -149,13 +148,6 @@ BOOL CSF5MFCAIPOPDlg::OnInitDialog()
 	GetDlgItem(IDC_STATIC_HEADER)->ShowWindow(SW_HIDE);
 
 
-	GetDlgItem(IDC_STATIC_TITLE)->GetFont()->GetLogFont(&logFont);
-	logFont.lfWeight = 1000;
-	logFont.lfHeight = 30;
-
-	font.CreateFontIndirect(&logFont);
-	GetDlgItem(IDC_STATIC_TITLE)->SetFont(&font);
-
 
 	//GetDlgItem(IDC_STATIC_NOTICE1)->GetWindowRect(&rectNotice1);
 	//ScreenToClient(&rectNotice1);
@@ -265,89 +257,89 @@ void CSF5MFCAIPOPDlg::OnSize(UINT nType, int cx, int cy)
 {
 	CDialogEx::OnSize(nType, cx, cy);
 
-	const int buttonWidth = 150;
-	const int buttonHeight = 40;
-	const int margin = 20;
-	const int headerHeight = 100; // 헤더의 높이
-	const int headerMargin = 5; // 헤더의 상하좌우 여백 크기
+	//const int buttonWidth = 150;
+	//const int buttonHeight = 40;
+	//const int margin = 20;
+	//const int headerHeight = 100; // 헤더의 높이
+	//const int headerMargin = 5; // 헤더의 상하좌우 여백 크기
 
-	// 버튼 위치 계산
-	int xPosCancel = cx - buttonWidth - margin;
-	int xPosOK = xPosCancel - buttonWidth - margin;
-	int yPosButtons = headerHeight + margin;
+	//// 버튼 위치 계산
+	//int xPosCancel = cx - buttonWidth - margin;
+	//int xPosOK = xPosCancel - buttonWidth - margin;
+	//int yPosButtons = headerHeight + margin;
 
-	// 리스트 컨트롤 위치 계산
-	const int listHeight = 500;
-	int yPosListControl = cy - listHeight - margin;
+	//// 리스트 컨트롤 위치 계산
+	//const int listHeight = 500;
+	//int yPosListControl = cy - listHeight - margin;
 
-	// 현재 시간 텍스트 위치 계산
-	const int timeWidth = 300;
-	const int timeHeight = 40;
-	int xPosTime = cx - timeWidth - margin;
-	int yPosTime = headerHeight - timeHeight - margin;
+	//// 현재 시간 텍스트 위치 계산
+	//const int timeWidth = 300;
+	//const int timeHeight = 40;
+	//int xPosTime = cx - timeWidth - margin;
+	//int yPosTime = headerHeight - timeHeight - margin;
 
-	int titleWidth = 200; // Title 컨트롤의 너비
-	int titleHeight = 50; // Title 컨트롤의 높이
+	//int titleWidth = 200; // Title 컨트롤의 너비
+	//int titleHeight = 50; // Title 컨트롤의 높이
 
-	int xPosTitle = (cx - titleWidth) / 2; // 창의 너비를 기준으로 중앙 위치 계산
-	int yPosTitle = headerMargin + (headerHeight - titleHeight) / 2; // 헤더의 높이를 기준으로 중앙 위치 계산
+	//int xPosTitle = (cx - titleWidth) / 2; // 창의 너비를 기준으로 중앙 위치 계산
+	//int yPosTitle = headerMargin + (headerHeight - titleHeight) / 2; // 헤더의 높이를 기준으로 중앙 위치 계산
 
-	// 헤더 컨트롤 위치 계산
-	CWnd* pHeader = GetDlgItem(IDC_STATIC_HEADER);
-	if (pHeader != nullptr)
-	{
-		pHeader->SetWindowPos(nullptr, headerMargin, headerMargin, cx - 2 * headerMargin, headerHeight - 2 * headerMargin, 0);
-	}
-
-	//CWnd* pTitle = GetDlgItem(IDC_STATIC_TITLE);
-	//if (pTitle != nullptr)
+	//// 헤더 컨트롤 위치 계산
+	//CWnd* pHeader = GetDlgItem(IDC_STATIC_HEADER);
+	//if (pHeader != nullptr)
 	//{
-	//	pTitle->SetWindowPos(nullptr, xPosTitle, yPosTitle, titleWidth, titleHeight, 0);
+	//	pHeader->SetWindowPos(nullptr, headerMargin, headerMargin, cx - 2 * headerMargin, headerHeight - 2 * headerMargin, 0);
 	//}
 
-	//// m_staticHeader 위치 계산 및 설정
-	//if (m_staticHeader.GetSafeHwnd())
+	////CWnd* pTitle = GetDlgItem(IDC_STATIC_TITLE);
+	////if (pTitle != nullptr)
+	////{
+	////	pTitle->SetWindowPos(nullptr, xPosTitle, yPosTitle, titleWidth, titleHeight, 0);
+	////}
+
+	////// m_staticHeader 위치 계산 및 설정
+	////if (m_staticHeader.GetSafeHwnd())
+	////{
+	////	int headerWidth = cx - 2 * headerMargin;
+	////	int headerTop = headerMargin;
+	////	int headerBottom = headerMargin + headerHeight;
+
+	////	int textWidth = headerWidth - 2 * margin;
+	////	int textHeight = 30;
+
+	////	int xPosText = margin;
+	////	int yPosText = (headerHeight - textHeight) / 2;
+
+	////	m_staticHeader.SetWindowPos(nullptr, xPosText, yPosText, textWidth, textHeight, SWP_NOZORDER);
+	////}
+
+	//// OK 버튼 위치 설정
+	//CWnd* pOKButton = GetDlgItem(IDOK);
+	//if (pOKButton != nullptr)
 	//{
-	//	int headerWidth = cx - 2 * headerMargin;
-	//	int headerTop = headerMargin;
-	//	int headerBottom = headerMargin + headerHeight;
-
-	//	int textWidth = headerWidth - 2 * margin;
-	//	int textHeight = 30;
-
-	//	int xPosText = margin;
-	//	int yPosText = (headerHeight - textHeight) / 2;
-
-	//	m_staticHeader.SetWindowPos(nullptr, xPosText, yPosText, textWidth, textHeight, SWP_NOZORDER);
+	//	pOKButton->SetWindowPos(nullptr, xPosOK, yPosButtons, buttonWidth, buttonHeight, SWP_NOZORDER);
 	//}
 
-	// OK 버튼 위치 설정
-	CWnd* pOKButton = GetDlgItem(IDOK);
-	if (pOKButton != nullptr)
-	{
-		pOKButton->SetWindowPos(nullptr, xPosOK, yPosButtons, buttonWidth, buttonHeight, SWP_NOZORDER);
-	}
+	//// Cancel 버튼 위치 설정
+	//CWnd* pCancelButton = GetDlgItem(IDCANCEL);
+	//if (pCancelButton != nullptr)
+	//{
+	//	pCancelButton->SetWindowPos(nullptr, xPosCancel, yPosButtons, buttonWidth, buttonHeight, SWP_NOZORDER);
+	//}
 
-	// Cancel 버튼 위치 설정
-	CWnd* pCancelButton = GetDlgItem(IDCANCEL);
-	if (pCancelButton != nullptr)
-	{
-		pCancelButton->SetWindowPos(nullptr, xPosCancel, yPosButtons, buttonWidth, buttonHeight, SWP_NOZORDER);
-	}
+	//// 리스트 컨트롤 위치 설정
+	//CWnd* pListControl = GetDlgItem(IDC_LIST_ERROR);
+	//if (pListControl != nullptr)
+	//{
+	//	pListControl->SetWindowPos(nullptr, margin, yPosListControl, cx - 2 * margin, listHeight, SWP_NOZORDER);
+	//}
 
-	// 리스트 컨트롤 위치 설정
-	CWnd* pListControl = GetDlgItem(IDC_LIST_ERROR);
-	if (pListControl != nullptr)
-	{
-		pListControl->SetWindowPos(nullptr, margin, yPosListControl, cx - 2 * margin, listHeight, SWP_NOZORDER);
-	}
-
-	// 현재 시간 텍스트 위치 설정
-	CWnd* pCurTime = GetDlgItem(IDC_STATIC_CURRENT_TIME);
-	if (pCurTime != nullptr)
-	{
-		pCurTime->SetWindowPos(nullptr, xPosTime, yPosTime, timeWidth, timeHeight, SWP_NOZORDER);
-	}
+	//// 현재 시간 텍스트 위치 설정
+	//CWnd* pCurTime = GetDlgItem(IDC_STATIC_CURRENT_TIME);
+	//if (pCurTime != nullptr)
+	//{
+	//	pCurTime->SetWindowPos(nullptr, xPosTime, yPosTime, timeWidth, timeHeight, SWP_NOZORDER);
+	//}
 
 }
 
