@@ -35,6 +35,7 @@ BEGIN_MESSAGE_MAP(LOGINDlg, CDialogEx)
 	ON_WM_LBUTTONDOWN()
 	ON_BN_CLICKED(IDC_BUTTON_SIGNIN, &LOGINDlg::OnBnClickedButtonSignin)
 	ON_WM_ERASEBKGND()
+	ON_WM_CTLCOLOR()
 END_MESSAGE_MAP()
 
 
@@ -103,4 +104,33 @@ BOOL LOGINDlg::OnEraseBkgnd(CDC* pDC)
 	return TRUE;
 
 	return CDialogEx::OnEraseBkgnd(pDC);
+}
+
+
+BOOL LOGINDlg::OnInitDialog()
+{
+	CDialogEx::OnInitDialog();
+
+
+	return TRUE;  // return TRUE unless you set the focus to a control
+	// EXCEPTION: OCX Property Pages should return FALSE
+}
+
+
+HBRUSH LOGINDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
+{
+	HBRUSH hbr = CDialogEx::OnCtlColor(pDC, pWnd, nCtlColor);
+
+	// IDC_STATIC_TEXT1에 대해 배경을 투명하게 설정
+	if (pWnd->GetDlgCtrlID() == IDC_STATIC_TEXT1 
+		|| pWnd->GetDlgCtrlID() == IDC_STATIC_ID 
+		|| pWnd->GetDlgCtrlID() == IDC_STATIC_PW)
+	{
+		pDC->SetBkMode(TRANSPARENT);
+		pDC->SetTextColor(RGB(255, 255, 255));  // 흰색으로 글자 색 설정
+		return (HBRUSH)GetStockObject(NULL_BRUSH);  // 배경 브러시를 NULL로 설정하여 투명하게 만듦
+	}
+
+	// TODO:  Return a different brush if the default is not desired
+	return hbr;
 }

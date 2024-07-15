@@ -140,7 +140,7 @@ BOOL CSF5MFCAIPOPDlg::OnInitDialog()
 	ShowWindow(SW_SHOWMAXIMIZED); // 최대화
 	//back.Load(_T("res\\img\\BACK1.png"));
 
-		// 사용자 정의 스태틱 컨트롤 초기화
+	// 사용자 정의 스태틱 컨트롤 초기화
 	CRect rectHeader, rectNotice1, rectNotice2, rectNotice3, rectTitle;
 	GetDlgItem(IDC_STATIC_HEADER)->GetWindowRect(&rectHeader);
 	ScreenToClient(&rectHeader);
@@ -150,6 +150,26 @@ BOOL CSF5MFCAIPOPDlg::OnInitDialog()
 	ScreenToClient(&rectTitle);
 	m_staticTitle.Create(_T("통합관제시스템"), WS_VISIBLE | WS_CHILD | SS_CENTER, rectTitle, this);
 
+
+	//// Define the font
+	//m_font.CreateFont(
+	//	20,                        // nHeight
+	//	0,                         // nWidth
+	//	0,                         // nEscapement
+	//	0,                         // nOrientation
+	//	FW_BOLD,                   // nWeight
+	//	FALSE,                     // bItalic
+	//	FALSE,                     // bUnderline
+	//	0,                         // cStrikeOut
+	//	ANSI_CHARSET,              // nCharSet
+	//	OUT_DEFAULT_PRECIS,        // nOutPrecision
+	//	CLIP_DEFAULT_PRECIS,       // nClipPrecision
+	//	DEFAULT_QUALITY,           // nQuality
+	//	DEFAULT_PITCH | FF_SWISS,  // nPitchAndFamily
+	//	_T("Arial"));              // lpszFacename
+
+	//// Retrieve the static control and set its font
+	//m_staticTitle.SetFont(&m_font);
 
 	GetDlgItem(IDC_STATIC_NOTICE1)->GetWindowRect(&rectNotice1);
 	ScreenToClient(&rectNotice1);

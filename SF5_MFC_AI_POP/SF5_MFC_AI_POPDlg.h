@@ -109,4 +109,6 @@ public:
 
 	int offsetCur = 1, offsetVib = 1;
 	string strCur, strVib;
+
+	CFont m_font;
 };

@@ -16,7 +16,6 @@
 #define IDC_EDIT_PW                     1002
 #define IDC_BUTTON1                     1003
 #define IDC_LIST_ERROR                  1004
-#define IDC_STATIC_Test1                1005
 #define IDC_STATIC_HEAT_NOTICE          1005
 #define IDC_STATIC_ROBOT_NOTICE         1006
 #define IDC_BUTTON_PLASTIC              1007
@@ -36,6 +35,8 @@
 #define IDC_STATIC_NOTICE3              1021
 #define IDC_STATIC_FACILITY             1022
 #define IDC_BUTTON_HEAT                 1023
+#define IDC_STATIC_ID                   1024
+#define IDC_STATIC_PW                   1025
 
 // Next default values for new objects
 // 
@@ -43,7 +44,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        134
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1023
+#define _APS_NEXT_CONTROL_VALUE         1025
 #define _APS_NEXT_SYMED_VALUE           106
 #endif
 #endif
