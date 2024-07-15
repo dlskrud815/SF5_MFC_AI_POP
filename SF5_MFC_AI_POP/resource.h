@@ -12,6 +12,7 @@
 #define IDR_MAINFRAME                   128
 #define IDB_IMG_FACILITY                133
 #define IDB_IMG_LOGO                    134
+#define IDB_BITMAP1                     135
 #define IDC_STATIC_TEXT1                1000
 #define IDC_EDIT_ID                     1001
 #define IDC_EDIT_PW                     1002
@@ -45,14 +46,17 @@
 #define IDC_STATIC_IN_PW_RE             1029
 #define IDC_LIST_ERROR2                 1030
 #define IDC_LIST_ERROR3                 1031
+#define IDC_BUTTON_ROBOT_NOTICE         1032
+#define IDC_BUTTON_PLASTIC_NOTICE       1033
+#define IDC_BUTTON_HEAT_NOTICE          1034
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        135
+#define _APS_NEXT_RESOURCE_VALUE        136
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1031
+#define _APS_NEXT_CONTROL_VALUE         1033
 #define _APS_NEXT_SYMED_VALUE           106
 #endif
 #endif

@@ -93,6 +93,9 @@ BEGIN_MESSAGE_MAP(CSF5MFCAIPOPDlg, CDialogEx)
 	ON_MESSAGE(WM_NOTICE_LIST, &CSF5MFCAIPOPDlg::OnNoticeList)
 	ON_WM_ERASEBKGND()
 	ON_WM_CTLCOLOR()
+	ON_BN_CLICKED(IDC_BUTTON_ROBOT_NOTICE, &CSF5MFCAIPOPDlg::OnBnClickedButtonRobotNotice)
+	ON_BN_CLICKED(IDC_BUTTON_PLASTIC_NOTICE, &CSF5MFCAIPOPDlg::OnBnClickedButtonPlasticNotice)
+	ON_BN_CLICKED(IDC_BUTTON_HEAT_NOTICE, &CSF5MFCAIPOPDlg::OnBnClickedButtonHeatNotice)
 END_MESSAGE_MAP()
 
 
@@ -145,27 +148,26 @@ BOOL CSF5MFCAIPOPDlg::OnInitDialog()
 	// Picture Control 초기화
 	m_staticFacility.SubclassDlgItem(IDC_STATIC_FACILITY, this);
 
-	// 이미지 로드 (파일 경로로 로드합니다)
-	HRESULT hResult = m_imageFacility.Load(_T("res/img/facility.png"));
-	if (FAILED(hResult))
-	{
-		AfxMessageBox(_T("이미지를 로드할 수 없습니다."));
-		return FALSE;
-	}
-
 	CRect rect;
 	GetClientRect(&rect);
 
-
 	const int imgWidth = (rect.Width() - 3 * 50 - 800);
 	const int imgHeight = (rect.Height() - 2 * 10 - 110 - 2 * 50) * 2 / 3;
-
 	const int gap = ((rect.Height() - 2 * 10 - 110 - 2 * 50) - imgHeight) / 2;
-
 	m_staticFacility.SetWindowPos(NULL, 50, rect.Height() - 50 - gap - imgHeight, imgWidth, imgHeight, 0);
 
 
-	CRect rectHeader; //, rectNotice1, rectNotice2, rectNotice3;
+	//CWnd* pTitle = GetDlgItem(IDC_STATIC_TITLE);
+	//if (pTitle != nullptr)
+	//{
+	//	pTitle->SetWindowPos(&wndTop, 10, 10, rect.Width() - 2 * 10, 10 + 110, 0);
+	//}
+
+	m_font.CreatePointFont(150, L"나눔스퀘어");
+	GetDlgItem(IDC_STATIC_CURRENT_TIME)->SetFont(&m_font);
+
+
+	CRect rectHeader, rectNotice1, rectNotice2, rectNotice3;
 	GetDlgItem(IDC_STATIC_HEADER)->GetWindowRect(&rectHeader);
 	ScreenToClient(&rectHeader);
 	m_staticHeader.Create(_T(""), WS_VISIBLE | WS_CHILD | SS_NOTIFY, rectHeader, this, IDC_STATIC_HEADER);
@@ -173,16 +175,16 @@ BOOL CSF5MFCAIPOPDlg::OnInitDialog()
 
 
 
-	//GetDlgItem(IDC_STATIC_NOTICE1)->GetWindowRect(&rectNotice1);
-	//ScreenToClient(&rectNotice1);
-	//GetDlgItem(IDC_STATIC_NOTICE2)->GetWindowRect(&rectNotice2);
-	//ScreenToClient(&rectNotice2);
-	//GetDlgItem(IDC_STATIC_NOTICE3)->GetWindowRect(&rectNotice3);
-	//ScreenToClient(&rectNotice3);
+	GetDlgItem(IDC_STATIC_NOTICE1)->GetWindowRect(&rectNotice1);
+	ScreenToClient(&rectNotice1);
+	GetDlgItem(IDC_STATIC_NOTICE2)->GetWindowRect(&rectNotice2);
+	ScreenToClient(&rectNotice2);
+	GetDlgItem(IDC_STATIC_NOTICE3)->GetWindowRect(&rectNotice3);
+	ScreenToClient(&rectNotice3);
 
-	//m_staticNotice1.Create(_T(""), WS_VISIBLE | WS_CHILD | SS_NOTIFY, rectNotice1, this);
-	//m_staticNotice2.Create(_T(""), WS_VISIBLE | WS_CHILD | SS_NOTIFY, rectNotice2, this);
-	//m_staticNotice3.Create(_T(""), WS_VISIBLE | WS_CHILD | SS_NOTIFY, rectNotice3, this);
+	m_staticNotice1.Create(_T(""), WS_VISIBLE | WS_CHILD | SS_NOTIFY, rectNotice1, this);
+	m_staticNotice2.Create(_T(""), WS_VISIBLE | WS_CHILD | SS_NOTIFY, rectNotice2, this);
+	m_staticNotice3.Create(_T(""), WS_VISIBLE | WS_CHILD | SS_NOTIFY, rectNotice3, this);
 
 	// 리스트 칼럼 넣기
 	CListCtrl* listCtrls[] = { &m_listCtrl, &m_listCtrl2, &m_listCtrl3 };
@@ -190,10 +192,10 @@ BOOL CSF5MFCAIPOPDlg::OnInitDialog()
 	for (CListCtrl* list : listCtrls)
 	{
 		list->InsertColumn(0, L"메시지", LVCFMT_LEFT, 400, -1);
-		list->InsertColumn(0, L"설비", LVCFMT_LEFT, 200, -1);
-		list->InsertColumn(0, L"상태", LVCFMT_LEFT, 200, -1);
-		list->InsertColumn(0, L"시간", LVCFMT_LEFT, 300, -1);
-		list->InsertColumn(0, L"순번", LVCFMT_LEFT, 100, -1);
+		list->InsertColumn(0, L"설비", LVCFMT_LEFT, 150, -1);
+		list->InsertColumn(0, L"상태", LVCFMT_LEFT, 150, -1);
+		list->InsertColumn(0, L"시간", LVCFMT_LEFT, 250, -1);
+		list->InsertColumn(0, L"순번", LVCFMT_LEFT, 50, -1);
 	}
 
 	// 메인 스레드 생성
@@ -285,7 +287,7 @@ void CSF5MFCAIPOPDlg::OnSize(UINT nType, int cx, int cy)
 	CWnd* pCurTime = GetDlgItem(IDC_STATIC_CURRENT_TIME);
 	if (pCurTime != nullptr)
 	{
-		pCurTime->SetWindowPos(nullptr, cx - 2 * 10 - 400, 2 * 10, 400, 90, 0);
+		pCurTime->SetWindowPos(nullptr, cx - 2 * 10 - 400 - 30, 2 * 10 + 30, 400, 60, 0);
 	}
 	 
 	const int listHeight = (cy - 4 * 50 - 110 - 10) / 3;
@@ -318,73 +320,49 @@ void CSF5MFCAIPOPDlg::OnSize(UINT nType, int cx, int cy)
 		pCancelButton->SetWindowPos(nullptr, 10, cy - 10 - 50, 100, 50, 0);
 	}
 
+	const int centerWidth = cx - 3 * 50 - 800;
 
-	//const int buttonWidth = 150;
-	//const int buttonHeight = 40;
-	//const int margin = 20;
-	//const int headerHeight = 100; // 헤더의 높이
-	//const int headerMargin = 5; // 헤더의 상하좌우 여백 크기
+	CWnd* pNotice1 = GetDlgItem(IDC_STATIC_NOTICE1);
+	if (pNotice1 != nullptr)
+	{
+		pNotice1->SetWindowPos(nullptr, centerWidth / 2  - 500 / 2, 2 * 10 + 110 + 100, 500, 150, 0);
+	}
 
-	//// 버튼 위치 계산
-	//int xPosCancel = cx - buttonWidth - margin;
-	//int xPosOK = xPosCancel - buttonWidth - margin;
-	//int yPosButtons = headerHeight + margin;
+	CWnd* pNotice2 = GetDlgItem(IDC_STATIC_NOTICE2);
+	if (pNotice2 != nullptr)
+	{
+		pNotice2->SetWindowPos(nullptr, 50 + 100, cy - 50 - 300, 500, 150, 0);
+	}
 
-	//// 리스트 컨트롤 위치 계산
-	//const int listHeight = 500;
-	//int yPosListControl = cy - listHeight - margin;
+	CWnd* pNotice3 = GetDlgItem(IDC_STATIC_NOTICE3);
+	if (pNotice3 != nullptr)
+	{
+		pNotice3->SetWindowPos(nullptr, cx - 2 * 50 - 800 - 200 - 500, cy - 50 - 300, 500, 150, 0);
+	}
 
-	//// 현재 시간 텍스트 위치 계산
-	//const int timeWidth = 300;
-	//const int timeHeight = 40;
-	//int xPosTime = cx - timeWidth - margin;
-	//int yPosTime = headerHeight - timeHeight - margin;
+	CWnd* pRobotBtn = GetDlgItem(IDC_BUTTON_ROBOT);
+	if (pRobotBtn != nullptr)
+	{
+		pRobotBtn->SetWindowPos(nullptr, cx - 2 * 50 - 800 - 200, 2 * 10 + 110 + 50, 200, 50, 0);
+	}
 
-	//int titleWidth = 200; // Title 컨트롤의 너비
-	//int titleHeight = 50; // Title 컨트롤의 높이
+	CWnd* pPlasticBtn = GetDlgItem(IDC_BUTTON_PLASTIC);
+	if (pPlasticBtn != nullptr)
+	{
+		pPlasticBtn->SetWindowPos(nullptr, cx - 2 * 50 - 800 - 200, 2 * 10 + 110 + 50 + 20 + 50, 200, 50, 0);
+	}
 
-	//int xPosTitle = (cx - titleWidth) / 2; // 창의 너비를 기준으로 중앙 위치 계산
-	//int yPosTitle = headerMargin + (headerHeight - titleHeight) / 2; // 헤더의 높이를 기준으로 중앙 위치 계산
+	CWnd* pHeatBtn = GetDlgItem(IDC_BUTTON_HEAT);
+	if (pHeatBtn != nullptr)
+	{
+		pHeatBtn->SetWindowPos(nullptr, cx - 2 * 50 - 800 - 200, 2 * 10 + 110 + 50 + 2 * 20 + 2 * 50, 200, 50, 0);
+	}
 
-
-	////CWnd* pTitle = GetDlgItem(IDC_STATIC_TITLE);
-	////if (pTitle != nullptr)
-	////{
-	////	pTitle->SetWindowPos(nullptr, xPosTitle, yPosTitle, titleWidth, titleHeight, 0);
-	////}
-
-	////// m_staticHeader 위치 계산 및 설정
-	////if (m_staticHeader.GetSafeHwnd())
-	////{
-	////	int headerWidth = cx - 2 * headerMargin;
-	////	int headerTop = headerMargin;
-	////	int headerBottom = headerMargin + headerHeight;
-
-	////	int textWidth = headerWidth - 2 * margin;
-	////	int textHeight = 30;
-
-	////	int xPosText = margin;
-	////	int yPosText = (headerHeight - textHeight) / 2;
-
-	////	m_staticHeader.SetWindowPos(nullptr, xPosText, yPosText, textWidth, textHeight, SWP_NOZORDER);
-	////}
-
-	//// OK 버튼 위치 설정
-	//CWnd* pOKButton = GetDlgItem(IDOK);
-	//if (pOKButton != nullptr)
-	//{
-	//	pOKButton->SetWindowPos(nullptr, xPosOK, yPosButtons, buttonWidth, buttonHeight, SWP_NOZORDER);
-	//}
-
-	//// Cancel 버튼 위치 설정
-	//CWnd* pCancelButton = GetDlgItem(IDCANCEL);
-	//if (pCancelButton != nullptr)
-	//{
-	//	pCancelButton->SetWindowPos(nullptr, xPosCancel, yPosButtons, buttonWidth, buttonHeight, SWP_NOZORDER);
-	//}
-
-
-
+	CWnd* pRobotNotice = GetDlgItem(IDC_BUTTON_ROBOT_NOTICE);
+	if (pRobotNotice != nullptr)
+	{
+		//pRobotNotice->SetWindowPos(nullptr, cx - 2 * 50 - 800 - 200 , 2 * 10 + 110 + 50, 200, 50, 0);
+	}
 }
 
 
@@ -931,9 +909,6 @@ UINT CSF5MFCAIPOPDlg::HeatThread(LPVOID pParam)
 
 void CSF5MFCAIPOPDlg::OnBnClickedButtonRobot()
 {
-	//PROCESSDlg proDlg;
-	//proDlg.DoModal();
-
 	// 이전 스레드 핸들이 있는 경우 종료
 	if (m_hRobotThread != nullptr)
 	{
@@ -955,9 +930,6 @@ void CSF5MFCAIPOPDlg::OnBnClickedButtonRobot()
 
 void CSF5MFCAIPOPDlg::OnBnClickedButtonPlastic()
 {
-	//PROCESSDlg proDlg;
-	//proDlg.DoModal();
-
 	// 이전 스레드 핸들이 있는 경우 종료
 	if (m_hPlasticThread != nullptr)
 	{
@@ -979,9 +951,6 @@ void CSF5MFCAIPOPDlg::OnBnClickedButtonPlastic()
 
 void CSF5MFCAIPOPDlg::OnBnClickedButtonHeat()
 {
-	//PROCESSDlg proDlg;
-	//proDlg.DoModal();
-
 	// 이전 스레드 핸들이 있는 경우 종료
 	if (m_hHeatThread != nullptr)
 	{
@@ -1176,4 +1145,28 @@ HBRUSH CSF5MFCAIPOPDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 
 	// TODO:  Return a different brush if the default is not desired
 	return hbr;
+}
+
+
+void CSF5MFCAIPOPDlg::OnBnClickedButtonRobotNotice()
+{
+	// TODO: Add your control notification handler code here
+	PROCESSDlg proDlg;
+	proDlg.DoModal();
+}
+
+
+void CSF5MFCAIPOPDlg::OnBnClickedButtonPlasticNotice()
+{
+	// TODO: Add your control notification handler code here
+	PROCESSDlg proDlg;
+	proDlg.DoModal();
+}
+
+
+void CSF5MFCAIPOPDlg::OnBnClickedButtonHeatNotice()
+{
+	// TODO: Add your control notification handler code here
+	PROCESSDlg proDlg;
+	proDlg.DoModal();
 }

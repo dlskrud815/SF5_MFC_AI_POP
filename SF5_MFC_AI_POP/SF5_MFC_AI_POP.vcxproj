@@ -226,6 +226,7 @@
     <None Include="res\SF5MFCAIPOP.rc2" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="res\img\facility.bmp" />
     <Image Include="res\img\facility.png" />
     <Image Include="res\img\logo.png" />
     <Image Include="res\SF5_MFC_AI_POP.ico" />
