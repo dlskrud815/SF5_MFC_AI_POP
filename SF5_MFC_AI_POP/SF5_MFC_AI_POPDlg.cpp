@@ -393,9 +393,9 @@ CStringA CSF5MFCAIPOPDlg::prepareData(tName process, LPVOID pParam) {
 	}
 
 	case PLASTIC: {
-		string v0 = CThreadTest::strV0;
-		string v1 = CThreadTest::strV1;
-		string c1 = CThreadTest::strC1;
+		string v0 = pDlg->strV0;
+		string v1 = pDlg->strV1;
+		string c1 = pDlg->strC1;
 
 		CStringA A_v0(v0.c_str());
 		CStringA A_v1(v1.c_str());
@@ -405,7 +405,7 @@ CStringA CSF5MFCAIPOPDlg::prepareData(tName process, LPVOID pParam) {
 		break;
 	}
 	case HEAT: {
-		vector<string> colHeat = CThreadTest::strHeat;
+		vector<string> colHeat = pDlg->strHeat;
 
 		vector<CStringA> A_colHeat;
 		for (string colH : colHeat) {
@@ -632,7 +632,7 @@ string CSF5MFCAIPOPDlg::vectorToString(vector<double> vec) {
 	return output;
 }
 
-UINT CSF5MFCAIPOPDlg::Thread1(LPVOID pParam)
+UINT CSF5MFCAIPOPDlg::Thread_DB_Get_Cur(LPVOID pParam)
 {
 	CSF5MFCAIPOPDlg* pDlg = (CSF5MFCAIPOPDlg*)pParam;
 	MySQL_Connector* mysql = new MySQL_Connector();
@@ -649,7 +649,7 @@ UINT CSF5MFCAIPOPDlg::Thread1(LPVOID pParam)
 	return 0;
 }
 
-UINT CSF5MFCAIPOPDlg::Thread2(LPVOID pParam)
+UINT CSF5MFCAIPOPDlg::Thread_DB_Get_Vib(LPVOID pParam)
 {
 	CSF5MFCAIPOPDlg* pDlg = (CSF5MFCAIPOPDlg*)pParam;
 	MySQL_Connector* mysql = new MySQL_Connector();
@@ -683,13 +683,13 @@ UINT CSF5MFCAIPOPDlg::RobotThread(LPVOID pParam)
 		while (outlier < 5)
 		{
 			// Create the thread
-			CWinThread* pThread1 = AfxBeginThread(Thread1, pDlg);
-			if (pThread1 == NULL) AfxMessageBox(L"pThread1 Create Error");
+			CWinThread* pThreadCur = AfxBeginThread(Thread_DB_Get_Cur, pDlg);
+			if (pThreadCur == NULL) AfxMessageBox(L"pThreadCur Create Error");
 
-			CWinThread* pThread2 = AfxBeginThread(Thread2, pDlg);
-			if (pThread2 == NULL) AfxMessageBox(L"pThread2 Create Error");
+			CWinThread* pThreadVib = AfxBeginThread(Thread_DB_Get_Vib, pDlg);
+			if (pThreadVib == NULL) AfxMessageBox(L"pThreadVib Create Error");
 
-			HANDLE hThreads[2] = { pThread1->m_hThread, pThread2->m_hThread };
+			HANDLE hThreads[2] = { pThreadCur->m_hThread, pThreadVib->m_hThread };
 
 			// Wait for both threads to complete
 			DWORD dwThreadResult = WaitForMultipleObjects(2, hThreads, TRUE, INFINITE);
@@ -699,8 +699,8 @@ UINT CSF5MFCAIPOPDlg::RobotThread(LPVOID pParam)
 			}
 
 			// Close the thread handles
-			CloseHandle(pThread1->m_hThread);
-			CloseHandle(pThread2->m_hThread);
+			CloseHandle(pThreadCur->m_hThread);
+			CloseHandle(pThreadVib->m_hThread);
 			
 			pDlg->offsetCur++;
 			pDlg->offsetVib++;
@@ -757,92 +757,172 @@ UINT CSF5MFCAIPOPDlg::RobotThread(LPVOID pParam)
 	return 0;
 }
 
-UINT CSF5MFCAIPOPDlg::PlasticThread(LPVOID pParam)
+UINT CSF5MFCAIPOPDlg::Thread_DB_Get_Plastic(LPVOID pParam)
 {
-	//CSF5MFCAIPOPDlg* pDlg = (CSF5MFCAIPOPDlg*)pParam;
+	CSF5MFCAIPOPDlg* pDlg = (CSF5MFCAIPOPDlg*)pParam;
+	MySQL_Connector* mysql = new MySQL_Connector();
 
-	//// 대기 상태에서 이벤트를 기다립니다.
-	//DWORD dwWaitResult = WaitForSingleObject(pDlg->m_eventPlasticThread, INFINITE);
+	if (mysql->connect("tcp://127.0.0.1:3306", "Nia", "0000", "pop"))
+	{
+		vector<double> v0 = mysql->fetchDataFromTable(PLASTIC_V0, pDlg->offsetV0);
+		vector<double> v1 = mysql->fetchDataFromTable(PLASTIC_V1, pDlg->offsetV1);
+		vector<double> c1 = mysql->fetchDataFromTable(PLASTIC_C1, pDlg->offsetC1);
 
-	//// 이벤트가 설정되면 다음 작업을 수행합니다.
-	//if (dwWaitResult == WAIT_OBJECT_0)
-	//{
-	//	CThreadTest::Thread_DB_Wait_Plastic();
+		pDlg->strV0 = pDlg->vectorToString(v0);
+		pDlg->strV1 = pDlg->vectorToString(v1);
+		pDlg->strC1 = pDlg->vectorToString(c1);
 
-	//	CStringA jsonData;
-	//	jsonData = prepareData(PLASTIC);
+	}
 
-	//	wstring endpoint = SendPostRequest(PLASTIC);
-
-	//	CStringA result = pDlg->winHttp(jsonData, endpoint, 5002);
-
-	//	vector<int> parse = pDlg->parsing_plastic(result);
-
-	//	CString notice;
-
-	//	if (parse.size() >= 1) {
-	//		if (parse[0] == 1)
-	//		{
-	//			notice = L"플라스틱 이상";
-	//			pDlg->PostMessage(WM_NOTICE_LIST, (WPARAM)new CString(notice));
-	//		}
-	//		else
-	//		{
-	//			notice = L"플라스틱 정상";
-	//			pDlg->PostMessage(WM_NOTICE_LIST, (WPARAM)new CString(notice));
-	//		}
-	//	}
-
-	//	pDlg->PostMessage(WM_NOTICE_PLASTIC, (WPARAM)new CString(notice)); // CString 동적 할당 없이 수정
-	//}
-
-	//// 스레드 종료 후 이벤트 초기화
-	//pDlg->m_eventPlasticThread.ResetEvent();
+	delete mysql;
 
 	return 0;
 }
 
+UINT CSF5MFCAIPOPDlg::PlasticThread(LPVOID pParam)
+{
+	CSF5MFCAIPOPDlg* pDlg = (CSF5MFCAIPOPDlg*)pParam;
+
+	// 대기 상태에서 이벤트를 기다립니다.
+	DWORD dwWaitResult = WaitForSingleObject(pDlg->m_eventPlasticThread, INFINITE);
+
+	// 이벤트가 설정되면 다음 작업을 수행합니다.
+	if (dwWaitResult == WAIT_OBJECT_0)
+	{
+		int outlier = 0;
+		while (outlier < 5)
+		{
+			// Create the thread
+			CWinThread* pThreadPlastic = AfxBeginThread(Thread_DB_Get_Plastic, pDlg);
+			if (pThreadPlastic == NULL) AfxMessageBox(L"pThreadPlastic Create Error");
+
+			// Wait for both threads to complete
+			DWORD dwThreadResult = WaitForSingleObject(pThreadPlastic->m_hThread, INFINITE);
+			if (dwThreadResult == WAIT_FAILED)
+			{
+				AfxMessageBox(L"Error waiting for threads to complete");
+			}
+
+			// Close the thread handles
+			CloseHandle(pThreadPlastic->m_hThread);
+
+			pDlg->offsetV0++;
+			pDlg->offsetV1++;
+			pDlg->offsetC1++;
+
+			CStringA jsonData;
+			jsonData = prepareData(PLASTIC, pDlg);
+
+			wstring endpoint = SendPostRequest(PLASTIC);
+
+			CStringA result = pDlg->winHttp(jsonData, endpoint, 5002);
+
+			vector<int> parse = pDlg->parsing_plastic(result);
+
+			CString notice;
+
+			if (parse.size() >= 1) {
+				if (parse[0] == 1)
+				{
+					notice = L"플라스틱 이상";
+					pDlg->PostMessage(WM_NOTICE_LIST, (WPARAM)new CString(notice));
+				
+					outlier++;
+				}
+				else
+				{
+					notice = L"플라스틱 정상";
+					pDlg->PostMessage(WM_NOTICE_LIST, (WPARAM)new CString(notice));
+				}
+			}
+
+			pDlg->PostMessage(WM_NOTICE_PLASTIC, (WPARAM)new CString(notice)); // CString 동적 할당 없이 수정
+		}
+	}
+	// 스레드 종료 후 이벤트 초기화
+	pDlg->m_eventPlasticThread.ResetEvent();
+
+	return 0;
+}
+
+
+UINT CSF5MFCAIPOPDlg::Thread_DB_Get_Heat(LPVOID pParam)
+{
+	CSF5MFCAIPOPDlg* pDlg = (CSF5MFCAIPOPDlg*)pParam;
+	MySQL_Connector* mysql = new MySQL_Connector();
+
+	if (mysql->connect("tcp://127.0.0.1:3306", "Nia", "0000", "pop"))
+	{
+		vector<double> heat = mysql->fetchDataFromTable(HEAT_NUM, pDlg->offsetHeat);
+
+		for (double h : heat) {
+			pDlg->strHeat.push_back(std::to_string(h));
+		}
+	}
+
+	delete mysql;
+
+	return 0;
+}
 UINT CSF5MFCAIPOPDlg::HeatThread(LPVOID pParam)
 {
-	//CSF5MFCAIPOPDlg* pDlg = (CSF5MFCAIPOPDlg*)pParam;
+	CSF5MFCAIPOPDlg* pDlg = (CSF5MFCAIPOPDlg*)pParam;
 
-	//// 대기 상태에서 이벤트를 기다립니다.
-	//DWORD dwWaitResult = WaitForSingleObject(pDlg->m_eventHeatThread, INFINITE);
+	// 대기 상태에서 이벤트를 기다립니다.
+	DWORD dwWaitResult = WaitForSingleObject(pDlg->m_eventHeatThread, INFINITE);
 
-	//// 이벤트가 설정되면 다음 작업을 수행합니다.
-	//if (dwWaitResult == WAIT_OBJECT_0)
-	//{
-	//	CThreadTest::Thread_DB_Wait_Heat();
+	// 이벤트가 설정되면 다음 작업을 수행합니다.
+	if (dwWaitResult == WAIT_OBJECT_0)
+	{
+		int outlier = 0;
+		while (outlier < 5)
+		{
+			// Create the thread
+			CWinThread* pThreadHeat = AfxBeginThread(Thread_DB_Get_Heat, pDlg);
+			if (pThreadHeat == NULL) AfxMessageBox(L"pThreadHeat Create Error");
 
-	//	CStringA jsonData;
-	//	jsonData = prepareData(HEAT);
+			// Wait for both threads to complete
+			DWORD dwThreadResult = WaitForSingleObject(pThreadHeat->m_hThread, INFINITE);
+			if (dwThreadResult == WAIT_FAILED)
+			{
+				AfxMessageBox(L"Error waiting for threads to complete");
+			}
 
-	//	wstring endpoint = SendPostRequest(HEAT);
+			// Close the thread handles
+			CloseHandle(pThreadHeat->m_hThread);
 
-	//	CStringA result = pDlg->winHttp(jsonData, endpoint, 5003);
+			pDlg->offsetHeat++;
 
-	//	vector<int> parse = pDlg->parsing_heat(result);
+			CStringA jsonData;
+			jsonData = prepareData(HEAT, pDlg);
 
-	//	CString notice;
+			wstring endpoint = SendPostRequest(HEAT);
 
-	//	if (parse.size() >= 1) {
-	//		if (parse[0] == 1)
-	//		{
-	//			notice = L"열처리 이상";
-	//			pDlg->PostMessage(WM_NOTICE_LIST, (WPARAM)new CString(notice));
-	//		}
-	//		else
-	//		{
-	//			notice = L"열처리 정상";
-	//			pDlg->PostMessage(WM_NOTICE_LIST, (WPARAM)new CString(notice));
-	//		}
-	//	}
+			CStringA result = pDlg->winHttp(jsonData, endpoint, 5003);
 
-	//	pDlg->PostMessage(WM_NOTICE_HEAT, (WPARAM)new CString(notice)); // CString 동적 할당 없이 수정
-	//}
+			vector<int> parse = pDlg->parsing_heat(result);
 
-	//// 스레드 종료 후 이벤트 초기화
-	//pDlg->m_eventHeatThread.ResetEvent();
+			CString notice;
+
+			if (parse.size() >= 1) {
+				if (parse[0] == 1)
+				{
+					notice = L"열처리 이상";
+					pDlg->PostMessage(WM_NOTICE_LIST, (WPARAM)new CString(notice));
+					outlier++;
+				}
+				else
+				{
+					notice = L"열처리 정상";
+					pDlg->PostMessage(WM_NOTICE_LIST, (WPARAM)new CString(notice));
+				}
+			}
+
+			pDlg->PostMessage(WM_NOTICE_HEAT, (WPARAM)new CString(notice)); // CString 동적 할당 없이 수정
+		}
+	}
+	// 스레드 종료 후 이벤트 초기화
+	pDlg->m_eventHeatThread.ResetEvent();
 
 	return 0;
 }

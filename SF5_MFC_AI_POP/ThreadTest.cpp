@@ -9,8 +9,6 @@ string CThreadTest::strC1;
 vector<string> CThreadTest::strHeat;
 mutex CThreadTest::critSect;
 
-int CThreadTest::offsetCur = 1;
-int CThreadTest::offsetVib = 1;
 
 string CThreadTest::vectorToString(vector<double> vec) {
     string output;
@@ -65,24 +63,19 @@ void CThreadTest::Thread_DB_Get_Vib()
     delete mysql;
 }
 
-void CThreadTest::Thread_DB_Get_Plastic()
+void CThreadTest::Thread_DB_Get_Plastic(MySQL_Connector* mysql)
 {
-    MySQL_Connector* mysql = new MySQL_Connector();
+  
+    vector<double> v0 = mysql->fetchDataFromTable(PLASTIC_V0, offsetCur);
+    vector<double> v1 = mysql->fetchDataFromTable(PLASTIC_V1, offsetCur);
+    vector<double> c1 = mysql->fetchDataFromTable(PLASTIC_C1, offsetCur);
 
-    if (mysql->connect("tcp://127.0.0.1:3306", "Nia", "0000", "pop"))
-    {
-        vector<double> v0 = mysql->fetchDataFromTable(PLASTIC_V0, offsetCur);
-        vector<double> v1 = mysql->fetchDataFromTable(PLASTIC_V1, offsetCur);
-        vector<double> c1 = mysql->fetchDataFromTable(PLASTIC_C1, offsetCur);
+    lock_guard<mutex> lock(critSect);
 
-        lock_guard<mutex> lock(critSect);
-
-        strV0 = vectorToString(v0);
-        strV1 = vectorToString(v1);
-        strC1 = vectorToString(c1);
-    }
-
-    delete mysql;
+    strV0 = vectorToString(v0);
+    strV1 = vectorToString(v1);
+    strC1 = vectorToString(c1);
+    
 }
 
 void CThreadTest::Thread_DB_Get_Heat()
@@ -130,3 +123,4 @@ int CThreadTest::Thread_DB_Wait_Heat() {
 
     return 0;
 }
+

@@ -18,14 +18,12 @@ public:
     static std::string strC1;
     static vector<string> strHeat;
     static std::mutex critSect;
-    static int offsetCur;
-    static int offsetVib;
 
     static string vectorToString(vector<double> vec);
 
     static void Thread_DB_Get_Cur();
     static void Thread_DB_Get_Vib();
-    static void Thread_DB_Get_Plastic();
+    static void Thread_DB_Get_Plastic(MySQL_Connector* mysql);
     static void Thread_DB_Get_Heat();
 
     static int Thread_DB_Wait_Robot();

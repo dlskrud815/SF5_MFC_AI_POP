@@ -76,25 +76,27 @@ public:
 
 	static UINT TimeUpdateThread(LPVOID _mothod);
 	afx_msg LRESULT OnUpdateTime(WPARAM wParam, LPARAM lParam);
-
-
-	static UINT Thread1(LPVOID pParam);
-	static UINT Thread2(LPVOID pParam);
-
-
+	
 	HANDLE m_hPlasticThread = nullptr; // 소성가공 스레드 핸들 추가
 	HANDLE m_hRobotThread = nullptr; // 로봇용접 스레드 핸들 추가
 	HANDLE m_hHeatThread = nullptr; // 열처리 스레드 핸들 추가
+
+
+	static UINT Thread_DB_Get_Cur(LPVOID pParam);
+	static UINT Thread_DB_Get_Vib(LPVOID pParam);
+
+	CEvent m_eventRobotThread; // 이벤트 객체 선언
+	static UINT RobotThread(LPVOID pParam); // 대기 스레드 함수 선언
+	afx_msg LRESULT OnNoticeRobotError(WPARAM wParam, LPARAM lParam);
+
 	
+	static UINT Thread_DB_Get_Plastic(LPVOID pParam);
 
 	CEvent m_eventPlasticThread; // 이벤트 객체 선언
 	static UINT PlasticThread(LPVOID pParam); // 대기 스레드 함수 선언
 	afx_msg LRESULT OnNoticePlasticError(WPARAM wParam, LPARAM lParam);
 
-
-	CEvent m_eventRobotThread; // 이벤트 객체 선언
-	static UINT RobotThread(LPVOID pParam); // 대기 스레드 함수 선언
-	afx_msg LRESULT OnNoticeRobotError(WPARAM wParam, LPARAM lParam);
+	static UINT Thread_DB_Get_Heat(LPVOID pParam);
 
 	CEvent m_eventHeatThread; // 이벤트 객체 선언
 	static UINT HeatThread(LPVOID pParam); // 대기 스레드 함수 선언
@@ -103,9 +105,10 @@ public:
 	
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 
+	static string vectorToString(vector<double> vec);
 
-	string vectorToString(vector<double> vec);
+	int offsetCur = 1, offsetVib = 1, offsetV0 = 1, offsetV1 = 1, offsetC1 = 1, offsetHeat = 1;
 
-	int offsetCur = 1, offsetVib = 1;
-	string strCur, strVib;
+	string strCur, strVib, strV0, strV1, strC1;
+	vector<string> strHeat;
 };
