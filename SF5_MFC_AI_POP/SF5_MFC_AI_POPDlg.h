@@ -62,7 +62,7 @@ protected:
 
 	static CCriticalSection critSect;
 
-	CCustomStatic m_staticHeader, m_staticNotice1, m_staticNotice2, m_staticNotice3;
+	//CCustomStatic m_staticHeader, m_staticNotice1, m_staticNotice2, m_staticNotice3;
 	CListCtrl m_listCtrl, m_listCtrl2, m_listCtrl3;
 	afx_msg void OnNMCustomdrawList1(NMHDR* pNMHDR, LRESULT* pResult);
 
@@ -126,14 +126,14 @@ public:
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 
 	// Picture Control을 위한 멤버 변수 선언
-	CStatic m_staticFacility;
+	CStatic m_staticFacility, m_logo;
 	// 이미지 리소스를 저장할 멤버 변수
-	CImage m_imageFacility;
+	CImage m_imageFacility, m_imageLogo;
 	afx_msg void OnBnClickedButtonRobotNotice();
 	afx_msg void OnBnClickedButtonPlasticNotice();
 	afx_msg void OnBnClickedButtonHeatNotice();
 	
-	CFont m_font;
+	CFont m_font, m_font2;
 
 	
 	RobotDetailDlg* pChartDialog_Robot;

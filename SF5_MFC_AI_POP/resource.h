@@ -15,6 +15,7 @@
 #define IDB_IMG_FACILITY                133
 #define IDB_IMG_LOGO                    134
 #define IDB_BITMAP1                     135
+#define IDB_BITMAP2                     139
 #define IDC_STATIC_TEXT1                1000
 #define IDC_EDIT_ID                     1001
 #define IDC_EDIT_PW                     1002
@@ -67,14 +68,15 @@
 #define IDC_STATIC_HEAT_DETAIL_TEXT     1049
 #define IDC_BUTTON_PLASTIC_X            1050
 #define IDC_BUTTON_HEAT_X               1051
+#define IDC_STATIC_LOGO                 1052
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        139
+#define _APS_NEXT_RESOURCE_VALUE        140
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1050
+#define _APS_NEXT_CONTROL_VALUE         1051
 #define _APS_NEXT_SYMED_VALUE           109
 #endif
 #endif

@@ -151,6 +151,7 @@ BOOL CSF5MFCAIPOPDlg::OnInitDialog()
 
 	// Picture Control 초기화
 	m_staticFacility.SubclassDlgItem(IDC_STATIC_FACILITY, this);
+	m_logo.SubclassDlgItem(IDC_STATIC_LOGO, this);
 
 	CRect rect;
 	GetClientRect(&rect);
@@ -159,36 +160,40 @@ BOOL CSF5MFCAIPOPDlg::OnInitDialog()
 	const int imgHeight = (rect.Height() - 2 * 10 - 110 - 2 * 50) * 2 / 3;
 	const int gap = ((rect.Height() - 2 * 10 - 110 - 2 * 50) - imgHeight) / 2;
 	m_staticFacility.SetWindowPos(NULL, 50, rect.Height() - 50 - gap - imgHeight, imgWidth, imgHeight, 0);
-
-
-	//CWnd* pTitle = GetDlgItem(IDC_STATIC_TITLE);
-	//if (pTitle != nullptr)
-	//{
-	//	pTitle->SetWindowPos(&wndTop, 10, 10, rect.Width() - 2 * 10, 10 + 110, 0);
-	//}
+	m_logo.SetWindowPos(NULL, 10 + 15, 10 + 15, 280, 80, 0);
 
 	m_font.CreatePointFont(150, L"나눔스퀘어");
 	GetDlgItem(IDC_STATIC_CURRENT_TIME)->SetFont(&m_font);
 
-
-	CRect rectHeader, rectNotice1, rectNotice2, rectNotice3;
-	GetDlgItem(IDC_STATIC_HEADER)->GetWindowRect(&rectHeader);
-	ScreenToClient(&rectHeader);
-	m_staticHeader.Create(_T(""), WS_VISIBLE | WS_CHILD | SS_NOTIFY, rectHeader, this, IDC_STATIC_HEADER);
-	GetDlgItem(IDC_STATIC_HEADER)->ShowWindow(SW_HIDE);
+	m_font2.CreatePointFont(250, L"나눔스퀘어");
+	GetDlgItem(IDC_STATIC_TITLE)->SetFont(&m_font2);
 
 
+	//CRect rectHeader;
+	//GetDlgItem(IDC_STATIC_TITLE2)->GetWindowRect(&rectHeader);
+	//ScreenToClient(&rectHeader);
+	//m_staticHeader.Create(_T(""), WS_VISIBLE | WS_CHILD | SS_NOTIFY, rectHeader, this, IDC_STATIC_TITLE2);
+	//GetDlgItem(IDC_STATIC_TITLE2)->ShowWindow(SW_HIDE);
+	 
+	// 
+	//CRect rectHeader, rectNotice1, rectNotice2, rectNotice3;
+	//GetDlgItem(IDC_STATIC_HEADER)->GetWindowRect(&rectHeader);
+	//ScreenToClient(&rectHeader);
+	//m_staticHeader.Create(_T(""), WS_VISIBLE | WS_CHILD | SS_NOTIFY, rectHeader, this, IDC_STATIC_HEADER);
+	//GetDlgItem(IDC_STATIC_HEADER)->ShowWindow(SW_HIDE);
 
-	GetDlgItem(IDC_STATIC_NOTICE1)->GetWindowRect(&rectNotice1);
-	ScreenToClient(&rectNotice1);
-	GetDlgItem(IDC_STATIC_NOTICE2)->GetWindowRect(&rectNotice2);
-	ScreenToClient(&rectNotice2);
-	GetDlgItem(IDC_STATIC_NOTICE3)->GetWindowRect(&rectNotice3);
-	ScreenToClient(&rectNotice3);
+	//GetDlgItem(IDC_STATIC_NOTICE1)->GetWindowRect(&rectNotice1);
+	//ScreenToClient(&rectNotice1);
+	//GetDlgItem(IDC_STATIC_NOTICE2)->GetWindowRect(&rectNotice2);
+	//ScreenToClient(&rectNotice2);
+	//GetDlgItem(IDC_STATIC_NOTICE3)->GetWindowRect(&rectNotice3);
+	//ScreenToClient(&rectNotice3);
 
-	m_staticNotice1.Create(_T(""), WS_VISIBLE | WS_CHILD | SS_NOTIFY, rectNotice1, this);
-	m_staticNotice2.Create(_T(""), WS_VISIBLE | WS_CHILD | SS_NOTIFY, rectNotice2, this);
-	m_staticNotice3.Create(_T(""), WS_VISIBLE | WS_CHILD | SS_NOTIFY, rectNotice3, this);
+	//m_staticNotice1.Create(_T(""), WS_VISIBLE | WS_CHILD | SS_NOTIFY, rectNotice1, this);
+	//m_staticNotice2.Create(_T(""), WS_VISIBLE | WS_CHILD | SS_NOTIFY, rectNotice2, this);
+	//m_staticNotice3.Create(_T(""), WS_VISIBLE | WS_CHILD | SS_NOTIFY, rectNotice3, this);
+
+
 
 	// 리스트 칼럼 넣기
 	CListCtrl* listCtrls[] = { &m_listCtrl, &m_listCtrl2, &m_listCtrl3 };
@@ -281,6 +286,22 @@ void CSF5MFCAIPOPDlg::OnPaint()
 			// DC 해제
 			pStaticFacility->ReleaseDC(pDC);
 		}
+
+		CStatic* pStaticLogo = (CStatic*)GetDlgItem(IDC_STATIC_LOGO);
+		if (pStaticLogo != nullptr)
+		{
+			CRect rect;
+			pStaticLogo->GetClientRect(&rect);
+
+			// 클라이언트 DC 가져오기
+			CDC* pDC = pStaticLogo->GetDC();
+
+			// 이미지를 Picture Control 크기에 맞게 스케일링하여 그리기
+			m_imageLogo.Draw(pDC->m_hDC, rect);
+
+			// DC 해제
+			pStaticLogo->ReleaseDC(pDC);
+		}
 	}
 }
 
@@ -296,13 +317,28 @@ void CSF5MFCAIPOPDlg::OnSize(UINT nType, int cx, int cy)
 {
 	CDialogEx::OnSize(nType, cx, cy);
 
-	// 헤더 컨트롤 위치 계산
-	CWnd* pHeader = GetDlgItem(IDC_STATIC_HEADER);
-	if (pHeader != nullptr)
+	//// 헤더 컨트롤 위치 계산
+	//CWnd* pHeader = GetDlgItem(IDC_STATIC_HEADER);
+	//if (pHeader != nullptr)
+	//{
+	//	pHeader->SetWindowPos(nullptr, 10, 10, cx - 2 * 10, 10 + 110 , 0);
+	//}
+
+	// 타이틀 위치 계산
+	CWnd* ptitle = GetDlgItem(IDC_STATIC_TITLE);
+	if (ptitle != nullptr)
 	{
-		pHeader->SetWindowPos(nullptr, 10, 10, cx - 2 * 10, 10 + 110 , 0);
+		ptitle->SetWindowPos(nullptr, 10, 10, cx - 2 * 10, 110, 0);
+		ptitle->BringWindowToTop();
 	}
-	 
+
+	//// 타이틀 위치 계산
+	//CWnd* ptitle2 = GetDlgItem(IDC_STATIC_TITLE);
+	//if (ptitle2 != nullptr)
+	//{
+	//	ptitle2->SetWindowPos(nullptr, 10, 10, cx - 2 * 10, 110, 0);
+	//}
+
 	// 현재 시간 텍스트 위치 설정
 	CWnd* pCurTime = GetDlgItem(IDC_STATIC_CURRENT_TIME);
 	if (pCurTime != nullptr)
@@ -342,23 +378,23 @@ void CSF5MFCAIPOPDlg::OnSize(UINT nType, int cx, int cy)
 
 	const int centerWidth = cx - 3 * 50 - 800;
 
-	CWnd* pNotice1 = GetDlgItem(IDC_STATIC_NOTICE1);
-	if (pNotice1 != nullptr)
-	{
-		pNotice1->SetWindowPos(nullptr, centerWidth / 2  - 500 / 2, 2 * 10 + 110 + 100, 500, 150, 0);
-	}
+	//CWnd* pNotice1 = GetDlgItem(IDC_STATIC_NOTICE1);
+	//if (pNotice1 != nullptr)
+	//{
+	//	pNotice1->SetWindowPos(nullptr, centerWidth / 2  - 500 / 2, 2 * 10 + 110 + 100, 500, 150, 0);
+	//}
 
-	CWnd* pNotice2 = GetDlgItem(IDC_STATIC_NOTICE2);
-	if (pNotice2 != nullptr)
-	{
-		pNotice2->SetWindowPos(nullptr, 50 + 100, cy - 50 - 300, 500, 150, 0);
-	}
+	//CWnd* pNotice2 = GetDlgItem(IDC_STATIC_NOTICE2);
+	//if (pNotice2 != nullptr)
+	//{
+	//	pNotice2->SetWindowPos(nullptr, 50 + 100, cy - 50 - 300, 500, 150, 0);
+	//}
 
-	CWnd* pNotice3 = GetDlgItem(IDC_STATIC_NOTICE3);
-	if (pNotice3 != nullptr)
-	{
-		pNotice3->SetWindowPos(nullptr, cx - 2 * 50 - 800 - 200 - 500, cy - 50 - 300, 500, 150, 0);
-	}
+	//CWnd* pNotice3 = GetDlgItem(IDC_STATIC_NOTICE3);
+	//if (pNotice3 != nullptr)
+	//{
+	//	pNotice3->SetWindowPos(nullptr, cx - 2 * 50 - 800 - 200 - 500, cy - 50 - 300, 500, 150, 0);
+	//}
 
 	CWnd* pRobotBtn = GetDlgItem(IDC_BUTTON_ROBOT);
 	if (pRobotBtn != nullptr)
@@ -854,7 +890,7 @@ UINT CSF5MFCAIPOPDlg::RobotThread(LPVOID pParam)
 				{
 					notice = L"전류 정상";
 					//outlier++;
-					pDlg->PostMessage(WM_NOTICE_LIST, (WPARAM)new CString(notice));
+					//pDlg->PostMessage(WM_NOTICE_LIST, (WPARAM)new CString(notice));
 				}
 
 				if (parse[1] == 1)
@@ -867,7 +903,7 @@ UINT CSF5MFCAIPOPDlg::RobotThread(LPVOID pParam)
 				{
 					notice = L"진동 정상";
 					//outlier++;
-					pDlg->PostMessage(WM_NOTICE_LIST, (WPARAM)new CString(notice));
+					//pDlg->PostMessage(WM_NOTICE_LIST, (WPARAM)new CString(notice));
 				}
 
 				if (outCur == true || outVib == true) {
@@ -959,7 +995,7 @@ UINT CSF5MFCAIPOPDlg::PlasticThread(LPVOID pParam)
 				else
 				{
 					notice = L"플라스틱 정상";
-					pDlg->PostMessage(WM_NOTICE_LIST, (WPARAM)new CString(notice));
+					//pDlg->PostMessage(WM_NOTICE_LIST, (WPARAM)new CString(notice));
 					outlier = 0;
 				}
 			}
@@ -1034,7 +1070,7 @@ UINT CSF5MFCAIPOPDlg::HeatThread(LPVOID pParam)
 				else
 				{
 					notice = L"열처리 정상";
-					pDlg->PostMessage(WM_NOTICE_LIST, (WPARAM)new CString(notice));
+					//pDlg->PostMessage(WM_NOTICE_LIST, (WPARAM)new CString(notice));
 					outlier = 0;
 				}
 			}
