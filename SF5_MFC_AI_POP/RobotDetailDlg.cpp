@@ -37,6 +37,7 @@ void RobotDetailDlg::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(RobotDetailDlg, CDialogEx)
 	ON_MESSAGE(WM_UPDATE_CHART1, &RobotDetailDlg::OnUpdateChart)
     ON_BN_CLICKED(IDC_BUTTON1, &RobotDetailDlg::OnBnClickedButton1)
+    ON_WM_LBUTTONDOWN()
 END_MESSAGE_MAP()
 
 
@@ -101,4 +102,38 @@ void RobotDetailDlg::OnBnClickedButton1()
     {
         AfxGetMainWnd()->SetForegroundWindow();
     }
+}
+
+
+void RobotDetailDlg::OnLButtonDown(UINT nFlags, CPoint point)
+{
+    // TODO: Add your message handler code here and/or call default
+    SendMessage(WM_NCLBUTTONDOWN, HTCAPTION, MAKELPARAM(point.x, point.y));
+
+    CDialogEx::OnLButtonDown(nFlags, point);
+}
+
+
+BOOL RobotDetailDlg::OnInitDialog()
+{
+    CDialogEx::OnInitDialog();
+
+    // 다이얼로그를 화면 중앙에 위치시키기 위한 코드 추가
+    CRect rectDlg;
+    GetWindowRect(rectDlg);
+
+    int nDlgWidth = rectDlg.Width();
+    int nDlgHeight = rectDlg.Height();
+
+    int nScreenWidth = GetSystemMetrics(SM_CXSCREEN);
+    int nScreenHeight = GetSystemMetrics(SM_CYSCREEN);
+
+    int nX = (nScreenWidth - nDlgWidth) / 2;
+    int nY = (nScreenHeight - nDlgHeight) / 2;
+
+    SetWindowPos(NULL, nX, nY, nDlgWidth, nDlgHeight, SWP_NOZORDER | SWP_NOSIZE);
+
+
+    return TRUE;  // return TRUE unless you set the focus to a control
+    // EXCEPTION: OCX Property Pages should return FALSE
 }

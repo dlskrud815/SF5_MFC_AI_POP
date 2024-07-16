@@ -200,8 +200,17 @@ BOOL CSF5MFCAIPOPDlg::OnInitDialog()
 
 	// RobotDetailDlg 초기화
 	pChartDialog_Robot = new RobotDetailDlg();
+	pChartDialog_Robot->Create(IDD_ROBOT_DETAIL_DAILOG, this);
+
 	pChartDialog_Plastic = new PlasticDetailDlg();
+	pChartDialog_Plastic->Create(IDD_PLASTIC_DETAIL_DAILOG, this);
+
 	pChartDialog_Heat = new HeatDetailDlg();
+	pChartDialog_Heat->Create(IDD_HEAT_DETAIL_DAILOG, this);
+
+	pChartDialog_Robot->ShowWindow(SW_SHOW);
+	pChartDialog_Plastic->ShowWindow(SW_SHOW);
+	pChartDialog_Heat->ShowWindow(SW_SHOW);
 
 	// 메인 스레드 생성
 	CWinThread* pMainThread = AfxBeginThread(MainThread, this);
@@ -631,13 +640,6 @@ UINT CSF5MFCAIPOPDlg::MainThread(LPVOID _method)
 	// Create the time update thread
 	CWinThread* pTimeThread = AfxBeginThread(TimeUpdateThread, (LPVOID)pDlg);
 	if (pTimeThread == NULL) AfxMessageBox(L"TimeUpdateThread Create Error");
-
-	pDlg->pChartDialog_Robot->DoModal();
-	//pDlg->pChartDialog_Robot->ShowWindow(SW_HIDE);
-	pDlg->pChartDialog_Plastic->DoModal();
-	//pDlg->pChartDialog_Plastic->ShowWindow(SW_HIDE);
-	pDlg->pChartDialog_Heat->DoModal();
-	//pDlg->pChartDialog_Heat->ShowWindow(SW_HIDE);
 
 	return 0;
 }
