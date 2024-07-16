@@ -67,6 +67,7 @@ protected:
 	afx_msg void OnNMCustomdrawList1(NMHDR* pNMHDR, LRESULT* pResult);
 
 	bool robotBtn = false, plasticBtn = false, heatBtn = false;
+	HCURSOR m_hCursor;
 
 	DECLARE_MESSAGE_MAP()
 

@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include "afxdialogex.h"
-
+#include "MyButton.h"
 #include "ChartViewer.h"
 #include <vector>
 
@@ -43,6 +43,7 @@ private:
 	void AddDataPoints(const vector<vector<double>>& dataPoints);
 
 	CFont m_font;
+	HCURSOR m_hCursor;
 
 public:
 	afx_msg void OnBnClickedButton1();
@@ -50,4 +51,6 @@ public:
 	virtual BOOL OnInitDialog();
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
+	CMyButton* m_plastic_x;
+	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
 };

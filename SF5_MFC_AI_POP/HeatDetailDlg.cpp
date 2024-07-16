@@ -28,8 +28,8 @@ HeatDetailDlg::~HeatDetailDlg()
 
 void HeatDetailDlg::DoDataExchange(CDataExchange* pDX)
 {
-	CDialogEx::DoDataExchange(pDX);
-	DDX_Control(pDX, IDC_STATIC_CHART3, m_ChartViewer);
+    CDialogEx::DoDataExchange(pDX);
+    DDX_Control(pDX, IDC_STATIC_CHART3, m_ChartViewer);
     DDX_Control(pDX, IDC_STATIC_CHART11, m_ChartViewer1);
     DDX_Control(pDX, IDC_STATIC_CHART12, m_ChartViewer2);
     DDX_Control(pDX, IDC_STATIC_CHART13, m_ChartViewer3);
@@ -42,10 +42,11 @@ void HeatDetailDlg::DoDataExchange(CDataExchange* pDX)
 
 BEGIN_MESSAGE_MAP(HeatDetailDlg, CDialogEx)
 	ON_MESSAGE(WM_UPDATE_CHART3, &HeatDetailDlg::OnUpdateChart)
-	ON_BN_CLICKED(IDC_BUTTON1, &HeatDetailDlg::OnBnClickedButton1)
+	ON_BN_CLICKED(IDC_BUTTON_HEAT_X, &HeatDetailDlg::OnBnClickedButton1)
     ON_WM_LBUTTONDOWN()
     ON_WM_ERASEBKGND()
     ON_WM_CTLCOLOR()
+    ON_WM_SETCURSOR()
 END_MESSAGE_MAP()
 
 
@@ -281,8 +282,19 @@ BOOL HeatDetailDlg::OnInitDialog()
 
     SetWindowPos(NULL, nX, nY, nDlgWidth, nDlgHeight, SWP_NOZORDER | SWP_NOSIZE);
 
+    m_hCursor = ::LoadCursor(NULL, IDC_HAND);
+
     m_font.CreatePointFont(150, L"나눔스퀘어");
     GetDlgItem(IDC_STATIC_HEAT_DETAIL_TEXT)->SetFont(&m_font);
+
+    m_heat_x = new CMyButton();
+
+    CRect rect_btn1;
+    GetDlgItem(IDC_BUTTON_HEAT_X)->GetWindowRect(&rect_btn1);
+    ScreenToClient(&rect_btn1);
+    m_heat_x->Create(_T("X"), WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON | BS_CENTER | BS_VCENTER,
+        rect_btn1, this, IDC_BUTTON_HEAT_X);
+    GetDlgItem(IDC_BUTTON_HEAT_X)->ShowWindow(SW_HIDE);
 
     return TRUE;  // return TRUE unless you set the focus to a control
     // EXCEPTION: OCX Property Pages should return FALSE
@@ -315,4 +327,17 @@ HBRUSH HeatDetailDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 
     // TODO:  Return a different brush if the default is not desired
     return hbr;
+}
+
+
+BOOL HeatDetailDlg::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
+{
+    // TODO: Add your message handler code here and/or call default
+    if (pWnd == m_heat_x)
+    {
+        ::SetCursor(m_hCursor);
+        return TRUE;
+    }
+
+    return CDialogEx::OnSetCursor(pWnd, nHitTest, message);
 }

@@ -217,6 +217,7 @@ BOOL CSF5MFCAIPOPDlg::OnInitDialog()
 	pChartDialog_Plastic->ShowWindow(SW_HIDE);
 	pChartDialog_Heat->ShowWindow(SW_HIDE);
 
+
 	// 메인 스레드 생성
 	CWinThread* pMainThread = AfxBeginThread(MainThread, this);
 	if (pMainThread == NULL) AfxMessageBox(L"MainThread Create Error");
