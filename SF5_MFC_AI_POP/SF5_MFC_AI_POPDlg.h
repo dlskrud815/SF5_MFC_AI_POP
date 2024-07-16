@@ -76,7 +76,7 @@ public:
 	afx_msg void OnBnClickedButtonPlastic();
 	afx_msg void OnBnClickedButtonHeat();
 
-	static int listIndex;
+	static int listIndex, listIndex2, listIndex3;
 	afx_msg LRESULT OnNoticeList(WPARAM wParam, LPARAM lParam);
 
 

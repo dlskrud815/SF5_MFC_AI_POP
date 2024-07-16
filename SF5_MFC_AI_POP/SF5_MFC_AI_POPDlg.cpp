@@ -27,6 +27,8 @@
 CCriticalSection CSF5MFCAIPOPDlg::critSect;
 
 int CSF5MFCAIPOPDlg::listIndex = 1;
+int CSF5MFCAIPOPDlg::listIndex2 = 1;
+int CSF5MFCAIPOPDlg::listIndex3 = 1;
 
 // CAboutDlg dialog used for App About
 
@@ -834,7 +836,7 @@ UINT CSF5MFCAIPOPDlg::RobotThread(LPVOID pParam)
 	pDlg->m_eventRobotThread.ResetEvent();
 
 	pDlg->GetDlgItem(IDC_BUTTON_ROBOT)->EnableWindow(TRUE);
-
+	pDlg->robotBtn = false;
 	return 0;
 }
 
@@ -881,6 +883,7 @@ UINT CSF5MFCAIPOPDlg::PlasticThread(LPVOID pParam)
 	pDlg->m_eventPlasticThread.ResetEvent();
 
 	pDlg->GetDlgItem(IDC_BUTTON_PLASTIC)->EnableWindow(TRUE);
+	pDlg->plasticBtn = false;
 
 	return 0;
 }
@@ -928,6 +931,7 @@ UINT CSF5MFCAIPOPDlg::HeatThread(LPVOID pParam)
 	pDlg->m_eventHeatThread.ResetEvent();
 
 	pDlg->GetDlgItem(IDC_BUTTON_HEAT)->EnableWindow(TRUE);
+	pDlg->heatBtn = false;
 
 	return 0;
 }
@@ -1064,72 +1068,107 @@ LRESULT CSF5MFCAIPOPDlg::OnNoticeHeatError(WPARAM wParam, LPARAM lParam)
 LRESULT CSF5MFCAIPOPDlg::OnNoticeList(WPARAM wParam, LPARAM lParam)
 {
 	const CString& notice = *((CString*)wParam);
-
 	CString strIndex;
-	strIndex.Format(_T("%d"), listIndex++);
 
 	CTime currentTime = CTime::GetCurrentTime();
 	CString strTime = currentTime.Format(L"%Y-%m-%d %H:%M:%S");
 
 	CString result1, result2, result3;
 
-	if (notice.Compare(L"플라스틱 이상") == 0)
+	if (notice.Find(L"플라스틱") != -1)
 	{
-		result1 = L"경보 발생";
-		result2 = L"소성가공";
-		result3 = L"설비 이상";
+		strIndex.Format(_T("%d"), listIndex++);
+
+		if (notice.Find(L"이상") != -1)
+		{
+			result1 = L"경보 발생";
+			result2 = L"소성가공";
+			result3 = L"설비 이상";
+		}
+		else if (notice.Find(L"정상") != -1)
+		{
+			result1 = L"정상";
+			result2 = L"소성가공";
+			result3 = L"설비 정상";
+		}
+
 	}
-	else if (notice.Compare(L"플라스틱 정상") == 0)
+	else if (notice.Find(L"전류") != -1 || notice.Find(L"진동") != -1)
 	{
-		result1 = L"정상";
-		result2 = L"소성가공";
-		result3 = L"설비 정상";
+		strIndex.Format(_T("%d"), listIndex2++);
+
+		if (notice.Find(L"전류") != -1 || notice.Find(L"이상") != -1)
+		{
+			result1 = L"경보 발생";
+			result2 = L"로봇 용접";
+			result3 = L"전류 이상";
+		}
+		else if (notice.Find(L"전류") != -1 || notice.Find(L"정상") != -1)
+		{
+			result1 = L"정상";
+			result2 = L"로봇 용접";
+			result3 = L"전류 정상";
+		}
+
+		if (notice.Find(L"진동") != -1 || notice.Find(L"이상") != -1)
+		{
+			result1 = L"경보 발생";
+			result2 = L"로봇 용접";
+			result3 = L"진동 이상";
+		}
+		else if (notice.Find(L"진동") != -1 || notice.Find(L"정상") != -1)
+		{
+			result1 = L"정상";
+			result2 = L"로봇 용접";
+			result3 = L"진동 정상";
+		}
 	}
-	else if (notice.Compare(L"전류 이상") == 0)
+	else if ((notice.Find(L"열처리") != -1))
 	{
-		result1 = L"경보 발생";
-		result2 = L"로봇 용접";
-		result3 = L"진동 이상";
+		strIndex.Format(_T("%d"), listIndex3++);
+
+		if (notice.Find(L"이상") != -1)
+		{
+			result1 = L"경보 발생";
+			result2 = L"열처리";
+			result3 = L"설비 이상";
+		}
+		else if (notice.Find(L"정상") != -1)
+		{
+			result1 = L"정상";
+			result2 = L"열처리";
+			result3 = L"설비 정상";
+		}
 	}
-	else if (notice.Compare(L"진동 이상") == 0)
-	{
-		result1 = L"경보 발생";
-		result2 = L"로봇 용접";
-		result3 = L"진동 이상";
-	}
-	else if (notice.Compare(L"전류 정상") == 0)
-	{
-		result1 = L"정상";
-		result2 = L"로봇 용접";
-		result3 = L"전류 정상";
-	}
-	else if (notice.Compare(L"진동 정상") == 0)
-	{
-		result1 = L"정상";
-		result2 = L"로봇 용접";
-		result3 = L"진동 정상";
-	}
-	else if (notice.Compare(L"열처리 이상") == 0)
-	{
-		result1 = L"경보 발생";
-		result2 = L"열처리";
-		result3 = L"설비 이상";
-	}
-	else if (notice.Compare(L"열처리 정상") == 0)
-	{
-		result1 = L"정상";
-		result2 = L"열처리";
-		result3 = L"설비 정상";
-	}
+
 
 
 	if (!result1.IsEmpty() && !result2.IsEmpty() && !result3.IsEmpty())
 	{
-		m_listCtrl.InsertItem(0, CString(strIndex));
-		m_listCtrl.SetItem(0, 1, LVIF_TEXT, CString(strTime), 0, 0, 0, NULL);
-		m_listCtrl.SetItem(0, 2, LVIF_TEXT, CString(result1), 0, 0, 0, NULL);
-		m_listCtrl.SetItem(0, 3, LVIF_TEXT, CString(result2), 0, 0, 0, NULL);
-		m_listCtrl.SetItem(0, 4, LVIF_TEXT, CString(result3), 0, 0, 0, NULL);
+		if (notice.Find(L"전류") != -1 || notice.Find(L"진동") != -1)
+		{
+			m_listCtrl.InsertItem(0, CString(strIndex));
+			m_listCtrl.SetItem(0, 1, LVIF_TEXT, CString(strTime), 0, 0, 0, NULL);
+			m_listCtrl.SetItem(0, 2, LVIF_TEXT, CString(result1), 0, 0, 0, NULL);
+			m_listCtrl.SetItem(0, 3, LVIF_TEXT, CString(result2), 0, 0, 0, NULL);
+			m_listCtrl.SetItem(0, 4, LVIF_TEXT, CString(result3), 0, 0, 0, NULL);
+		}
+		if (notice.Find(L"플라스틱") != -1)
+		{
+			m_listCtrl2.InsertItem(0, CString(strIndex));
+			m_listCtrl2.SetItem(0, 1, LVIF_TEXT, CString(strTime), 0, 0, 0, NULL);
+			m_listCtrl2.SetItem(0, 2, LVIF_TEXT, CString(result1), 0, 0, 0, NULL);
+			m_listCtrl2.SetItem(0, 3, LVIF_TEXT, CString(result2), 0, 0, 0, NULL);
+			m_listCtrl2.SetItem(0, 4, LVIF_TEXT, CString(result3), 0, 0, 0, NULL);
+		}
+		if (notice.Find(L"열처리") != -1)
+		{
+			m_listCtrl3.InsertItem(0, CString(strIndex));
+			m_listCtrl3.SetItem(0, 1, LVIF_TEXT, CString(strTime), 0, 0, 0, NULL);
+			m_listCtrl3.SetItem(0, 2, LVIF_TEXT, CString(result1), 0, 0, 0, NULL);
+			m_listCtrl3.SetItem(0, 3, LVIF_TEXT, CString(result2), 0, 0, 0, NULL);
+			m_listCtrl3.SetItem(0, 4, LVIF_TEXT, CString(result3), 0, 0, 0, NULL);
+		}
 	}
 
 	delete (CString*)wParam; // 메모리 해제
