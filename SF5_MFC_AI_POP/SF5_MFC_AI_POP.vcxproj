@@ -232,6 +232,8 @@
     <Image Include="res\img\facility.png" />
     <Image Include="res\img\logo.bmp" />
     <Image Include="res\img\logo.png" />
+    <Image Include="res\img\warning.ico" />
+    <Image Include="res\img\warning.png" />
     <Image Include="res\SF5_MFC_AI_POP.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

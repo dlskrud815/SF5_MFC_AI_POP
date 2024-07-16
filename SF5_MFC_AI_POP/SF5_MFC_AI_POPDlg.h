@@ -133,8 +133,8 @@ public:
 	afx_msg void OnBnClickedButtonPlasticNotice();
 	afx_msg void OnBnClickedButtonHeatNotice();
 	
-	CFont m_font, m_font2;
-
+	CFont m_font, m_font2, m_font3;
+	CButton m_robotBtn;
 	
 	RobotDetailDlg* pChartDialog_Robot;
 	PlasticDetailDlg* pChartDialog_Plastic;

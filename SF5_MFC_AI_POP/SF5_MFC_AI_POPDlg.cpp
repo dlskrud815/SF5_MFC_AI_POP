@@ -149,6 +149,15 @@ BOOL CSF5MFCAIPOPDlg::OnInitDialog()
 	ShowWindow(SW_SHOWMAXIMIZED); // 최대화
 	//back.Load(_T("res\\img\\BACK1.png"));
 
+
+	// 버튼 컨트롤과 아이콘 로드
+	m_robotBtn.SubclassDlgItem(IDC_BUTTON_ROBOT_NOTICE, this);  // IDC_MYBUTTON은 버튼의 ID입니다.
+	HICON hIcon = (HICON)LoadImage(AfxGetInstanceHandle(), MAKEINTRESOURCE(IDI_ICON1), IMAGE_ICON, 128, 128, LR_DEFAULTCOLOR);
+
+	// 아이콘 설정
+	m_robotBtn.SetIcon(hIcon);
+
+
 	// Picture Control 초기화
 	m_staticFacility.SubclassDlgItem(IDC_STATIC_FACILITY, this);
 	m_logo.SubclassDlgItem(IDC_STATIC_LOGO, this);
@@ -167,6 +176,11 @@ BOOL CSF5MFCAIPOPDlg::OnInitDialog()
 
 	m_font2.CreatePointFont(250, L"나눔스퀘어");
 	GetDlgItem(IDC_STATIC_TITLE)->SetFont(&m_font2);
+
+	//m_font3.CreatePointFont(200, L"나눔스퀘어");
+	//GetDlgItem(IDC_STATIC_ROBOT_NOTICE)->SetFont(&m_font3);
+	//GetDlgItem(IDC_STATIC_PLASTIC_NOTICE)->SetFont(&m_font3);
+	//GetDlgItem(IDC_STATIC_HEAT_NOTICE)->SetFont(&m_font3);
 
 
 	//CRect rectHeader;
@@ -378,23 +392,42 @@ void CSF5MFCAIPOPDlg::OnSize(UINT nType, int cx, int cy)
 
 	const int centerWidth = cx - 3 * 50 - 800;
 
-	//CWnd* pNotice1 = GetDlgItem(IDC_STATIC_NOTICE1);
-	//if (pNotice1 != nullptr)
-	//{
-	//	pNotice1->SetWindowPos(nullptr, centerWidth / 2  - 500 / 2, 2 * 10 + 110 + 100, 500, 150, 0);
-	//}
+	CWnd* pNotice1 = GetDlgItem(IDC_STATIC_RUN_HEAT);
+	if (pNotice1 != nullptr)
+	{
+		pNotice1->SetWindowPos(nullptr, centerWidth / 2  - 500 / 2, 2 * 10 + 110 + 100, 500, 150, 0);
+	}
 
-	//CWnd* pNotice2 = GetDlgItem(IDC_STATIC_NOTICE2);
-	//if (pNotice2 != nullptr)
-	//{
-	//	pNotice2->SetWindowPos(nullptr, 50 + 100, cy - 50 - 300, 500, 150, 0);
-	//}
+	CWnd* pNotice2 = GetDlgItem(IDC_STATIC_RUN_PLASTIC);
+	if (pNotice2 != nullptr)
+	{
+		pNotice2->SetWindowPos(nullptr, 50 + 100, cy - 50 - 300, 500, 150, 0);
+	}
 
-	//CWnd* pNotice3 = GetDlgItem(IDC_STATIC_NOTICE3);
-	//if (pNotice3 != nullptr)
-	//{
-	//	pNotice3->SetWindowPos(nullptr, cx - 2 * 50 - 800 - 200 - 500, cy - 50 - 300, 500, 150, 0);
-	//}
+	CWnd* pNotice3 = GetDlgItem(IDC_STATIC_RUN_ROBOT);
+	if (pNotice3 != nullptr)
+	{
+		pNotice3->SetWindowPos(nullptr, cx - 2 * 50 - 800 - 200 - 500, cy - 50 - 300, 500, 150, 0);
+	}
+
+	CWnd* pNotice11 = GetDlgItem(IDC_BUTTON_HEAT_NOTICE);
+	if (pNotice11 != nullptr)
+	{
+		pNotice11->SetWindowPos(nullptr, centerWidth / 2 - 500 / 2 + 10, 2 * 10 + 110 + 100 + 10, 130, 130, 0);
+	}
+
+	CWnd* pNotice12 = GetDlgItem(IDC_BUTTON_PLASTIC_NOTICE);
+	if (pNotice12 != nullptr)
+	{
+		pNotice12->SetWindowPos(nullptr, 50 + 100 + 10, cy - 50 - 300 + 10, 130, 130, 0);
+	}
+
+	CWnd* pNotice13 = GetDlgItem(IDC_BUTTON_ROBOT_NOTICE);
+	if (pNotice13 != nullptr)
+	{
+		pNotice13->SetWindowPos(nullptr, cx - 2 * 50 - 800 - 200 - 500 + 10, cy - 50 - 300 + 10, 130, 130, 0);
+	}
+
 
 	CWnd* pRobotBtn = GetDlgItem(IDC_BUTTON_ROBOT);
 	if (pRobotBtn != nullptr)
@@ -913,14 +946,14 @@ UINT CSF5MFCAIPOPDlg::RobotThread(LPVOID pParam)
 					outlier = 0;
 				}
 			}
-
-			pDlg->PostMessage(WM_NOTICE_ROBOT, (WPARAM)new CString(notice)); // CString 동적 할당 없이 수정
+			pDlg->PostMessage(WM_NOTICE_ROBOT, (WPARAM)new CString(notice));
+			//pDlg->PostMessage(WM_NOTICE_ROBOT, (WPARAM)new CString(L"작동중")); // CString 동적 할당 없이 수정
 		}
 	}
 
 	// 스레드 종료 후 이벤트 초기화
 	pDlg->m_eventRobotThread.ResetEvent();
-
+	//pDlg->PostMessage(WM_NOTICE_ROBOT, (WPARAM)new CString(L"작동안함"));
 	pDlg->GetDlgItem(IDC_BUTTON_ROBOT)->EnableWindow(TRUE);
 	//pDlg->robotBtn = false;
 	return 0;
@@ -999,14 +1032,14 @@ UINT CSF5MFCAIPOPDlg::PlasticThread(LPVOID pParam)
 					outlier = 0;
 				}
 			}
-
-			pDlg->PostMessage(WM_NOTICE_PLASTIC, (WPARAM)new CString(notice)); // CString 동적 할당 없이 수정
+			pDlg->PostMessage(WM_NOTICE_PLASTIC, (WPARAM)new CString(notice));
+			//pDlg->PostMessage(WM_NOTICE_PLASTIC, (WPARAM)new CString(L"작동중")); // CString 동적 할당 없이 수정
 		}
 	}
 
 	// 스레드 종료 후 이벤트 초기화
 	pDlg->m_eventPlasticThread.ResetEvent();
-
+	//pDlg->PostMessage(WM_NOTICE_PLASTIC, (WPARAM)new CString(L"작동안함"));
 	pDlg->GetDlgItem(IDC_BUTTON_PLASTIC)->EnableWindow(TRUE);
 	//pDlg->plasticBtn = false;
 
@@ -1074,14 +1107,14 @@ UINT CSF5MFCAIPOPDlg::HeatThread(LPVOID pParam)
 					outlier = 0;
 				}
 			}
-
-			pDlg->PostMessage(WM_NOTICE_HEAT, (WPARAM)new CString(notice)); // CString 동적 할당 없이 수정
+			pDlg->PostMessage(WM_NOTICE_HEAT, (WPARAM)new CString(notice));
+			//pDlg->PostMessage(WM_NOTICE_HEAT, (WPARAM)new CString(L"작동중")); // CString 동적 할당 없이 수정
 		}
 	}
 
 	// 스레드 종료 후 이벤트 초기화
 	pDlg->m_eventHeatThread.ResetEvent();
-
+	//pDlg->PostMessage(WM_NOTICE_HEAT, (WPARAM)new CString(L"작동안함"));
 	pDlg->GetDlgItem(IDC_BUTTON_HEAT)->EnableWindow(TRUE);
 	//pDlg->heatBtn = false;
 
@@ -1172,6 +1205,16 @@ LRESULT CSF5MFCAIPOPDlg::OnNoticeRobotError(WPARAM wParam, LPARAM lParam)
 	if (pNotice)
 	{
 		SetDlgItemText(IDC_STATIC_ROBOT_NOTICE, *pNotice);
+
+		//if (pNotice->Compare(L"작동중") == 0)
+		//{
+		//	SetDlgItemText(IDC_STATIC_RUN_ROBOT, L"로봇용접 설비 - 작동 중");
+		//}
+		//else
+		//{
+		//	SetDlgItemText(IDC_STATIC_RUN_ROBOT, L"로봇용접 설비 - 작동 안함");
+		//}
+
 		delete pNotice; // 메모리 해제
 	}
 	else
@@ -1189,6 +1232,16 @@ LRESULT CSF5MFCAIPOPDlg::OnNoticePlasticError(WPARAM wParam, LPARAM lParam)
 	if (pNotice)
 	{
 		SetDlgItemText(IDC_STATIC_PLASTIC_NOTICE, *pNotice);
+
+		//if (pNotice->Compare(L"작동중") == 0)
+		//{
+		//	SetDlgItemText(IDC_STATIC_RUN_ROBOT, L"로봇용접 설비 - 작동 중");
+		//}
+		//else
+		//{
+		//	SetDlgItemText(IDC_STATIC_RUN_ROBOT, L"로봇용접 설비 - 작동 안함");
+		//}
+
 		delete pNotice; // 메모리 해제
 	}
 	else
@@ -1206,6 +1259,16 @@ LRESULT CSF5MFCAIPOPDlg::OnNoticeHeatError(WPARAM wParam, LPARAM lParam)
 	if (pNotice)
 	{
 		SetDlgItemText(IDC_STATIC_HEAT_NOTICE, *pNotice);
+
+		//if (pNotice->Compare(L"작동중") == 0)
+		//{
+		//	SetDlgItemText(IDC_STATIC_RUN_ROBOT, L"로봇용접 설비 - 작동 중");
+		//}
+		//else
+		//{
+		//	SetDlgItemText(IDC_STATIC_RUN_ROBOT, L"로봇용접 설비 - 작동 안함");
+		//}
+
 		delete pNotice; // 메모리 해제
 	}
 	else
