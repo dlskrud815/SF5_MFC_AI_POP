@@ -39,16 +39,10 @@
     <ClInclude Include="MySQL_Connector.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="PROCESSDlg.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="ChartViewer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="SIGNINDlg.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ThreadTest.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="CustomStatic.h">
@@ -83,16 +77,10 @@
     <ClCompile Include="MySQL_Connector.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="PROCESSDlg.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="ChartViewer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="SIGNINDlg.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ThreadTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="CustomStatic.cpp">

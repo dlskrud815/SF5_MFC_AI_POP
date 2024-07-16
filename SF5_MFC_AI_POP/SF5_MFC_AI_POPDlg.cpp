@@ -882,7 +882,7 @@ UINT CSF5MFCAIPOPDlg::RobotThread(LPVOID pParam)
 	pDlg->m_eventRobotThread.ResetEvent();
 
 	pDlg->GetDlgItem(IDC_BUTTON_ROBOT)->EnableWindow(TRUE);
-	pDlg->robotBtn = false;
+	//pDlg->robotBtn = false;
 	return 0;
 }
 
@@ -968,7 +968,7 @@ UINT CSF5MFCAIPOPDlg::PlasticThread(LPVOID pParam)
 	pDlg->m_eventPlasticThread.ResetEvent();
 
 	pDlg->GetDlgItem(IDC_BUTTON_PLASTIC)->EnableWindow(TRUE);
-	pDlg->plasticBtn = false;
+	//pDlg->plasticBtn = false;
 
 	return 0;
 }
@@ -1043,7 +1043,7 @@ UINT CSF5MFCAIPOPDlg::HeatThread(LPVOID pParam)
 	pDlg->m_eventHeatThread.ResetEvent();
 
 	pDlg->GetDlgItem(IDC_BUTTON_HEAT)->EnableWindow(TRUE);
-	pDlg->heatBtn = false;
+	//pDlg->heatBtn = false;
 
 	return 0;
 }

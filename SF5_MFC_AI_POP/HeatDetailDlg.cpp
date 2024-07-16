@@ -45,6 +45,7 @@ BEGIN_MESSAGE_MAP(HeatDetailDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON1, &HeatDetailDlg::OnBnClickedButton1)
     ON_WM_LBUTTONDOWN()
     ON_WM_ERASEBKGND()
+    ON_WM_CTLCOLOR()
 END_MESSAGE_MAP()
 
 
@@ -204,10 +205,10 @@ void HeatDetailDlg::UpdateChart()
     layers[11]->addDataSet(DoubleArray(&m_dataSets[11][0], m_dataSets[11].size()), strtol(colors[0], nullptr, 16), labels[0]);
     layers[12]->addDataSet(DoubleArray(&m_dataSets[12][0], m_dataSets[12].size()), strtol(colors[1], nullptr, 16), labels[0]);
 
-    layers[13]->addDataSet(DoubleArray(&m_dataSets[13][0], m_dataSets[13].size()), strtol(colors[0], nullptr, 16), labels[1]);
+    layers[13]->addDataSet(DoubleArray(&m_dataSets[13][0], m_dataSets[13].size()), strtol(colors[3], nullptr, 16), labels[1]);
     layers[14]->addDataSet(DoubleArray(&m_dataSets[14][0], m_dataSets[14].size()), strtol(colors[1], nullptr, 16), labels[1]);
     layers[15]->addDataSet(DoubleArray(&m_dataSets[15][0], m_dataSets[15].size()), strtol(colors[2], nullptr, 16), labels[1]);
-    layers[16]->addDataSet(DoubleArray(&m_dataSets[16][0], m_dataSets[16].size()), strtol(colors[3], nullptr, 16), labels[1]);
+    layers[16]->addDataSet(DoubleArray(&m_dataSets[16][0], m_dataSets[16].size()), strtol(colors[0], nullptr, 16), labels[1]);
 
     layers[17]->addDataSet(DoubleArray(&m_dataSets[17][0], m_dataSets[17].size()), strtol(colors[0], nullptr, 16), labels[3]);
 
@@ -280,6 +281,9 @@ BOOL HeatDetailDlg::OnInitDialog()
 
     SetWindowPos(NULL, nX, nY, nDlgWidth, nDlgHeight, SWP_NOZORDER | SWP_NOSIZE);
 
+    m_font.CreatePointFont(150, L"나눔스퀘어");
+    GetDlgItem(IDC_STATIC_HEAT_DETAIL_TEXT)->SetFont(&m_font);
+
     return TRUE;  // return TRUE unless you set the focus to a control
     // EXCEPTION: OCX Property Pages should return FALSE
 }
@@ -294,4 +298,21 @@ BOOL HeatDetailDlg::OnEraseBkgnd(CDC* pDC)
     return TRUE;
 
     return CDialogEx::OnEraseBkgnd(pDC);
+}
+
+
+HBRUSH HeatDetailDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
+{
+    HBRUSH hbr = CDialogEx::OnCtlColor(pDC, pWnd, nCtlColor);
+
+    // IDC_STATIC_TEXT1에 대해 배경을 투명하게 설정
+    if (pWnd->GetDlgCtrlID() == IDC_STATIC_HEAT_DETAIL_TEXT)
+    {
+        pDC->SetBkMode(TRANSPARENT);
+        pDC->SetTextColor(RGB(255, 255, 255));  // 흰색으로 글자 색 설정
+        return (HBRUSH)GetStockObject(NULL_BRUSH);  // 배경 브러시를 NULL로 설정하여 투명하게 만듦
+    }
+
+    // TODO:  Return a different brush if the default is not desired
+    return hbr;
 }

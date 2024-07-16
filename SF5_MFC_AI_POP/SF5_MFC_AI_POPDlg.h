@@ -5,7 +5,6 @@
 #pragma once
 
 #include "MySQL_Connector.h"
-#include "ThreadTest.h"
 #include "CustomStatic.h" // CCustomStatic 클래스 포함
 
 #include "RobotDetailDlg.h"

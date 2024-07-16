@@ -41,9 +41,13 @@ private:
 
     void UpdateChart();
     void AddDataPoints(const vector<vector<double>>& dataPoints);
+
+    CFont m_font;
+
 public:
     afx_msg void OnBnClickedButton1();
     afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
     virtual BOOL OnInitDialog();
     afx_msg BOOL OnEraseBkgnd(CDC* pDC);
+    afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 };
