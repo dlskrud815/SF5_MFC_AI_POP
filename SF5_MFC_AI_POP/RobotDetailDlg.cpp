@@ -30,7 +30,8 @@ RobotDetailDlg::~RobotDetailDlg()
 void RobotDetailDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
-    DDX_Control(pDX, IDC_STATIC_CHART1, m_ChartViewer);
+    DDX_Control(pDX, IDC_STATIC_CHART1, m_ChartViewer1);
+    DDX_Control(pDX, IDC_STATIC_CHART4, m_ChartViewer2);
 }
 
 
@@ -38,6 +39,7 @@ BEGIN_MESSAGE_MAP(RobotDetailDlg, CDialogEx)
 	ON_MESSAGE(WM_UPDATE_CHART1, &RobotDetailDlg::OnUpdateChart)
     ON_BN_CLICKED(IDC_BUTTON1, &RobotDetailDlg::OnBnClickedButton1)
     ON_WM_LBUTTONDOWN()
+    ON_WM_ERASEBKGND()
 END_MESSAGE_MAP()
 
 
@@ -72,24 +74,54 @@ void RobotDetailDlg::AddDataPoints(const vector<vector<double>>& dataPoints)
 
 void RobotDetailDlg::UpdateChart()
 {
-    XYChart* c = new XYChart(600, 400);
+    // 다이얼로그 크기에 맞게 차트 크기 설정
+    int chartWidth = 320;
+    int chartHeight = 200;
 
-    c->setPlotArea(55, 50, 520, 300, 0xffffff, -1, -1, c->dashLineColor(0xaaaaaa, Chart::DotLine), -1);
+    // XYChart 객체 생성
+    XYChart* c1 = new XYChart(chartWidth, chartHeight);
+    XYChart* c2 = new XYChart(chartWidth, chartHeight);
 
-    LineLayer* layer = c->addLineLayer();
-    layer->setXData(DoubleArray(&m_timestamps[0], m_timestamps.size()));
+    // 플롯 영역을 설정. 매개변수를 조정하여 여백을 최소화
+    c1->setPlotArea(40, 20, chartWidth - 50, chartHeight - 50, 0xffffff, -1, -1, c1->dashLineColor(0xaaaaaa, Chart::DotLine), -1);
+    c2->setPlotArea(40, 20, chartWidth - 50, chartHeight - 50, 0xffffff, -1, -1, c2->dashLineColor(0xaaaaaa, Chart::DotLine), -1);
+    c1->setBackground(0X454C54);
+    c2->setBackground(0X454C54);
 
-    const char* colors[] = { "0xff0000", "0x00ff00", "0x0000ff" };
-    const char* labels[] = { "Data1", "Data2", "Data3" };
+    // 레이어 추가 및 X 데이터 설정
+    LineLayer* layer1 = c1->addLineLayer();
+    layer1->setXData(DoubleArray(&m_timestamps[0], m_timestamps.size()));
 
-    for (size_t i = 0; i < m_dataSets.size(); ++i)
-    {
-        layer->addDataSet(DoubleArray(&m_dataSets[i][0], m_dataSets[i].size()), strtol(colors[i], nullptr, 16), labels[i]);
-    }
+    LineLayer* layer2 = c2->addLineLayer();
+    layer2->setXData(DoubleArray(&m_timestamps[0], m_timestamps.size()));
 
-    m_ChartViewer.setChart(c);
 
-    delete c;
+    // 데이터셋 색상 및 라벨 설정
+    const char* colors[] = { "0xff0000", "0x0000ff" };
+    const char* labels[] = { "Data1", "Data2" };
+
+    //for (size_t i = 0; i < m_dataSets.size(); ++i)
+    //{
+    //    layer->addDataSet(DoubleArray(&m_dataSets[i][0], m_dataSets[i].size()), strtol(colors[i], nullptr, 16), labels[i]);
+    //}
+
+    layer1->addDataSet(DoubleArray(&m_dataSets[0][0], m_dataSets[0].size()), strtol(colors[0], nullptr, 16), labels[0]);
+    layer2->addDataSet(DoubleArray(&m_dataSets[1][0], m_dataSets[1].size()), strtol(colors[1], nullptr, 16), labels[1]);
+
+    
+    c1->xAxis()->setLabelStyle("", 8, 0xffffff); // 축 레이블 폰트 크기 축소
+    c1->yAxis()->setLabelStyle("", 8, 0xffffff);
+    c1->addTitle("Current Chart", "", 10, 0xffffff); // 제목이 있는 경우 폰트 크기 축소
+
+    c2->xAxis()->setLabelStyle("", 8, 0xffffff); // 축 레이블 폰트 크기 축소
+    c2->yAxis()->setLabelStyle("", 8, 0xffffff);
+    c2->addTitle("Vibration Chart", "", 10, 0xffffff); // 제목이 있는 경우 폰트 크기 축소
+
+    // 차트를 ChartViewer에 설정
+    m_ChartViewer1.setChart(c1);
+    m_ChartViewer2.setChart(c2);
+
+    delete c1, c2;
 }
 
 void RobotDetailDlg::OnBnClickedButton1()
@@ -136,4 +168,17 @@ BOOL RobotDetailDlg::OnInitDialog()
 
     return TRUE;  // return TRUE unless you set the focus to a control
     // EXCEPTION: OCX Property Pages should return FALSE
+}
+
+
+BOOL RobotDetailDlg::OnEraseBkgnd(CDC* pDC)
+{
+    // TODO: Add your message handler code here and/or call default
+    CRect rect;
+    GetClientRect(rect);
+
+    pDC->FillSolidRect(rect, RGB(69, 76, 84));
+    return TRUE;
+
+    return CDialogEx::OnEraseBkgnd(pDC);
 }

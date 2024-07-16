@@ -38,6 +38,7 @@ BEGIN_MESSAGE_MAP(PlasticDetailDlg, CDialogEx)
 	ON_MESSAGE(WM_UPDATE_CHART2, &PlasticDetailDlg::OnUpdateChart)
 	ON_BN_CLICKED(IDC_BUTTON1, &PlasticDetailDlg::OnBnClickedButton1)
     ON_WM_LBUTTONDOWN()
+    ON_WM_ERASEBKGND()
 END_MESSAGE_MAP()
 
 
@@ -138,4 +139,17 @@ BOOL PlasticDetailDlg::OnInitDialog()
 
     return TRUE;  // return TRUE unless you set the focus to a control
     // EXCEPTION: OCX Property Pages should return FALSE
+}
+
+
+BOOL PlasticDetailDlg::OnEraseBkgnd(CDC* pDC)
+{
+    // TODO: Add your message handler code here and/or call default
+    CRect rect;
+    GetClientRect(rect);
+
+    pDC->FillSolidRect(rect, RGB(69, 76, 84));
+    return TRUE;
+
+    return CDialogEx::OnEraseBkgnd(pDC);
 }

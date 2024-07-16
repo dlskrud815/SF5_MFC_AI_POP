@@ -52,9 +52,10 @@
 #define IDC_BUTTON_ROBOT_NOTICE         1032
 #define IDC_BUTTON_PLASTIC_NOTICE       1033
 #define IDC_BUTTON_HEAT_NOTICE          1034
-#define IDC_STATIC_CHART2               1034
-#define IDC_STATIC_CHART1               1035
-#define IDC_STATIC_CHART3               1035
+#define IDC_STATIC_CHART2               1035
+#define IDC_STATIC_CHART1               1036
+#define IDC_STATIC_CHART3               1037
+#define IDC_STATIC_CHART4               1038
 
 // Next default values for new objects
 // 

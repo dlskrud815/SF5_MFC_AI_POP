@@ -208,9 +208,9 @@ BOOL CSF5MFCAIPOPDlg::OnInitDialog()
 	pChartDialog_Heat = new HeatDetailDlg();
 	pChartDialog_Heat->Create(IDD_HEAT_DETAIL_DAILOG, this);
 
-	pChartDialog_Robot->ShowWindow(SW_SHOW);
-	pChartDialog_Plastic->ShowWindow(SW_SHOW);
-	pChartDialog_Heat->ShowWindow(SW_SHOW);
+	pChartDialog_Robot->ShowWindow(SW_HIDE);
+	pChartDialog_Plastic->ShowWindow(SW_HIDE);
+	pChartDialog_Heat->ShowWindow(SW_HIDE);
 
 	// 메인 스레드 생성
 	CWinThread* pMainThread = AfxBeginThread(MainThread, this);
@@ -777,16 +777,13 @@ UINT CSF5MFCAIPOPDlg::RobotThread(LPVOID pParam)
 			pDlg->offsetCur++;
 			pDlg->offsetVib++;
 
-			//// 데이터 전달
-			//vector<double> v_cur = pDlg->cur;
-			//vector<double> v_vib = pDlg->vib;
+			// 데이터 전달
+			vector<vector<double>> v_cur_vib;
+			v_cur_vib.push_back(pDlg->cur);
+			v_cur_vib.push_back(pDlg->vib);
 
-			//vector<vector<double>> v_cur_vib;
-			//v_cur_vib.push_back(v_cur);
-			//v_cur_vib.push_back(v_vib);
-
-			//pDlg->SendChartUpdateMessage_Robot(v_cur_vib);
-			//// 데이터 전달
+			pDlg->SendChartUpdateMessage_Robot(v_cur_vib);
+			// 데이터 전달
 
 			CStringA jsonData;
 			jsonData = prepareData(ROBOT, pDlg);
@@ -836,6 +833,8 @@ UINT CSF5MFCAIPOPDlg::RobotThread(LPVOID pParam)
 	// 스레드 종료 후 이벤트 초기화
 	pDlg->m_eventRobotThread.ResetEvent();
 
+	pDlg->GetDlgItem(IDC_BUTTON_ROBOT)->EnableWindow(TRUE);
+
 	return 0;
 }
 
@@ -880,6 +879,8 @@ UINT CSF5MFCAIPOPDlg::PlasticThread(LPVOID pParam)
 
 	// 스레드 종료 후 이벤트 초기화
 	pDlg->m_eventPlasticThread.ResetEvent();
+
+	pDlg->GetDlgItem(IDC_BUTTON_PLASTIC)->EnableWindow(TRUE);
 
 	return 0;
 }
@@ -926,6 +927,8 @@ UINT CSF5MFCAIPOPDlg::HeatThread(LPVOID pParam)
 	// 스레드 종료 후 이벤트 초기화
 	pDlg->m_eventHeatThread.ResetEvent();
 
+	pDlg->GetDlgItem(IDC_BUTTON_HEAT)->EnableWindow(TRUE);
+
 	return 0;
 }
 
@@ -933,6 +936,9 @@ UINT CSF5MFCAIPOPDlg::HeatThread(LPVOID pParam)
 
 void CSF5MFCAIPOPDlg::OnBnClickedButtonRobot()
 {
+	robotBtn = !robotBtn;
+	GetDlgItem(IDC_BUTTON_ROBOT)->EnableWindow(FALSE);
+
 	// 이전 스레드 핸들이 있는 경우 종료
 	if (m_hRobotThread != nullptr)
 	{
@@ -954,6 +960,9 @@ void CSF5MFCAIPOPDlg::OnBnClickedButtonRobot()
 
 void CSF5MFCAIPOPDlg::OnBnClickedButtonPlastic()
 {
+	plasticBtn = !plasticBtn;
+	GetDlgItem(IDC_BUTTON_PLASTIC)->EnableWindow(FALSE);
+
 	// 이전 스레드 핸들이 있는 경우 종료
 	if (m_hPlasticThread != nullptr)
 	{
@@ -975,6 +984,10 @@ void CSF5MFCAIPOPDlg::OnBnClickedButtonPlastic()
 
 void CSF5MFCAIPOPDlg::OnBnClickedButtonHeat()
 {
+	GetDlgItem(IDC_BUTTON_HEAT)->EnableWindow(FALSE);
+
+	heatBtn = !heatBtn;
+
 	// 이전 스레드 핸들이 있는 경우 종료
 	if (m_hHeatThread != nullptr)
 	{
@@ -1174,19 +1187,40 @@ HBRUSH CSF5MFCAIPOPDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 
 void CSF5MFCAIPOPDlg::OnBnClickedButtonRobotNotice()
 {
-	pChartDialog_Robot->ShowWindow(SW_SHOW);
+	if (robotBtn)
+	{
+		pChartDialog_Robot->ShowWindow(SW_SHOW);
+	}
+	else
+	{
+		MessageBox(_T("실행 중인 공정이 아닙니다"), _T("오류"), MB_OK | MB_ICONERROR);
+	}
 }
 
 
 void CSF5MFCAIPOPDlg::OnBnClickedButtonPlasticNotice()
 {
-	pChartDialog_Plastic->ShowWindow(SW_SHOW);
+	if (plasticBtn)
+	{
+		pChartDialog_Plastic->ShowWindow(SW_SHOW);
+	}
+	else
+	{
+		MessageBox(_T("실행 중인 공정이 아닙니다"), _T("오류"), MB_OK | MB_ICONERROR);
+	}
 }
 
 
 void CSF5MFCAIPOPDlg::OnBnClickedButtonHeatNotice()
-{
-	pChartDialog_Heat->ShowWindow(SW_SHOW);
+{	
+	if (heatBtn)
+	{
+		pChartDialog_Heat->ShowWindow(SW_SHOW);
+	}
+	else
+	{
+		MessageBox(_T("실행 중인 공정이 아닙니다"), _T("오류"), MB_OK | MB_ICONERROR);
+	}
 }
 
 

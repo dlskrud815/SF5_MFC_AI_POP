@@ -45,4 +45,6 @@ private:
 public:
 	afx_msg void OnBnClickedButton1();
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
+	virtual BOOL OnInitDialog();
+	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 };

@@ -36,7 +36,7 @@ public:
 private:
     vector<vector<double>> m_dataSets;
     vector<double> m_timestamps;
-    CChartViewer m_ChartViewer;
+    CChartViewer m_ChartViewer1, m_ChartViewer2;
     double m_nextTime;
 
     void UpdateChart();
@@ -45,4 +45,5 @@ public:
     afx_msg void OnBnClickedButton1();
     afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
     virtual BOOL OnInitDialog();
+    afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 };
