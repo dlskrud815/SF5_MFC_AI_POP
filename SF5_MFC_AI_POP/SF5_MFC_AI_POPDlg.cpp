@@ -774,7 +774,7 @@ UINT CSF5MFCAIPOPDlg::Thread_DB_Get_Heat(LPVOID pParam)
 		pDlg->heat = mysql->fetchDataFromTable(HEAT_NUM, pDlg->offsetHeat);
 
 		for (double h : pDlg->heat) {
-			pDlg->strHeat.push_back(std::to_string(h));
+			pDlg->strHeat.push_back(to_string(h));
 		}
 	}
 

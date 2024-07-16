@@ -15,7 +15,7 @@ IMPLEMENT_DYNAMIC(PlasticDetailDlg, CDialogEx)
 PlasticDetailDlg::PlasticDetailDlg(CWnd* pParent /*=nullptr*/)
 	: CDialogEx(IDD_PLASTIC_DETAIL_DAILOG, pParent), m_nextTime(0)
 {
-	m_dataSets.resize(2);
+	m_dataSets.resize(3);
 	for (auto& dataSet : m_dataSets)
 	{
 		dataSet.reserve(10);
@@ -78,8 +78,9 @@ void PlasticDetailDlg::AddDataPoints(const vector<vector<double>>& dataPoints)
         k++;
     }
 
-    m_dataSets[1].push_back((avgVib0 / i + avgVib1 / j) / 2);
     m_dataSets[0].push_back(avgCur1 / k);
+    m_dataSets[1].push_back(avgVib0 / i);
+    m_dataSets[2].push_back(avgVib1 / j);
 
     if (m_timestamps.size() > 10)
     {
@@ -114,19 +115,17 @@ void PlasticDetailDlg::UpdateChart()
     LineLayer* layer2 = c2->addLineLayer();
     layer2->setXData(DoubleArray(&m_timestamps[0], m_timestamps.size()));
 
+    LineLayer* layer3 = c2->addLineLayer();
+    layer3->setXData(DoubleArray(&m_timestamps[0], m_timestamps.size()));
+
 
     // 데이터셋 색상 및 라벨 설정
-    const char* colors[] = { "0xff0000", "0x0000ff" };
+    const char* colors[] = { "0xff0000", "0x0000ff", "0x00ff00"};
     const char* labels[] = { "Cur", "Vib" };
-
-    //for (size_t i = 0; i < m_dataSets.size(); ++i)
-    //{
-    //    layer->addDataSet(DoubleArray(&m_dataSets[i][0], m_dataSets[i].size()), strtol(colors[i], nullptr, 16), labels[i]);
-    //}
 
     layer1->addDataSet(DoubleArray(&m_dataSets[0][0], m_dataSets[0].size()), strtol(colors[0], nullptr, 16), labels[0]);
     layer2->addDataSet(DoubleArray(&m_dataSets[1][0], m_dataSets[1].size()), strtol(colors[1], nullptr, 16), labels[1]);
-
+    layer3->addDataSet(DoubleArray(&m_dataSets[2][0], m_dataSets[2].size()), strtol(colors[2], nullptr, 16), labels[1]);
 
     c1->xAxis()->setLabelStyle("", 8, 0xffffff); // 축 레이블 폰트 크기 축소
     c1->yAxis()->setLabelStyle("", 8, 0xffffff);

@@ -3,6 +3,7 @@
 
 #include "ChartViewer.h"
 #include <vector>
+#include <string>
 
 using namespace std;
 
@@ -36,7 +37,7 @@ public:
 private:
 	vector<vector<double>> m_dataSets;
 	vector<double> m_timestamps;
-	CChartViewer m_ChartViewer;
+	CChartViewer m_ChartViewer, m_ChartViewer1, m_ChartViewer2, m_ChartViewer3, m_ChartViewer4, m_ChartViewer5, m_ChartViewer6, m_ChartViewer7;
 	double m_nextTime;
 
 	void UpdateChart();

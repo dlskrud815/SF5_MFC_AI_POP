@@ -52,12 +52,18 @@
 #define IDC_BUTTON_ROBOT_NOTICE         1032
 #define IDC_BUTTON_PLASTIC_NOTICE       1033
 #define IDC_BUTTON_HEAT_NOTICE          1034
-#define IDC_STATIC_CHART2               1035
-#define IDC_STATIC_CHART1               1036
-#define IDC_STATIC_CHART5               1036
+#define IDC_STATIC_CHART1               1035
+#define IDC_STATIC_CHART2               1036
 #define IDC_STATIC_CHART3               1037
-#define IDC_STATIC_CHART6               1037
 #define IDC_STATIC_CHART4               1038
+#define IDC_STATIC_CHART5               1039
+#define IDC_STATIC_CHART11              1040
+#define IDC_STATIC_CHART12              1041
+#define IDC_STATIC_CHART13              1042
+#define IDC_STATIC_CHART14              1043
+#define IDC_STATIC_CHART15              1044
+#define IDC_STATIC_CHART16              1045
+#define IDC_STATIC_CHART17              1046
 
 // Next default values for new objects
 // 
@@ -65,7 +71,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        139
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1036
+#define _APS_NEXT_CONTROL_VALUE         1037
 #define _APS_NEXT_SYMED_VALUE           109
 #endif
 #endif
