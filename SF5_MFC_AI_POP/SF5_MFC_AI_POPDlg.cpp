@@ -464,9 +464,9 @@ CStringA CSF5MFCAIPOPDlg::prepareData(tName process, LPVOID pParam) {
 	}
 
 	case PLASTIC: {
-		string v0 = CThreadTest::strV0;
-		string v1 = CThreadTest::strV1;
-		string c1 = CThreadTest::strC1;
+		string v0 = pDlg->strV0;
+		string v1 = pDlg->strV1;
+		string c1 = pDlg->strC1;
 
 		CStringA A_v0(v0.c_str());
 		CStringA A_v1(v1.c_str());
@@ -476,7 +476,7 @@ CStringA CSF5MFCAIPOPDlg::prepareData(tName process, LPVOID pParam) {
 		break;
 	}
 	case HEAT: {
-		vector<string> colHeat = CThreadTest::strHeat;
+		vector<string> colHeat = pDlg->strHeat;
 
 		vector<CStringA> A_colHeat;
 		for (string colH : colHeat) {
@@ -1387,7 +1387,7 @@ void CSF5MFCAIPOPDlg::SendChartUpdateMessage_Plastic(vector<vector<double>> newV
 {
 	if (pChartDialog_Plastic != nullptr)
 	{
-		pChartDialog_Plastic->SendMessage(WM_UPDATE_CHART2, reinterpret_cast<WPARAM>(&newValue), 0);
+		//pChartDialog_Plastic->SendMessage(WM_UPDATE_CHART2, reinterpret_cast<WPARAM>(&newValue), 0);
 	}
 }
 
@@ -1395,6 +1395,6 @@ void CSF5MFCAIPOPDlg::SendChartUpdateMessage_Heat(vector<vector<double>> newValu
 {
 	if (pChartDialog_Heat != nullptr)
 	{
-		pChartDialog_Heat->SendMessage(WM_UPDATE_CHART3, reinterpret_cast<WPARAM>(&newValue), 0);
+		//pChartDialog_Heat->SendMessage(WM_UPDATE_CHART3, reinterpret_cast<WPARAM>(&newValue), 0);
 	}
 }
