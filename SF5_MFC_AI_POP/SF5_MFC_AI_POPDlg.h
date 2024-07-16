@@ -8,6 +8,11 @@
 #include "ThreadTest.h"
 #include "CustomStatic.h" // CCustomStatic 클래스 포함
 
+#include "RobotDetailDlg.h"
+#include "PlasticDetailDlg.h"
+#include "HeatDetailDlg.h"
+
+
 using namespace std;
 
 // CSF5MFCAIPOPDlg dialog
@@ -108,6 +113,7 @@ public:
 
 	int offsetCur = 1, offsetVib = 1;
 	string strCur, strVib;
+	vector<double> cur, vib;
 
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 
@@ -120,4 +126,13 @@ public:
 	afx_msg void OnBnClickedButtonHeatNotice();
 	
 	CFont m_font;
+
+	
+	RobotDetailDlg* pChartDialog_Robot;
+	PlasticDetailDlg* pChartDialog_Plastic;
+	HeatDetailDlg* pChartDialog_Heat;
+
+	void SendChartUpdateMessage_Robot(vector<vector<double>> newValue);
+	void SendChartUpdateMessage_Plastic(vector<vector<double>> newValue);
+	void SendChartUpdateMessage_Heat(vector<vector<double>> newValue);
 };

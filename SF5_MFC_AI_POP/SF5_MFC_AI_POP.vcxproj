@@ -189,12 +189,15 @@
     <ClInclude Include="ChartViewer.h" />
     <ClInclude Include="CustomStatic.h" />
     <ClInclude Include="framework.h" />
+    <ClInclude Include="HeatDetailDlg.h" />
     <ClInclude Include="LOGINDlg.h" />
     <ClInclude Include="MyButton.h" />
     <ClInclude Include="MySQL_Connector.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="PlasticDetailDlg.h" />
     <ClInclude Include="PROCESSDlg.h" />
     <ClInclude Include="Resource.h" />
+    <ClInclude Include="RobotDetailDlg.h" />
     <ClInclude Include="SF5_MFC_AI_POP.h" />
     <ClInclude Include="SF5_MFC_AI_POPDlg.h" />
     <ClInclude Include="SIGNINDlg.h" />
@@ -204,6 +207,7 @@
   <ItemGroup>
     <ClCompile Include="ChartViewer.cpp" />
     <ClCompile Include="CustomStatic.cpp" />
+    <ClCompile Include="HeatDetailDlg.cpp" />
     <ClCompile Include="LOGINDlg.cpp" />
     <ClCompile Include="MyButton.cpp" />
     <ClCompile Include="MySQL_Connector.cpp" />
@@ -213,7 +217,9 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="PlasticDetailDlg.cpp" />
     <ClCompile Include="PROCESSDlg.cpp" />
+    <ClCompile Include="RobotDetailDlg.cpp" />
     <ClCompile Include="SF5_MFC_AI_POP.cpp" />
     <ClCompile Include="SF5_MFC_AI_POPDlg.cpp" />
     <ClCompile Include="SIGNINDlg.cpp" />

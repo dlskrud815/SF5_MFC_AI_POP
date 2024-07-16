@@ -9,6 +9,9 @@
 #define IDD_LOGIN_DIALOG                103
 #define IDD_PROCESS_DIALOG              104
 #define IDD_SIGNIN_DIALOG               105
+#define IDD_ROBOT_DETAIL_DAILOG         106
+#define IDD_PLASTIC_DETAIL_DAILOG       107
+#define IDD_HEAT_DETAIL_DAILOG          108
 #define IDR_MAINFRAME                   128
 #define IDB_IMG_FACILITY                133
 #define IDB_IMG_LOGO                    134
@@ -49,14 +52,17 @@
 #define IDC_BUTTON_ROBOT_NOTICE         1032
 #define IDC_BUTTON_PLASTIC_NOTICE       1033
 #define IDC_BUTTON_HEAT_NOTICE          1034
+#define IDC_STATIC_CHART2               1034
+#define IDC_STATIC_CHART1               1035
+#define IDC_STATIC_CHART3               1035
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        136
+#define _APS_NEXT_RESOURCE_VALUE        139
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1033
-#define _APS_NEXT_SYMED_VALUE           106
+#define _APS_NEXT_CONTROL_VALUE         1036
+#define _APS_NEXT_SYMED_VALUE           109
 #endif
 #endif

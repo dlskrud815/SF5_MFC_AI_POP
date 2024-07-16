@@ -8,7 +8,6 @@
 #include "SF5_MFC_AI_POPDlg.h"
 #include "afxdialogex.h"
 #include "LOGINDlg.h"
-#include "PROCESSDlg.h"
 #include <string>
 #include <iostream>
 
@@ -197,6 +196,12 @@ BOOL CSF5MFCAIPOPDlg::OnInitDialog()
 		list->InsertColumn(0, L"시간", LVCFMT_LEFT, 250, -1);
 		list->InsertColumn(0, L"순번", LVCFMT_LEFT, 50, -1);
 	}
+
+
+	// RobotDetailDlg 초기화
+	pChartDialog_Robot = new RobotDetailDlg();
+	pChartDialog_Plastic = new PlasticDetailDlg();
+	pChartDialog_Heat = new HeatDetailDlg();
 
 	// 메인 스레드 생성
 	CWinThread* pMainThread = AfxBeginThread(MainThread, this);
@@ -627,6 +632,13 @@ UINT CSF5MFCAIPOPDlg::MainThread(LPVOID _method)
 	CWinThread* pTimeThread = AfxBeginThread(TimeUpdateThread, (LPVOID)pDlg);
 	if (pTimeThread == NULL) AfxMessageBox(L"TimeUpdateThread Create Error");
 
+	pDlg->pChartDialog_Robot->DoModal();
+	//pDlg->pChartDialog_Robot->ShowWindow(SW_HIDE);
+	pDlg->pChartDialog_Plastic->DoModal();
+	//pDlg->pChartDialog_Plastic->ShowWindow(SW_HIDE);
+	pDlg->pChartDialog_Heat->DoModal();
+	//pDlg->pChartDialog_Heat->ShowWindow(SW_HIDE);
+
 	return 0;
 }
 
@@ -697,9 +709,9 @@ UINT CSF5MFCAIPOPDlg::Thread1(LPVOID pParam)
 
 	if (mysql->connect("tcp://127.0.0.1:3306", "Nia", "0000", "pop"))
 	{
-		vector<double> cur = mysql->fetchDataFromTable(ROBOT_CUR, pDlg->offsetCur);
+		pDlg->cur = mysql->fetchDataFromTable(ROBOT_CUR, pDlg->offsetCur);
 
-		pDlg->strCur = pDlg->vectorToString(cur);
+		pDlg->strCur = pDlg->vectorToString(pDlg->cur);
 	}
 
 	delete mysql;
@@ -714,9 +726,9 @@ UINT CSF5MFCAIPOPDlg::Thread2(LPVOID pParam)
 
 	if (mysql->connect("tcp://127.0.0.1:3306", "Nia", "0000", "pop"))
 	{
-		vector<double> vib = mysql->fetchDataFromTable(ROBOT_VIB, pDlg->offsetVib);
+		pDlg->vib = mysql->fetchDataFromTable(ROBOT_VIB, pDlg->offsetVib);
 
-		pDlg->strVib = pDlg->vectorToString(vib);
+		pDlg->strVib = pDlg->vectorToString(pDlg->vib);
 	}
 
 	delete mysql;
@@ -763,6 +775,16 @@ UINT CSF5MFCAIPOPDlg::RobotThread(LPVOID pParam)
 			pDlg->offsetCur++;
 			pDlg->offsetVib++;
 
+			//// 데이터 전달
+			//vector<double> v_cur = pDlg->cur;
+			//vector<double> v_vib = pDlg->vib;
+
+			//vector<vector<double>> v_cur_vib;
+			//v_cur_vib.push_back(v_cur);
+			//v_cur_vib.push_back(v_vib);
+
+			//pDlg->SendChartUpdateMessage_Robot(v_cur_vib);
+			//// 데이터 전달
 
 			CStringA jsonData;
 			jsonData = prepareData(ROBOT, pDlg);
@@ -1150,23 +1172,42 @@ HBRUSH CSF5MFCAIPOPDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 
 void CSF5MFCAIPOPDlg::OnBnClickedButtonRobotNotice()
 {
-	// TODO: Add your control notification handler code here
-	PROCESSDlg proDlg;
-	proDlg.DoModal();
+	pChartDialog_Robot->ShowWindow(SW_SHOW);
 }
 
 
 void CSF5MFCAIPOPDlg::OnBnClickedButtonPlasticNotice()
 {
-	// TODO: Add your control notification handler code here
-	PROCESSDlg proDlg;
-	proDlg.DoModal();
+	pChartDialog_Plastic->ShowWindow(SW_SHOW);
 }
 
 
 void CSF5MFCAIPOPDlg::OnBnClickedButtonHeatNotice()
 {
-	// TODO: Add your control notification handler code here
-	PROCESSDlg proDlg;
-	proDlg.DoModal();
+	pChartDialog_Heat->ShowWindow(SW_SHOW);
+}
+
+
+void CSF5MFCAIPOPDlg::SendChartUpdateMessage_Robot(vector<vector<double>> newValue)
+{
+	if (pChartDialog_Robot != nullptr)
+	{
+		pChartDialog_Robot->SendMessage(WM_UPDATE_CHART1, reinterpret_cast<WPARAM>(&newValue), 0);
+	}
+}
+
+void CSF5MFCAIPOPDlg::SendChartUpdateMessage_Plastic(vector<vector<double>> newValue)
+{
+	if (pChartDialog_Plastic != nullptr)
+	{
+		pChartDialog_Plastic->SendMessage(WM_UPDATE_CHART2, reinterpret_cast<WPARAM>(&newValue), 0);
+	}
+}
+
+void CSF5MFCAIPOPDlg::SendChartUpdateMessage_Heat(vector<vector<double>> newValue)
+{
+	if (pChartDialog_Heat != nullptr)
+	{
+		pChartDialog_Heat->SendMessage(WM_UPDATE_CHART3, reinterpret_cast<WPARAM>(&newValue), 0);
+	}
 }
