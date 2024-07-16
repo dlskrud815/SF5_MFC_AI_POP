@@ -54,7 +54,9 @@
 #define IDC_BUTTON_HEAT_NOTICE          1034
 #define IDC_STATIC_CHART2               1035
 #define IDC_STATIC_CHART1               1036
+#define IDC_STATIC_CHART5               1036
 #define IDC_STATIC_CHART3               1037
+#define IDC_STATIC_CHART6               1037
 #define IDC_STATIC_CHART4               1038
 
 // Next default values for new objects

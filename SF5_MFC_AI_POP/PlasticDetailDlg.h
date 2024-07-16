@@ -36,7 +36,7 @@ public:
 private:
 	vector<vector<double>> m_dataSets;
 	vector<double> m_timestamps;
-	CChartViewer m_ChartViewer;
+	CChartViewer m_ChartViewer, m_ChartViewer1;
 	double m_nextTime;
 
 	void UpdateChart();

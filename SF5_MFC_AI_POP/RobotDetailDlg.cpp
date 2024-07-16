@@ -15,7 +15,7 @@ IMPLEMENT_DYNAMIC(RobotDetailDlg, CDialogEx)
 RobotDetailDlg::RobotDetailDlg(CWnd* pParent /*=nullptr*/)
 	: CDialogEx(IDD_ROBOT_DETAIL_DAILOG, pParent), m_nextTime(0)
 {
-    m_dataSets.resize(3);
+    m_dataSets.resize(2);
     for (auto& dataSet : m_dataSets)
     {
         dataSet.reserve(10);
@@ -54,13 +54,24 @@ LRESULT RobotDetailDlg::OnUpdateChart(WPARAM wParam, LPARAM lParam)
 
 void RobotDetailDlg::AddDataPoints(const vector<vector<double>>& dataPoints)
 {
-    for (size_t i = 0; i < dataPoints.size(); ++i)
-    {
-        m_dataSets[i].push_back(dataPoints[i][0]);
-    }
-
     m_timestamps.push_back(m_nextTime);
     m_nextTime += 1;
+
+    int i = 0, j = 0;
+    double avgCur = 0, avgVib = 0;
+    for (double cur1 : dataPoints[0])
+    {
+        avgCur += cur1;
+        i++;
+    }
+    for (double vib1 : dataPoints[1])
+    {
+        avgVib += vib1;
+        j++;
+    }
+
+    m_dataSets[0].push_back(avgCur / i);
+    m_dataSets[1].push_back(avgVib / i);
 
     if (m_timestamps.size() > 10)
     {
@@ -98,7 +109,7 @@ void RobotDetailDlg::UpdateChart()
 
     // 데이터셋 색상 및 라벨 설정
     const char* colors[] = { "0xff0000", "0x0000ff" };
-    const char* labels[] = { "Data1", "Data2" };
+    const char* labels[] = { "Cur", "Vib" };
 
     //for (size_t i = 0; i < m_dataSets.size(); ++i)
     //{
@@ -111,11 +122,11 @@ void RobotDetailDlg::UpdateChart()
     
     c1->xAxis()->setLabelStyle("", 8, 0xffffff); // 축 레이블 폰트 크기 축소
     c1->yAxis()->setLabelStyle("", 8, 0xffffff);
-    c1->addTitle("Current Chart", "", 10, 0xffffff); // 제목이 있는 경우 폰트 크기 축소
+    c1->addTitle("Robot Welding - Current", "", 10, 0xffffff); // 제목이 있는 경우 폰트 크기 축소
 
     c2->xAxis()->setLabelStyle("", 8, 0xffffff); // 축 레이블 폰트 크기 축소
     c2->yAxis()->setLabelStyle("", 8, 0xffffff);
-    c2->addTitle("Vibration Chart", "", 10, 0xffffff); // 제목이 있는 경우 폰트 크기 축소
+    c2->addTitle("Robot Welding - Vibration", "", 10, 0xffffff); // 제목이 있는 경우 폰트 크기 축소
 
     // 차트를 ChartViewer에 설정
     m_ChartViewer1.setChart(c1);

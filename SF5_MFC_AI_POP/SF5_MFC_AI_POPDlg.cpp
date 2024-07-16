@@ -1387,7 +1387,7 @@ void CSF5MFCAIPOPDlg::SendChartUpdateMessage_Plastic(vector<vector<double>> newV
 {
 	if (pChartDialog_Plastic != nullptr)
 	{
-		//pChartDialog_Plastic->SendMessage(WM_UPDATE_CHART2, reinterpret_cast<WPARAM>(&newValue), 0);
+		pChartDialog_Plastic->SendMessage(WM_UPDATE_CHART2, reinterpret_cast<WPARAM>(&newValue), 0);
 	}
 }
 
@@ -1395,6 +1395,6 @@ void CSF5MFCAIPOPDlg::SendChartUpdateMessage_Heat(vector<vector<double>> newValu
 {
 	if (pChartDialog_Heat != nullptr)
 	{
-		//pChartDialog_Heat->SendMessage(WM_UPDATE_CHART3, reinterpret_cast<WPARAM>(&newValue), 0);
+		pChartDialog_Heat->SendMessage(WM_UPDATE_CHART3, reinterpret_cast<WPARAM>(&newValue), 0);
 	}
 }
