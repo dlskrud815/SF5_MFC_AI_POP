@@ -745,6 +745,9 @@ UINT CSF5MFCAIPOPDlg::RobotThread(LPVOID pParam)
 				if (outCur == true || outVib == true) {
 					outlier++;
 				}
+				else if (outCur == false || outVib == false) {
+					outlier = 0;
+				}
 			}
 
 			pDlg->PostMessage(WM_NOTICE_ROBOT, (WPARAM)new CString(notice)); // CString 동적 할당 없이 수정
@@ -789,9 +792,10 @@ UINT CSF5MFCAIPOPDlg::PlasticThread(LPVOID pParam)
 	// 이벤트가 설정되면 다음 작업을 수행합니다.
 	if (dwWaitResult == WAIT_OBJECT_0)
 	{
-		int outlier = 0;
-		while (outlier < 5)
+		int outlier = 0, total = 0;
+		while (outlier < 5 && total < 20)
 		{
+			
 			// Create the thread
 			CWinThread* pThreadPlastic = AfxBeginThread(Thread_DB_Get_Plastic, pDlg);
 			if (pThreadPlastic == NULL) AfxMessageBox(L"pThreadPlastic Create Error");
@@ -822,17 +826,22 @@ UINT CSF5MFCAIPOPDlg::PlasticThread(LPVOID pParam)
 			CString notice;
 
 			if (parse.size() >= 1) {
+				total++;
 				if (parse[0] == 1)
 				{
 					notice = L"플라스틱 이상";
 					pDlg->PostMessage(WM_NOTICE_LIST, (WPARAM)new CString(notice));
-				
 					outlier++;
+				}
+				// 
+				else if(parse[0] == -1) {
+					outlier = 5;
 				}
 				else
 				{
 					notice = L"플라스틱 정상";
 					pDlg->PostMessage(WM_NOTICE_LIST, (WPARAM)new CString(notice));
+					outlier = 0;
 				}
 			}
 
@@ -853,6 +862,8 @@ UINT CSF5MFCAIPOPDlg::Thread_DB_Get_Heat(LPVOID pParam)
 
 	if (mysql->connect("tcp://127.0.0.1:3306", "Nia", "0000", "pop"))
 	{
+		pDlg->strHeat.clear();
+
 		vector<double> heat = mysql->fetchDataFromTable(HEAT_NUM, pDlg->offsetHeat);
 
 		for (double h : heat) {
@@ -915,6 +926,7 @@ UINT CSF5MFCAIPOPDlg::HeatThread(LPVOID pParam)
 				{
 					notice = L"열처리 정상";
 					pDlg->PostMessage(WM_NOTICE_LIST, (WPARAM)new CString(notice));
+					outlier = 0;
 				}
 			}
 

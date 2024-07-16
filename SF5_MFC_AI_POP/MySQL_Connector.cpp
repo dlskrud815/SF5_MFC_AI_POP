@@ -44,7 +44,7 @@ vector<double> MySQL_Connector::fetchDataFromTable(tNum process, int offset)
             string col, data;
             vector<double> data_set;
 
-            //data_set.clear();
+            data_set.clear();
 
             pstmt = con->prepareStatement("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'current' ORDER BY ORDINAL_POSITION LIMIT 1 OFFSET ?");
             pstmt->setString(1, to_string(offset));
@@ -71,7 +71,7 @@ vector<double> MySQL_Connector::fetchDataFromTable(tNum process, int offset)
             string col, data;
             vector<double> data_set;
 
-            //data_set.clear();
+            data_set.clear();
 
             pstmt = con->prepareStatement("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'vibration' ORDER BY ORDINAL_POSITION LIMIT 1 OFFSET ?");
             pstmt->setString(1, to_string(offset));
@@ -98,6 +98,8 @@ vector<double> MySQL_Connector::fetchDataFromTable(tNum process, int offset)
             string data;
             vector<double> data_set;
 
+            data_set.clear();
+
             pstmt = con->prepareStatement("SELECT AI0_Vibration FROM pop.plastic LIMIT 20 OFFSET ?");
             pstmt->setString(1, to_string(offset - 1));
             result = pstmt->executeQuery();
@@ -117,6 +119,8 @@ vector<double> MySQL_Connector::fetchDataFromTable(tNum process, int offset)
             string data;
             vector<double> data_set;
 
+            data_set.clear();
+
             pstmt = con->prepareStatement("SELECT AI1_Vibration FROM pop.plastic LIMIT 20 OFFSET ?");
             pstmt->setString(1, to_string(offset - 1));
             result = pstmt->executeQuery();
@@ -135,6 +139,8 @@ vector<double> MySQL_Connector::fetchDataFromTable(tNum process, int offset)
         try {
             string data;
             vector<double> data_set;
+
+            data_set.clear();
 
             pstmt = con->prepareStatement("SELECT AI2_Current FROM pop.plastic LIMIT 20 OFFSET ?");
             pstmt->setString(1, to_string(offset - 1));
