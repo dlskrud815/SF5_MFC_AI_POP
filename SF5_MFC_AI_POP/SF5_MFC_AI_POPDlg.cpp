@@ -97,6 +97,9 @@ BEGIN_MESSAGE_MAP(CSF5MFCAIPOPDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON_ROBOT_NOTICE, &CSF5MFCAIPOPDlg::OnBnClickedButtonRobotNotice)
 	ON_BN_CLICKED(IDC_BUTTON_PLASTIC_NOTICE, &CSF5MFCAIPOPDlg::OnBnClickedButtonPlasticNotice)
 	ON_BN_CLICKED(IDC_BUTTON_HEAT_NOTICE, &CSF5MFCAIPOPDlg::OnBnClickedButtonHeatNotice)
+	ON_NOTIFY(NM_CUSTOMDRAW, IDC_LIST_ERROR, &CSF5MFCAIPOPDlg::OnNMCustomdrawList1)
+	ON_NOTIFY(NM_CUSTOMDRAW, IDC_LIST_ERROR2, &CSF5MFCAIPOPDlg::OnNMCustomdrawList1)
+	ON_NOTIFY(NM_CUSTOMDRAW, IDC_LIST_ERROR3, &CSF5MFCAIPOPDlg::OnNMCustomdrawList1)
 END_MESSAGE_MAP()
 
 
@@ -1397,4 +1400,36 @@ void CSF5MFCAIPOPDlg::SendChartUpdateMessage_Heat(vector<vector<double>> newValu
 	{
 		pChartDialog_Heat->SendMessage(WM_UPDATE_CHART3, reinterpret_cast<WPARAM>(&newValue), 0);
 	}
+}
+
+
+void CSF5MFCAIPOPDlg::OnNMCustomdrawList1(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	LPNMLVCUSTOMDRAW pLVCD = reinterpret_cast<LPNMLVCUSTOMDRAW>(pNMHDR);
+
+	// 초기화 및 전처리 단계
+	if (pLVCD->nmcd.dwDrawStage == CDDS_PREPAINT)
+	{
+		*pResult = CDRF_NOTIFYITEMDRAW;
+		return;
+	}
+
+	// 아이템 단위의 전처리 단계
+	if (pLVCD->nmcd.dwDrawStage == CDDS_ITEMPREPAINT)
+	{
+		*pResult = CDRF_NOTIFYSUBITEMDRAW;
+		return;
+	}
+
+	// 서브아이템 단위의 전처리 단계
+	if (pLVCD->nmcd.dwDrawStage == CDDS_SUBITEM | CDDS_ITEMPREPAINT)
+	{
+		// 텍스트 색상을 빨강으로 설정
+		pLVCD->clrText = RGB(255, 0, 0);
+
+		*pResult = CDRF_DODEFAULT;
+		return;
+	}
+
+	*pResult = 0;
 }

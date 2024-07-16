@@ -64,7 +64,7 @@ protected:
 
 	CCustomStatic m_staticHeader, m_staticNotice1, m_staticNotice2, m_staticNotice3;
 	CListCtrl m_listCtrl, m_listCtrl2, m_listCtrl3;
-
+	afx_msg void OnNMCustomdrawList1(NMHDR* pNMHDR, LRESULT* pResult);
 
 	bool robotBtn = false, plasticBtn = false, heatBtn = false;
 
