@@ -706,7 +706,7 @@ string CSF5MFCAIPOPDlg::vectorToString(vector<double> vec) {
 	return output;
 }
 
-UINT CSF5MFCAIPOPDlg::Thread1(LPVOID pParam)
+UINT CSF5MFCAIPOPDlg::Thread_DB_Get_Cur(LPVOID pParam)
 {
 	CSF5MFCAIPOPDlg* pDlg = (CSF5MFCAIPOPDlg*)pParam;
 	MySQL_Connector* mysql = new MySQL_Connector();
@@ -723,7 +723,7 @@ UINT CSF5MFCAIPOPDlg::Thread1(LPVOID pParam)
 	return 0;
 }
 
-UINT CSF5MFCAIPOPDlg::Thread2(LPVOID pParam)
+UINT CSF5MFCAIPOPDlg::Thread_DB_Get_Vib(LPVOID pParam)
 {
 	CSF5MFCAIPOPDlg* pDlg = (CSF5MFCAIPOPDlg*)pParam;
 	MySQL_Connector* mysql = new MySQL_Connector();
@@ -757,13 +757,13 @@ UINT CSF5MFCAIPOPDlg::RobotThread(LPVOID pParam)
 		while (outlier < 5)
 		{
 			// Create the thread
-			CWinThread* pThread1 = AfxBeginThread(Thread1, pDlg);
-			if (pThread1 == NULL) AfxMessageBox(L"pThread1 Create Error");
+			CWinThread* pThreadCur = AfxBeginThread(Thread_DB_Get_Cur, pDlg);
+			if (pThreadCur == NULL) AfxMessageBox(L"pThread1 Create Error");
 
-			CWinThread* pThread2 = AfxBeginThread(Thread2, pDlg);
-			if (pThread2 == NULL) AfxMessageBox(L"pThread2 Create Error");
+			CWinThread* pThreadVib = AfxBeginThread(Thread_DB_Get_Vib, pDlg);
+			if (pThreadVib == NULL) AfxMessageBox(L"pThread2 Create Error");
 
-			HANDLE hThreads[2] = { pThread1->m_hThread, pThread2->m_hThread };
+			HANDLE hThreads[2] = { pThreadCur->m_hThread, pThreadVib->m_hThread };
 
 			// Wait for both threads to complete
 			DWORD dwThreadResult = WaitForMultipleObjects(2, hThreads, TRUE, INFINITE);
@@ -773,13 +773,13 @@ UINT CSF5MFCAIPOPDlg::RobotThread(LPVOID pParam)
 			}
 
 			// Close the thread handles
-			CloseHandle(pThread1->m_hThread);
-			CloseHandle(pThread2->m_hThread);
+			CloseHandle(pThreadCur->m_hThread);
+			CloseHandle(pThreadVib->m_hThread);
 			
 			pDlg->offsetCur++;
 			pDlg->offsetVib++;
 
-			// 데이터 전달
+			// 데이터 전달 추가
 			vector<vector<double>> v_cur_vib;
 			v_cur_vib.push_back(pDlg->cur);
 			v_cur_vib.push_back(pDlg->vib);
@@ -823,8 +823,12 @@ UINT CSF5MFCAIPOPDlg::RobotThread(LPVOID pParam)
 					//outlier++;
 					pDlg->PostMessage(WM_NOTICE_LIST, (WPARAM)new CString(notice));
 				}
+
 				if (outCur == true || outVib == true) {
 					outlier++;
+				}
+				else if (outCur == false || outVib == false) {
+					outlier = 0;
 				}
 			}
 

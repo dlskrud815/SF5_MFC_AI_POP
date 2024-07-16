@@ -86,8 +86,8 @@ public:
 	afx_msg LRESULT OnUpdateTime(WPARAM wParam, LPARAM lParam);
 
 
-	static UINT Thread1(LPVOID pParam);
-	static UINT Thread2(LPVOID pParam);
+	static UINT Thread_DB_Get_Cur(LPVOID pParam);
+	static UINT Thread_DB_Get_Vib(LPVOID pParam);
 
 
 	HANDLE m_hPlasticThread = nullptr; // 소성가공 스레드 핸들 추가
