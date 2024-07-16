@@ -1187,17 +1187,47 @@ LRESULT CSF5MFCAIPOPDlg::OnNoticeList(WPARAM wParam, LPARAM lParam)
 
 	CString result1, result2, result3;
 
-	if (notice.Find(L"플라스틱") != -1)
+	if (notice.Find(L"전류") != -1 || notice.Find(L"진동") != -1)
+	{
+		strIndex.Format(_T("%d"), listIndex2++);
+
+		if (notice.Compare(L"전류 이상") == 0)
+		{
+			result1 = L"경보 발생";
+			result2 = L"로봇 용접";
+			result3 = L"전류 이상";
+		}
+		else if (notice.Compare(L"전류 정상") == 0)
+		{
+			result1 = L"정상";
+			result2 = L"로봇 용접";
+			result3 = L"전류 정상";
+		}
+
+		if (notice.Compare(L"진동 이상") == 0)
+		{
+			result1 = L"경보 발생";
+			result2 = L"로봇 용접";
+			result3 = L"진동 이상";
+		}
+		else if (notice.Compare(L"진동 정상") == 0)
+		{
+			result1 = L"정상";
+			result2 = L"로봇 용접";
+			result3 = L"진동 정상";
+		}
+	}
+	else if (notice.Find(L"플라스틱") != -1)
 	{
 		strIndex.Format(_T("%d"), listIndex++);
 
-		if (notice.Find(L"이상") != -1)
+		if (notice.Compare(L"플라스틱 이상") == 0)
 		{
 			result1 = L"경보 발생";
 			result2 = L"소성가공";
 			result3 = L"설비 이상";
 		}
-		else if (notice.Find(L"정상") != -1)
+		else if (notice.Compare(L"플라스틱 정상") == 0)
 		{
 			result1 = L"정상";
 			result2 = L"소성가공";
@@ -1205,47 +1235,17 @@ LRESULT CSF5MFCAIPOPDlg::OnNoticeList(WPARAM wParam, LPARAM lParam)
 		}
 
 	}
-	else if (notice.Find(L"전류") != -1 || notice.Find(L"진동") != -1)
-	{
-		strIndex.Format(_T("%d"), listIndex2++);
-
-		if (notice.Find(L"전류") != -1 || notice.Find(L"이상") != -1)
-		{
-			result1 = L"경보 발생";
-			result2 = L"로봇 용접";
-			result3 = L"전류 이상";
-		}
-		else if (notice.Find(L"전류") != -1 || notice.Find(L"정상") != -1)
-		{
-			result1 = L"정상";
-			result2 = L"로봇 용접";
-			result3 = L"전류 정상";
-		}
-
-		if (notice.Find(L"진동") != -1 || notice.Find(L"이상") != -1)
-		{
-			result1 = L"경보 발생";
-			result2 = L"로봇 용접";
-			result3 = L"진동 이상";
-		}
-		else if (notice.Find(L"진동") != -1 || notice.Find(L"정상") != -1)
-		{
-			result1 = L"정상";
-			result2 = L"로봇 용접";
-			result3 = L"진동 정상";
-		}
-	}
 	else if ((notice.Find(L"열처리") != -1))
 	{
 		strIndex.Format(_T("%d"), listIndex3++);
 
-		if (notice.Find(L"이상") != -1)
+		if (notice.Compare(L"열처리 이상") == 0)
 		{
 			result1 = L"경보 발생";
 			result2 = L"열처리";
 			result3 = L"설비 이상";
 		}
-		else if (notice.Find(L"정상") != -1)
+		else if (notice.Compare(L"열처리 정상") == 0)
 		{
 			result1 = L"정상";
 			result2 = L"열처리";
