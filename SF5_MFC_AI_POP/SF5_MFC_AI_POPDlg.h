@@ -88,6 +88,8 @@ public:
 
 	static UINT Thread_DB_Get_Cur(LPVOID pParam);
 	static UINT Thread_DB_Get_Vib(LPVOID pParam);
+	static UINT Thread_DB_Get_Plastic(LPVOID pParam);
+	static UINT Thread_DB_Get_Heat(LPVOID pParam);
 
 
 	HANDLE m_hPlasticThread = nullptr; // 소성가공 스레드 핸들 추가
@@ -114,9 +116,12 @@ public:
 
 	string vectorToString(vector<double> vec);
 
-	int offsetCur = 1, offsetVib = 1;
-	string strCur, strVib;
-	vector<double> cur, vib;
+	int offsetCur = 1, offsetVib = 1, offsetV0 = 1, offsetV1 = 1, offsetC1 = 1, offsetHeat = 1;
+
+	string strCur, strVib, strV0, strV1, strC1;
+	vector<string> strHeat;
+	
+	vector<double> cur, vib, v0, v1, c1, heat;
 
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 

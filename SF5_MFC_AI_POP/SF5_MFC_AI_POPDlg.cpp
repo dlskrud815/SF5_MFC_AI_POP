@@ -740,6 +740,48 @@ UINT CSF5MFCAIPOPDlg::Thread_DB_Get_Vib(LPVOID pParam)
 	return 0;
 }
 
+UINT CSF5MFCAIPOPDlg::Thread_DB_Get_Plastic(LPVOID pParam)
+{
+	CSF5MFCAIPOPDlg* pDlg = (CSF5MFCAIPOPDlg*)pParam;
+	MySQL_Connector* mysql = new MySQL_Connector();
+
+	if (mysql->connect("tcp://127.0.0.1:3306", "Nia", "0000", "pop"))
+	{
+		pDlg->v0 = mysql->fetchDataFromTable(PLASTIC_V0, pDlg->offsetV0);
+		pDlg->v1 = mysql->fetchDataFromTable(PLASTIC_V1, pDlg->offsetV1);
+		pDlg->c1 = mysql->fetchDataFromTable(PLASTIC_C1, pDlg->offsetC1);
+
+		pDlg->strV0 = pDlg->vectorToString(pDlg->v0);
+		pDlg->strV1 = pDlg->vectorToString(pDlg->v1);
+		pDlg->strC1 = pDlg->vectorToString(pDlg->c1);
+
+	}
+
+	delete mysql;
+
+	return 0;
+}
+
+UINT CSF5MFCAIPOPDlg::Thread_DB_Get_Heat(LPVOID pParam)
+{
+	CSF5MFCAIPOPDlg* pDlg = (CSF5MFCAIPOPDlg*)pParam;
+	MySQL_Connector* mysql = new MySQL_Connector();
+
+	if (mysql->connect("tcp://127.0.0.1:3306", "Nia", "0000", "pop"))
+	{
+		pDlg->strHeat.clear();
+
+		pDlg->heat = mysql->fetchDataFromTable(HEAT_NUM, pDlg->offsetHeat);
+
+		for (double h : pDlg->heat) {
+			pDlg->strHeat.push_back(std::to_string(h));
+		}
+	}
+
+	delete mysql;
+
+	return 0;
+}
 
 
 UINT CSF5MFCAIPOPDlg::RobotThread(LPVOID pParam)
@@ -854,33 +896,72 @@ UINT CSF5MFCAIPOPDlg::PlasticThread(LPVOID pParam)
 	// 이벤트가 설정되면 다음 작업을 수행합니다.
 	if (dwWaitResult == WAIT_OBJECT_0)
 	{
-		CThreadTest::Thread_DB_Wait_Plastic();
+		int outlier = 0, total = 0;
+		while (outlier < 5 && total < 20)
+		{
 
-		CStringA jsonData;
-		jsonData = prepareData(PLASTIC, pDlg);
+			// Create the thread
+			CWinThread* pThreadPlastic = AfxBeginThread(Thread_DB_Get_Plastic, pDlg);
+			if (pThreadPlastic == NULL) AfxMessageBox(L"pThreadPlastic Create Error");
 
-		wstring endpoint = SendPostRequest(PLASTIC);
-
-		CStringA result = pDlg->winHttp(jsonData, endpoint, 5002);
-
-		vector<int> parse = pDlg->parsing_plastic(result);
-
-		CString notice;
-
-		if (parse.size() >= 1) {
-			if (parse[0] == 1)
+			// Wait for both threads to complete
+			DWORD dwThreadResult = WaitForSingleObject(pThreadPlastic->m_hThread, INFINITE);
+			if (dwThreadResult == WAIT_FAILED)
 			{
-				notice = L"플라스틱 이상";
-				pDlg->PostMessage(WM_NOTICE_LIST, (WPARAM)new CString(notice));
+				AfxMessageBox(L"Error waiting for threads to complete");
 			}
-			else
-			{
-				notice = L"플라스틱 정상";
-				pDlg->PostMessage(WM_NOTICE_LIST, (WPARAM)new CString(notice));
+
+			// Close the thread handles
+			CloseHandle(pThreadPlastic->m_hThread);
+
+			pDlg->offsetV0++;
+			pDlg->offsetV1++;
+			pDlg->offsetC1++;
+
+
+			// 데이터 전달 추가
+			vector<vector<double>> v_plastic;
+			v_plastic.push_back(pDlg->v0);
+			v_plastic.push_back(pDlg->v1);
+			v_plastic.push_back(pDlg->c1);
+
+			pDlg->SendChartUpdateMessage_Plastic(v_plastic);
+			// 데이터 전달
+
+
+			CStringA jsonData;
+			jsonData = prepareData(PLASTIC, pDlg);
+
+			wstring endpoint = SendPostRequest(PLASTIC);
+
+			CStringA result = pDlg->winHttp(jsonData, endpoint, 5002);
+
+			vector<int> parse = pDlg->parsing_plastic(result);
+
+			CString notice;
+
+			if (parse.size() >= 1) {
+				total++;
+				if (parse[0] == 1)
+				{
+					notice = L"플라스틱 이상";
+					pDlg->PostMessage(WM_NOTICE_LIST, (WPARAM)new CString(notice));
+					outlier++;
+				}
+				// 
+				else if (parse[0] == -1) {
+					outlier = 5;
+				}
+				else
+				{
+					notice = L"플라스틱 정상";
+					pDlg->PostMessage(WM_NOTICE_LIST, (WPARAM)new CString(notice));
+					outlier = 0;
+				}
 			}
+
+			pDlg->PostMessage(WM_NOTICE_PLASTIC, (WPARAM)new CString(notice)); // CString 동적 할당 없이 수정
 		}
-
-		pDlg->PostMessage(WM_NOTICE_PLASTIC, (WPARAM)new CString(notice)); // CString 동적 할당 없이 수정
 	}
 
 	// 스레드 종료 후 이벤트 초기화
@@ -902,33 +983,60 @@ UINT CSF5MFCAIPOPDlg::HeatThread(LPVOID pParam)
 	// 이벤트가 설정되면 다음 작업을 수행합니다.
 	if (dwWaitResult == WAIT_OBJECT_0)
 	{
-		CThreadTest::Thread_DB_Wait_Heat();
+		int outlier = 0;
+		while (outlier < 5)
+		{
+			// Create the thread
+			CWinThread* pThreadHeat = AfxBeginThread(Thread_DB_Get_Heat, pDlg);
+			if (pThreadHeat == NULL) AfxMessageBox(L"pThreadHeat Create Error");
 
-		CStringA jsonData;
-		jsonData = prepareData(HEAT, pDlg);
-
-		wstring endpoint = SendPostRequest(HEAT);
-
-		CStringA result = pDlg->winHttp(jsonData, endpoint, 5003);
-
-		vector<int> parse = pDlg->parsing_heat(result);
-
-		CString notice;
-
-		if (parse.size() >= 1) {
-			if (parse[0] == 1)
+			// Wait for both threads to complete
+			DWORD dwThreadResult = WaitForSingleObject(pThreadHeat->m_hThread, INFINITE);
+			if (dwThreadResult == WAIT_FAILED)
 			{
-				notice = L"열처리 이상";
-				pDlg->PostMessage(WM_NOTICE_LIST, (WPARAM)new CString(notice));
+				AfxMessageBox(L"Error waiting for threads to complete");
 			}
-			else
-			{
-				notice = L"열처리 정상";
-				pDlg->PostMessage(WM_NOTICE_LIST, (WPARAM)new CString(notice));
+
+			// Close the thread handles
+			CloseHandle(pThreadHeat->m_hThread);
+
+			pDlg->offsetHeat++;
+
+			// 데이터 전달 추가
+			vector<vector<double>> v_heat;
+			v_heat.push_back(pDlg->heat);
+
+			pDlg->SendChartUpdateMessage_Heat(v_heat);
+			// 데이터 전달
+
+			CStringA jsonData;
+			jsonData = prepareData(HEAT, pDlg);
+
+			wstring endpoint = SendPostRequest(HEAT);
+
+			CStringA result = pDlg->winHttp(jsonData, endpoint, 5003);
+
+			vector<int> parse = pDlg->parsing_heat(result);
+
+			CString notice;
+
+			if (parse.size() >= 1) {
+				if (parse[0] == 1)
+				{
+					notice = L"열처리 이상";
+					pDlg->PostMessage(WM_NOTICE_LIST, (WPARAM)new CString(notice));
+					outlier++;
+				}
+				else
+				{
+					notice = L"열처리 정상";
+					pDlg->PostMessage(WM_NOTICE_LIST, (WPARAM)new CString(notice));
+					outlier = 0;
+				}
 			}
+
+			pDlg->PostMessage(WM_NOTICE_HEAT, (WPARAM)new CString(notice)); // CString 동적 할당 없이 수정
 		}
-
-		pDlg->PostMessage(WM_NOTICE_HEAT, (WPARAM)new CString(notice)); // CString 동적 할당 없이 수정
 	}
 
 	// 스레드 종료 후 이벤트 초기화
