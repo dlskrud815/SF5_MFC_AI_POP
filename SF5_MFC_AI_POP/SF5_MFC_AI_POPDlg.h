@@ -111,6 +111,11 @@ public:
 	afx_msg LRESULT OnNoticeHeatError(WPARAM wParam, LPARAM lParam);
 	
 	
+	afx_msg LRESULT OnNoticePlasticError2(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnNoticeRobotError2(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnNoticeHeatError2(WPARAM wParam, LPARAM lParam);
+
+
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 
 

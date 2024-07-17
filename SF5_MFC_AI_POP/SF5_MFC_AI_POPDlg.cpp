@@ -22,7 +22,12 @@
 #define WM_NOTICE_ROBOT (WM_APP + 2)
 #define WM_NOTICE_PLASTIC (WM_APP + 3)
 #define WM_NOTICE_HEAT (WM_APP + 4)
-#define WM_NOTICE_LIST (WM_APP + 5)
+
+#define WM_NOTICE_ROBOT2 (WM_APP + 5)
+#define WM_NOTICE_PLASTIC2 (WM_APP + 6)
+#define WM_NOTICE_HEAT2 (WM_APP + 7)
+
+#define WM_NOTICE_LIST (WM_APP + 8)
 
 CCriticalSection CSF5MFCAIPOPDlg::critSect;
 
@@ -84,19 +89,30 @@ BEGIN_MESSAGE_MAP(CSF5MFCAIPOPDlg, CDialogEx)
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
 	ON_WM_SIZE()
+	
 	ON_BN_CLICKED(IDC_BUTTON_ROBOT, &CSF5MFCAIPOPDlg::OnBnClickedButtonRobot)
 	ON_BN_CLICKED(IDC_BUTTON_PLASTIC, &CSF5MFCAIPOPDlg::OnBnClickedButtonPlastic)
 	ON_BN_CLICKED(IDC_BUTTON_HEAT, &CSF5MFCAIPOPDlg::OnBnClickedButtonHeat)
+	
 	ON_MESSAGE(WM_UPDATE_TIME, &CSF5MFCAIPOPDlg::OnUpdateTime)
+	
 	ON_MESSAGE(WM_NOTICE_ROBOT, &CSF5MFCAIPOPDlg::OnNoticeRobotError)
 	ON_MESSAGE(WM_NOTICE_PLASTIC, &CSF5MFCAIPOPDlg::OnNoticePlasticError)
 	ON_MESSAGE(WM_NOTICE_HEAT, &CSF5MFCAIPOPDlg::OnNoticeHeatError)
+
+	ON_MESSAGE(WM_NOTICE_ROBOT2, &CSF5MFCAIPOPDlg::OnNoticeRobotError2)
+	ON_MESSAGE(WM_NOTICE_PLASTIC2, &CSF5MFCAIPOPDlg::OnNoticePlasticError2)
+	ON_MESSAGE(WM_NOTICE_HEAT2, &CSF5MFCAIPOPDlg::OnNoticeHeatError2)
+
 	ON_MESSAGE(WM_NOTICE_LIST, &CSF5MFCAIPOPDlg::OnNoticeList)
+	
 	ON_WM_ERASEBKGND()
 	ON_WM_CTLCOLOR()
+	
 	ON_BN_CLICKED(IDC_BUTTON_ROBOT_NOTICE, &CSF5MFCAIPOPDlg::OnBnClickedButtonRobotNotice)
 	ON_BN_CLICKED(IDC_BUTTON_PLASTIC_NOTICE, &CSF5MFCAIPOPDlg::OnBnClickedButtonPlasticNotice)
 	ON_BN_CLICKED(IDC_BUTTON_HEAT_NOTICE, &CSF5MFCAIPOPDlg::OnBnClickedButtonHeatNotice)
+	
 	ON_NOTIFY(NM_CUSTOMDRAW, IDC_LIST_ERROR, &CSF5MFCAIPOPDlg::OnNMCustomdrawList1)
 	ON_NOTIFY(NM_CUSTOMDRAW, IDC_LIST_ERROR2, &CSF5MFCAIPOPDlg::OnNMCustomdrawList1)
 	ON_NOTIFY(NM_CUSTOMDRAW, IDC_LIST_ERROR3, &CSF5MFCAIPOPDlg::OnNMCustomdrawList1)
@@ -176,37 +192,6 @@ BOOL CSF5MFCAIPOPDlg::OnInitDialog()
 
 	m_font2.CreatePointFont(250, L"나눔스퀘어");
 	GetDlgItem(IDC_STATIC_TITLE)->SetFont(&m_font2);
-
-	//m_font3.CreatePointFont(200, L"나눔스퀘어");
-	//GetDlgItem(IDC_STATIC_ROBOT_NOTICE)->SetFont(&m_font3);
-	//GetDlgItem(IDC_STATIC_PLASTIC_NOTICE)->SetFont(&m_font3);
-	//GetDlgItem(IDC_STATIC_HEAT_NOTICE)->SetFont(&m_font3);
-
-
-	//CRect rectHeader;
-	//GetDlgItem(IDC_STATIC_TITLE2)->GetWindowRect(&rectHeader);
-	//ScreenToClient(&rectHeader);
-	//m_staticHeader.Create(_T(""), WS_VISIBLE | WS_CHILD | SS_NOTIFY, rectHeader, this, IDC_STATIC_TITLE2);
-	//GetDlgItem(IDC_STATIC_TITLE2)->ShowWindow(SW_HIDE);
-	 
-	// 
-	//CRect rectHeader, rectNotice1, rectNotice2, rectNotice3;
-	//GetDlgItem(IDC_STATIC_HEADER)->GetWindowRect(&rectHeader);
-	//ScreenToClient(&rectHeader);
-	//m_staticHeader.Create(_T(""), WS_VISIBLE | WS_CHILD | SS_NOTIFY, rectHeader, this, IDC_STATIC_HEADER);
-	//GetDlgItem(IDC_STATIC_HEADER)->ShowWindow(SW_HIDE);
-
-	//GetDlgItem(IDC_STATIC_NOTICE1)->GetWindowRect(&rectNotice1);
-	//ScreenToClient(&rectNotice1);
-	//GetDlgItem(IDC_STATIC_NOTICE2)->GetWindowRect(&rectNotice2);
-	//ScreenToClient(&rectNotice2);
-	//GetDlgItem(IDC_STATIC_NOTICE3)->GetWindowRect(&rectNotice3);
-	//ScreenToClient(&rectNotice3);
-
-	//m_staticNotice1.Create(_T(""), WS_VISIBLE | WS_CHILD | SS_NOTIFY, rectNotice1, this);
-	//m_staticNotice2.Create(_T(""), WS_VISIBLE | WS_CHILD | SS_NOTIFY, rectNotice2, this);
-	//m_staticNotice3.Create(_T(""), WS_VISIBLE | WS_CHILD | SS_NOTIFY, rectNotice3, this);
-
 
 
 	// 리스트 칼럼 넣기
@@ -395,37 +380,56 @@ void CSF5MFCAIPOPDlg::OnSize(UINT nType, int cx, int cy)
 	CWnd* pNotice1 = GetDlgItem(IDC_STATIC_RUN_HEAT);
 	if (pNotice1 != nullptr)
 	{
-		pNotice1->SetWindowPos(nullptr, centerWidth / 2  - 500 / 2, 2 * 10 + 110 + 100, 500, 150, 0);
+		pNotice1->SetWindowPos(nullptr, centerWidth / 2  - 500 / 2 + 200, 2 * 10 + 110 + 100 + 50, 300, 50, 0);
 	}
 
 	CWnd* pNotice2 = GetDlgItem(IDC_STATIC_RUN_PLASTIC);
 	if (pNotice2 != nullptr)
 	{
-		pNotice2->SetWindowPos(nullptr, 50 + 100, cy - 50 - 300, 500, 150, 0);
+		pNotice2->SetWindowPos(nullptr, 50 + 100 + 200, cy - 50 - 300, 300, 50, 0);
 	}
 
 	CWnd* pNotice3 = GetDlgItem(IDC_STATIC_RUN_ROBOT);
 	if (pNotice3 != nullptr)
 	{
-		pNotice3->SetWindowPos(nullptr, cx - 2 * 50 - 800 - 200 - 500, cy - 50 - 300, 500, 150, 0);
+		pNotice3->SetWindowPos(nullptr, cx - 2 * 50 - 800 - 200 - 500 + 200, cy - 50 - 300, 300, 50, 0);
 	}
+
+	CWnd* pNotice111 = GetDlgItem(IDC_STATIC_ROBOT_NOTICE);
+	if (pNotice111 != nullptr)
+	{
+		pNotice111->SetWindowPos(nullptr, cx - 2 * 50 - 800 - 200 - 500 + 200, cy - 50 - 300 + 50, 300, 50, 0);
+	}
+
+	CWnd* pNotice112 = GetDlgItem(IDC_STATIC_PLASTIC_NOTICE);
+	if (pNotice112 != nullptr)
+	{
+		pNotice112->SetWindowPos(nullptr, 50 + 100 + 200, cy - 50 - 300 + 50, 300, 50, 0);
+	}
+
+	CWnd* pNotice113 = GetDlgItem(IDC_STATIC_HEAT_NOTICE);
+	if (pNotice113 != nullptr)
+	{
+		pNotice113->SetWindowPos(nullptr, centerWidth / 2  - 500 / 2 + 200, 2 * 10 + 110 + 100 + 50 + 50, 300, 50, 0);
+	}
+
 
 	CWnd* pNotice11 = GetDlgItem(IDC_BUTTON_HEAT_NOTICE);
 	if (pNotice11 != nullptr)
 	{
-		pNotice11->SetWindowPos(nullptr, centerWidth / 2 - 500 / 2 + 10, 2 * 10 + 110 + 100 + 10, 130, 130, 0);
+		pNotice11->SetWindowPos(nullptr, centerWidth / 2 - 500 / 2 + 80, 2 * 10 + 110 + 100 + 50, 100, 100, 0);
 	}
 
 	CWnd* pNotice12 = GetDlgItem(IDC_BUTTON_PLASTIC_NOTICE);
 	if (pNotice12 != nullptr)
 	{
-		pNotice12->SetWindowPos(nullptr, 50 + 100 + 10, cy - 50 - 300 + 10, 130, 130, 0);
+		pNotice12->SetWindowPos(nullptr, 50 + 100 + 80, cy - 50 - 300, 100, 100, 0);
 	}
 
 	CWnd* pNotice13 = GetDlgItem(IDC_BUTTON_ROBOT_NOTICE);
 	if (pNotice13 != nullptr)
 	{
-		pNotice13->SetWindowPos(nullptr, cx - 2 * 50 - 800 - 200 - 500 + 10, cy - 50 - 300 + 10, 130, 130, 0);
+		pNotice13->SetWindowPos(nullptr, cx - 2 * 50 - 800 - 200 - 500 + 80, cy - 50 - 300, 100, 100, 0);
 	}
 
 
@@ -445,12 +449,6 @@ void CSF5MFCAIPOPDlg::OnSize(UINT nType, int cx, int cy)
 	if (pHeatBtn != nullptr)
 	{
 		pHeatBtn->SetWindowPos(nullptr, cx - 2 * 50 - 800 - 200, 2 * 10 + 110 + 50 + 2 * 20 + 2 * 50, 200, 50, 0);
-	}
-
-	CWnd* pRobotNotice = GetDlgItem(IDC_BUTTON_ROBOT_NOTICE);
-	if (pRobotNotice != nullptr)
-	{
-		//pRobotNotice->SetWindowPos(nullptr, cx - 2 * 50 - 800 - 200 , 2 * 10 + 110 + 50, 200, 50, 0);
 	}
 }
 
@@ -1280,6 +1278,26 @@ LRESULT CSF5MFCAIPOPDlg::OnNoticeHeatError(WPARAM wParam, LPARAM lParam)
 }
 
 
+LRESULT CSF5MFCAIPOPDlg::OnNoticeRobotError2(WPARAM wParam, LPARAM lParam)
+{
+
+	return 0;
+}
+
+LRESULT CSF5MFCAIPOPDlg::OnNoticePlasticError2(WPARAM wParam, LPARAM lParam)
+{
+
+	return 0;
+}
+
+LRESULT CSF5MFCAIPOPDlg::OnNoticeHeatError2(WPARAM wParam, LPARAM lParam)
+{
+
+	return 0;
+}
+
+
+
 LRESULT CSF5MFCAIPOPDlg::OnNoticeList(WPARAM wParam, LPARAM lParam)
 {
 	const CString& notice = *((CString*)wParam);
@@ -1409,10 +1427,7 @@ HBRUSH CSF5MFCAIPOPDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 
 	// TODO:  Change any attributes of the DC here
 	if (pWnd->GetDlgCtrlID() == IDC_STATIC_CURRENT_TIME
-		|| pWnd->GetDlgCtrlID() == IDC_STATIC_TITLE
-		|| pWnd->GetDlgCtrlID() == IDC_STATIC_HEAT_NOTICE
-		|| pWnd->GetDlgCtrlID() == IDC_STATIC_PLASTIC_NOTICE
-		|| pWnd->GetDlgCtrlID() == IDC_STATIC_ROBOT_NOTICE)
+		|| pWnd->GetDlgCtrlID() == IDC_STATIC_TITLE)
 	{
 		// Set text color to white
 		pDC->SetTextColor(RGB(255, 255, 255));
@@ -1422,6 +1437,33 @@ HBRUSH CSF5MFCAIPOPDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 
 		// Create a solid brush with background color
 		CBrush brush(RGB(64, 70, 76));
+
+		// Get the control's rectangle
+		CRect rect;
+		pWnd->GetClientRect(&rect);
+
+		// Fill the background with the solid brush
+		pDC->FillRect(&rect, &brush);
+
+		// Return a brush that is not used
+		return (HBRUSH)GetStockObject(NULL_BRUSH);
+	}
+
+	if (pWnd->GetDlgCtrlID() == IDC_STATIC_HEAT_NOTICE
+		|| pWnd->GetDlgCtrlID() == IDC_STATIC_PLASTIC_NOTICE
+		|| pWnd->GetDlgCtrlID() == IDC_STATIC_ROBOT_NOTICE
+		|| pWnd->GetDlgCtrlID() == IDC_STATIC_RUN_ROBOT
+		|| pWnd->GetDlgCtrlID() == IDC_STATIC_RUN_PLASTIC
+		|| pWnd->GetDlgCtrlID() == IDC_STATIC_RUN_HEAT)
+	{
+		// Set text color to white
+		pDC->SetTextColor(RGB(255, 255, 255));
+
+		// Transparent background
+		pDC->SetBkMode(TRANSPARENT);
+
+		// Create a solid brush with background color
+		CBrush brush(RGB(0, 0, 255));
 
 		// Get the control's rectangle
 		CRect rect;
