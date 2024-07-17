@@ -23,6 +23,8 @@ public:
 
     bool connect(string server, string username, string password, string database);
     bool login(string id, string pw);
+    void truncateDB(string database);
+
     bool getData(int i);
 
     bool newAdmin(string id, string pw);
@@ -33,6 +35,8 @@ public:
     CString data2;
 
     CString getMessage();
+
+    void sendErrorToDB(CString idx, CString time, CString status, CString process, CString facility);
 
     bool getID();
     bool getFrom();

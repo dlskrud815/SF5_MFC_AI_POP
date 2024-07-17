@@ -6,6 +6,7 @@
 #include "framework.h"
 #include "SF5_MFC_AI_POP.h"
 #include "SF5_MFC_AI_POPDlg.h"
+#include "MySQL_Connector.h"
 #include "afxdialogex.h"
 #include "LOGINDlg.h"
 #include "PROCESSDlg.h"
@@ -693,10 +694,7 @@ UINT CSF5MFCAIPOPDlg::RobotThread(LPVOID pParam)
 
 			// Wait for both threads to complete
 			DWORD dwThreadResult = WaitForMultipleObjects(2, hThreads, TRUE, INFINITE);
-			if (dwThreadResult == WAIT_FAILED)
-			{
-				AfxMessageBox(L"Error waiting for threads to complete");
-			}
+			if (dwThreadResult == WAIT_FAILED)	AfxMessageBox(L"Error waiting for threads to complete");
 
 			// Close the thread handles
 			CloseHandle(pThreadCur->m_hThread);
@@ -704,7 +702,6 @@ UINT CSF5MFCAIPOPDlg::RobotThread(LPVOID pParam)
 			
 			pDlg->offsetCur++;
 			pDlg->offsetVib++;
-
 
 			CStringA jsonData;
 			jsonData = prepareData(ROBOT, pDlg);
@@ -1079,51 +1076,61 @@ LRESULT CSF5MFCAIPOPDlg::OnNoticeList(WPARAM wParam, LPARAM lParam)
 	CString strTime = currentTime.Format(L"%Y-%m-%d %H:%M:%S");
 
 	CString result1, result2, result3;
+	
+	bool isError = false;
 
 	if (notice.Compare(L"플라스틱 이상") == 0)
 	{
+		isError = true;
 		result1 = L"경보 발생";
 		result2 = L"소성가공";
 		result3 = L"설비 이상";
 	}
 	else if (notice.Compare(L"플라스틱 정상") == 0)
 	{
+		isError = false;
 		result1 = L"정상";
 		result2 = L"소성가공";
 		result3 = L"설비 정상";
 	}
 	else if (notice.Compare(L"전류 이상") == 0)
 	{
+		isError = true;
 		result1 = L"경보 발생";
 		result2 = L"로봇 용접";
 		result3 = L"진동 이상";
 	}
 	else if (notice.Compare(L"진동 이상") == 0)
 	{
+		isError = true;
 		result1 = L"경보 발생";
 		result2 = L"로봇 용접";
 		result3 = L"진동 이상";
 	}
 	else if (notice.Compare(L"전류 정상") == 0)
 	{
+		isError = false;
 		result1 = L"정상";
 		result2 = L"로봇 용접";
 		result3 = L"전류 정상";
 	}
 	else if (notice.Compare(L"진동 정상") == 0)
 	{
+		isError = false;
 		result1 = L"정상";
 		result2 = L"로봇 용접";
 		result3 = L"진동 정상";
 	}
 	else if (notice.Compare(L"열처리 이상") == 0)
 	{
+		isError = true;
 		result1 = L"경보 발생";
 		result2 = L"열처리";
 		result3 = L"설비 이상";
 	}
 	else if (notice.Compare(L"열처리 정상") == 0)
 	{
+		isError = false;
 		result1 = L"정상";
 		result2 = L"열처리";
 		result3 = L"설비 정상";
@@ -1137,12 +1144,23 @@ LRESULT CSF5MFCAIPOPDlg::OnNoticeList(WPARAM wParam, LPARAM lParam)
 		m_listCtrl.SetItem(0, 2, LVIF_TEXT, CString(result1), 0, 0, 0, NULL);
 		m_listCtrl.SetItem(0, 3, LVIF_TEXT, CString(result2), 0, 0, 0, NULL);
 		m_listCtrl.SetItem(0, 4, LVIF_TEXT, CString(result3), 0, 0, 0, NULL);
+
+		if (isError) {
+			MySQL_Connector* mysql = new MySQL_Connector();
+
+			if (mysql->connect("tcp://127.0.0.1:3306", "Nia", "0000", "pop_result"))
+			{
+				mysql->sendErrorToDB(strIndex, strTime, result1, result2, result3);
+			}
+
+			
+			delete mysql;
+		}
 	}
 
 	delete (CString*)wParam; // 메모리 해제
 	return 0;
 }
-
 
 BOOL CSF5MFCAIPOPDlg::OnEraseBkgnd(CDC* pDC)
 {
@@ -1154,3 +1172,4 @@ BOOL CSF5MFCAIPOPDlg::OnEraseBkgnd(CDC* pDC)
 
 	return CDialogEx::OnEraseBkgnd(pDC);
 }
+

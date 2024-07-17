@@ -100,8 +100,7 @@ public:
 	CEvent m_eventHeatThread; // 이벤트 객체 선언
 	static UINT HeatThread(LPVOID pParam); // 대기 스레드 함수 선언
 	afx_msg LRESULT OnNoticeHeatError(WPARAM wParam, LPARAM lParam);
-	
-	
+
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 
 	static string vectorToString(vector<double> vec);

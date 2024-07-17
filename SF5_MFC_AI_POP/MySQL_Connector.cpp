@@ -34,6 +34,11 @@ bool MySQL_Connector::login(string id, string pw)
     }
 }
 
+void MySQL_Connector::truncateDB(string database) {
+    pstmt = con->prepareStatement("TRUNCATE ?"); 
+    pstmt->setString(1, database);
+    pstmt->execute();
+}
 
 vector<double> MySQL_Connector::fetchDataFromTable(tNum process, int offset)
 {
@@ -181,6 +186,57 @@ vector<double> MySQL_Connector::fetchDataFromTable(tNum process, int offset)
         }
     }
 
+}
+
+void MySQL_Connector::sendErrorToDB(CString idx, CString time, CString status, CString facility, CString message)
+{
+    
+    try {
+        pstmt = con->prepareStatement("INSERT INTO pop_result.errorlist VALUE (?,?,?,?,?)");
+
+        pstmt->setString(1, string(CT2CA(idx)));
+        pstmt->setString(2, string(CT2CA(time)));
+        pstmt->setString(3, string(CT2CA(status)));
+        pstmt->setString(4, string(CT2CA(facility)));
+        pstmt->setString(5, string(CT2CA(message)));
+
+        pstmt->execute();
+
+        if (facility == "소성가공") {
+            pstmt = con->prepareStatement("INSERT INTO pop_result.plastic VALUE (?,?,?)");
+
+            pstmt->setString(1, string(CT2CA(idx)));
+            pstmt->setString(2, string(CT2CA(time)));
+            pstmt->setString(3, string(CT2CA(message)));
+
+            pstmt->execute();
+
+        }
+        else if (facility == "로봇 용접") {
+            pstmt = con->prepareStatement("INSERT INTO pop_result.robot VALUE (?,?,?)");
+
+            pstmt->setString(1, string(CT2CA(idx)));
+            pstmt->setString(2, string(CT2CA(time)));
+            pstmt->setString(3, string(CT2CA(message)));
+
+            pstmt->execute();
+
+        }
+        else if (facility == "열처리") {
+            pstmt = con->prepareStatement("INSERT INTO pop_result.heat VALUE (?,?,?)");
+
+            pstmt->setString(1, string(CT2CA(idx)));
+            pstmt->setString(2, string(CT2CA(time)));
+            pstmt->setString(3, string(CT2CA(message)));
+
+            pstmt->execute();
+
+        }
+    }
+
+    catch (sql::SQLException& e) {
+        cerr << "SQLException: " << e.what() << endl;
+    }
 }
 
 void MySQL_Connector::getTable(vector<double> dataset)
