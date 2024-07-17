@@ -82,6 +82,9 @@ void CSF5MFCAIPOPDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_LIST_ERROR, m_listCtrl);
 	DDX_Control(pDX, IDC_LIST_ERROR2, m_listCtrl2);
 	DDX_Control(pDX, IDC_LIST_ERROR3, m_listCtrl3);
+	DDX_Control(pDX, IDC_BUTTON_ROBOT_NOTICE, m_notify_btn1);
+	DDX_Control(pDX, IDC_BUTTON_PLASTIC_NOTICE, m_notify_btn2);
+	DDX_Control(pDX, IDC_BUTTON_HEAT_NOTICE, m_notify_btn3);
 }
 
 BEGIN_MESSAGE_MAP(CSF5MFCAIPOPDlg, CDialogEx)
@@ -116,6 +119,7 @@ BEGIN_MESSAGE_MAP(CSF5MFCAIPOPDlg, CDialogEx)
 	ON_NOTIFY(NM_CUSTOMDRAW, IDC_LIST_ERROR, &CSF5MFCAIPOPDlg::OnNMCustomdrawList1)
 	ON_NOTIFY(NM_CUSTOMDRAW, IDC_LIST_ERROR2, &CSF5MFCAIPOPDlg::OnNMCustomdrawList1)
 	ON_NOTIFY(NM_CUSTOMDRAW, IDC_LIST_ERROR3, &CSF5MFCAIPOPDlg::OnNMCustomdrawList1)
+	ON_WM_SETCURSOR()
 END_MESSAGE_MAP()
 
 
@@ -164,14 +168,41 @@ BOOL CSF5MFCAIPOPDlg::OnInitDialog()
 
 	ShowWindow(SW_SHOWMAXIMIZED); // 최대화
 	//back.Load(_T("res\\img\\BACK1.png"));
+	
+	m_hCursor = ::LoadCursor(NULL, IDC_HAND);
 
+	m_brushRunRobot.CreateSolidBrush(RGB(0, 255, 0)); // 녹색 배경
+	m_brushStopRobot.CreateSolidBrush(RGB(0, 0, 255)); // 파란색 배경
 
-	// 버튼 컨트롤과 아이콘 로드
-	m_robotBtn.SubclassDlgItem(IDC_BUTTON_ROBOT_NOTICE, this);  // IDC_MYBUTTON은 버튼의 ID입니다.
-	HICON hIcon = (HICON)LoadImage(AfxGetInstanceHandle(), MAKEINTRESOURCE(IDI_ICON1), IMAGE_ICON, 128, 128, LR_DEFAULTCOLOR);
+	pBtnX = new CMyButton();
+	pBtn1 = new CMyButton();
+	pBtn2 = new CMyButton();
+	pBtn3 = new CMyButton();
 
-	// 아이콘 설정
-	m_robotBtn.SetIcon(hIcon);
+	CRect rect_btnx, rect_btn1, rect_btn2, rect_btn3;
+	GetDlgItem(IDCANCEL)->GetWindowRect(&rect_btnx);
+	ScreenToClient(&rect_btnx);
+	pBtnX->Create(_T("X"), WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON | BS_CENTER | BS_VCENTER,
+		rect_btnx, this, IDCANCEL);
+	GetDlgItem(IDCANCEL)->ShowWindow(SW_HIDE);
+
+	GetDlgItem(IDC_BUTTON_ROBOT)->GetWindowRect(&rect_btn1);
+	ScreenToClient(&rect_btn1);
+	pBtn1->Create(_T("RBT ON"), WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON | BS_CENTER | BS_VCENTER,
+		rect_btn1, this, IDC_BUTTON_ROBOT);
+	GetDlgItem(IDC_BUTTON_ROBOT)->ShowWindow(SW_HIDE);
+
+	GetDlgItem(IDC_BUTTON_PLASTIC)->GetWindowRect(&rect_btn2);
+	ScreenToClient(&rect_btn2);
+	pBtn2->Create(_T("PLS ON"), WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON | BS_CENTER | BS_VCENTER,
+		rect_btn2, this, IDC_BUTTON_PLASTIC);
+	GetDlgItem(IDC_BUTTON_PLASTIC)->ShowWindow(SW_HIDE);
+
+	GetDlgItem(IDC_BUTTON_HEAT)->GetWindowRect(&rect_btn3);
+	ScreenToClient(&rect_btn3);
+	pBtn3->Create(_T("HT ON"), WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON | BS_CENTER | BS_VCENTER,
+		rect_btn3, this, IDC_BUTTON_HEAT);
+	GetDlgItem(IDC_BUTTON_HEAT)->ShowWindow(SW_HIDE);
 
 
 	// Picture Control 초기화
@@ -221,6 +252,10 @@ BOOL CSF5MFCAIPOPDlg::OnInitDialog()
 	pChartDialog_Plastic->ShowWindow(SW_HIDE);
 	pChartDialog_Heat->ShowWindow(SW_HIDE);
 
+
+	m_notify_btn1.SetBitmap(::LoadBitmap(AfxGetInstanceHandle(), MAKEINTRESOURCE(IDB_BITMAP3)));
+	m_notify_btn2.SetBitmap(::LoadBitmap(AfxGetInstanceHandle(), MAKEINTRESOURCE(IDB_BITMAP3)));
+	m_notify_btn3.SetBitmap(::LoadBitmap(AfxGetInstanceHandle(), MAKEINTRESOURCE(IDB_BITMAP3)));
 
 	// 메인 스레드 생성
 	CWinThread* pMainThread = AfxBeginThread(MainThread, this);
@@ -372,7 +407,7 @@ void CSF5MFCAIPOPDlg::OnSize(UINT nType, int cx, int cy)
 	CWnd* pCancelButton = GetDlgItem(IDCANCEL);
 	if (pCancelButton != nullptr)
 	{
-		pCancelButton->SetWindowPos(nullptr, 10, cy - 10 - 50, 100, 50, 0);
+		pCancelButton->SetWindowPos(nullptr, 10, cy - 10 - 50, 50, 50, 0);
 	}
 
 	const int centerWidth = cx - 3 * 50 - 800;
@@ -869,6 +904,8 @@ UINT CSF5MFCAIPOPDlg::RobotThread(LPVOID pParam)
 		bool outCur, outVib;
 		while (outlier < 5)
 		{
+			pDlg->PostMessage(WM_NOTICE_ROBOT, (WPARAM)new CString(L"작동중"));
+
 			// Create the thread
 			CWinThread* pThreadCur = AfxBeginThread(Thread_DB_Get_Cur, pDlg);
 			if (pThreadCur == NULL) AfxMessageBox(L"pThread1 Create Error");
@@ -944,16 +981,17 @@ UINT CSF5MFCAIPOPDlg::RobotThread(LPVOID pParam)
 					outlier = 0;
 				}
 			}
-			pDlg->PostMessage(WM_NOTICE_ROBOT, (WPARAM)new CString(notice));
+			
 			//pDlg->PostMessage(WM_NOTICE_ROBOT, (WPARAM)new CString(L"작동중")); // CString 동적 할당 없이 수정
 		}
 	}
 
 	// 스레드 종료 후 이벤트 초기화
 	pDlg->m_eventRobotThread.ResetEvent();
-	//pDlg->PostMessage(WM_NOTICE_ROBOT, (WPARAM)new CString(L"작동안함"));
-	pDlg->GetDlgItem(IDC_BUTTON_ROBOT)->EnableWindow(TRUE);
-	//pDlg->robotBtn = false;
+	pDlg->PostMessage(WM_NOTICE_ROBOT, (WPARAM)new CString(L"작동중지"));
+	//pDlg->GetDlgItem(IDC_BUTTON_ROBOT)->EnableWindow(TRUE);
+	pDlg->pBtn1->EnableWindow(TRUE);
+	pDlg->robotBtn = false;
 	return 0;
 }
 
@@ -970,6 +1008,7 @@ UINT CSF5MFCAIPOPDlg::PlasticThread(LPVOID pParam)
 		int outlier = 0, total = 0;
 		while (outlier < 5 && total < 20)
 		{
+			pDlg->PostMessage(WM_NOTICE_PLASTIC, (WPARAM)new CString(L"작동중"));
 
 			// Create the thread
 			CWinThread* pThreadPlastic = AfxBeginThread(Thread_DB_Get_Plastic, pDlg);
@@ -1030,16 +1069,17 @@ UINT CSF5MFCAIPOPDlg::PlasticThread(LPVOID pParam)
 					outlier = 0;
 				}
 			}
-			pDlg->PostMessage(WM_NOTICE_PLASTIC, (WPARAM)new CString(notice));
+			
 			//pDlg->PostMessage(WM_NOTICE_PLASTIC, (WPARAM)new CString(L"작동중")); // CString 동적 할당 없이 수정
 		}
 	}
 
 	// 스레드 종료 후 이벤트 초기화
 	pDlg->m_eventPlasticThread.ResetEvent();
-	//pDlg->PostMessage(WM_NOTICE_PLASTIC, (WPARAM)new CString(L"작동안함"));
-	pDlg->GetDlgItem(IDC_BUTTON_PLASTIC)->EnableWindow(TRUE);
-	//pDlg->plasticBtn = false;
+	pDlg->PostMessage(WM_NOTICE_PLASTIC, (WPARAM)new CString(L"작동중지"));
+	//pDlg->GetDlgItem(IDC_BUTTON_PLASTIC)->EnableWindow(TRUE);
+	pDlg->pBtn2->EnableWindow(TRUE);
+	pDlg->plasticBtn = false;
 
 	return 0;
 }
@@ -1057,6 +1097,8 @@ UINT CSF5MFCAIPOPDlg::HeatThread(LPVOID pParam)
 		int outlier = 0;
 		while (outlier < 5)
 		{
+			pDlg->PostMessage(WM_NOTICE_HEAT, (WPARAM)new CString(L"작동중"));
+
 			// Create the thread
 			CWinThread* pThreadHeat = AfxBeginThread(Thread_DB_Get_Heat, pDlg);
 			if (pThreadHeat == NULL) AfxMessageBox(L"pThreadHeat Create Error");
@@ -1105,16 +1147,17 @@ UINT CSF5MFCAIPOPDlg::HeatThread(LPVOID pParam)
 					outlier = 0;
 				}
 			}
-			pDlg->PostMessage(WM_NOTICE_HEAT, (WPARAM)new CString(notice));
+			
 			//pDlg->PostMessage(WM_NOTICE_HEAT, (WPARAM)new CString(L"작동중")); // CString 동적 할당 없이 수정
 		}
 	}
 
 	// 스레드 종료 후 이벤트 초기화
 	pDlg->m_eventHeatThread.ResetEvent();
-	//pDlg->PostMessage(WM_NOTICE_HEAT, (WPARAM)new CString(L"작동안함"));
-	pDlg->GetDlgItem(IDC_BUTTON_HEAT)->EnableWindow(TRUE);
-	//pDlg->heatBtn = false;
+	pDlg->PostMessage(WM_NOTICE_HEAT, (WPARAM)new CString(L"작동중지"));
+	//pDlg->GetDlgItem(IDC_BUTTON_HEAT)->EnableWindow(TRUE);
+	pDlg->pBtn3->EnableWindow(TRUE);
+	pDlg->heatBtn = false;
 
 	return 0;
 }
@@ -1123,8 +1166,11 @@ UINT CSF5MFCAIPOPDlg::HeatThread(LPVOID pParam)
 
 void CSF5MFCAIPOPDlg::OnBnClickedButtonRobot()
 {
-	robotBtn = !robotBtn;
-	GetDlgItem(IDC_BUTTON_ROBOT)->EnableWindow(FALSE);
+	robotBtn = true;
+	//GetDlgItem(IDC_BUTTON_ROBOT)->EnableWindow(FALSE);
+	pBtn1->EnableWindow(FALSE);
+
+	offsetCur = 1, offsetVib = 1;
 
 	// 이전 스레드 핸들이 있는 경우 종료
 	if (m_hRobotThread != nullptr)
@@ -1147,8 +1193,11 @@ void CSF5MFCAIPOPDlg::OnBnClickedButtonRobot()
 
 void CSF5MFCAIPOPDlg::OnBnClickedButtonPlastic()
 {
-	plasticBtn = !plasticBtn;
-	GetDlgItem(IDC_BUTTON_PLASTIC)->EnableWindow(FALSE);
+	plasticBtn = true;
+	//GetDlgItem(IDC_BUTTON_PLASTIC)->EnableWindow(FALSE);
+	pBtn2->EnableWindow(FALSE);
+
+	offsetV0 = 1, offsetV1 = 1, offsetC1 = 1;
 
 	// 이전 스레드 핸들이 있는 경우 종료
 	if (m_hPlasticThread != nullptr)
@@ -1171,9 +1220,11 @@ void CSF5MFCAIPOPDlg::OnBnClickedButtonPlastic()
 
 void CSF5MFCAIPOPDlg::OnBnClickedButtonHeat()
 {
-	GetDlgItem(IDC_BUTTON_HEAT)->EnableWindow(FALSE);
+	//GetDlgItem(IDC_BUTTON_HEAT)->EnableWindow(FALSE);
+	pBtn3->EnableWindow(FALSE);
+	heatBtn = true;
 
-	heatBtn = !heatBtn;
+	offsetHeat = 1;
 
 	// 이전 스레드 핸들이 있는 경우 종료
 	if (m_hHeatThread != nullptr)
@@ -1202,16 +1253,18 @@ LRESULT CSF5MFCAIPOPDlg::OnNoticeRobotError(WPARAM wParam, LPARAM lParam)
 
 	if (pNotice)
 	{
-		SetDlgItemText(IDC_STATIC_ROBOT_NOTICE, *pNotice);
-
-		//if (pNotice->Compare(L"작동중") == 0)
-		//{
-		//	SetDlgItemText(IDC_STATIC_RUN_ROBOT, L"로봇용접 설비 - 작동 중");
-		//}
-		//else
-		//{
-		//	SetDlgItemText(IDC_STATIC_RUN_ROBOT, L"로봇용접 설비 - 작동 안함");
-		//}
+		if (pNotice->Compare(L"작동중") == 0)
+		{
+			SetDlgItemText(IDC_STATIC_RUN_ROBOT, L"설비 가동중");
+			m_notify_btn1.SetBitmap(::LoadBitmap(AfxGetInstanceHandle(), MAKEINTRESOURCE(IDB_BITMAP4)));
+			runRobot = true;
+		}
+		else
+		{
+			SetDlgItemText(IDC_STATIC_RUN_ROBOT, L"설비 가동중지");
+			m_notify_btn1.SetBitmap(::LoadBitmap(AfxGetInstanceHandle(), MAKEINTRESOURCE(IDB_BITMAP5)));
+			runRobot = false;
+		}
 
 		delete pNotice; // 메모리 해제
 	}
@@ -1229,16 +1282,16 @@ LRESULT CSF5MFCAIPOPDlg::OnNoticePlasticError(WPARAM wParam, LPARAM lParam)
 
 	if (pNotice)
 	{
-		SetDlgItemText(IDC_STATIC_PLASTIC_NOTICE, *pNotice);
-
-		//if (pNotice->Compare(L"작동중") == 0)
-		//{
-		//	SetDlgItemText(IDC_STATIC_RUN_ROBOT, L"로봇용접 설비 - 작동 중");
-		//}
-		//else
-		//{
-		//	SetDlgItemText(IDC_STATIC_RUN_ROBOT, L"로봇용접 설비 - 작동 안함");
-		//}
+		if (pNotice->Compare(L"작동중") == 0)
+		{
+			SetDlgItemText(IDC_STATIC_RUN_PLASTIC, L"설비 가동중");
+			m_notify_btn2.SetBitmap(::LoadBitmap(AfxGetInstanceHandle(), MAKEINTRESOURCE(IDB_BITMAP4)));
+		}
+		else
+		{
+			SetDlgItemText(IDC_STATIC_RUN_PLASTIC, L"설비 가동중지");
+			m_notify_btn2.SetBitmap(::LoadBitmap(AfxGetInstanceHandle(), MAKEINTRESOURCE(IDB_BITMAP5)));
+		}
 
 		delete pNotice; // 메모리 해제
 	}
@@ -1256,16 +1309,16 @@ LRESULT CSF5MFCAIPOPDlg::OnNoticeHeatError(WPARAM wParam, LPARAM lParam)
 
 	if (pNotice)
 	{
-		SetDlgItemText(IDC_STATIC_HEAT_NOTICE, *pNotice);
-
-		//if (pNotice->Compare(L"작동중") == 0)
-		//{
-		//	SetDlgItemText(IDC_STATIC_RUN_ROBOT, L"로봇용접 설비 - 작동 중");
-		//}
-		//else
-		//{
-		//	SetDlgItemText(IDC_STATIC_RUN_ROBOT, L"로봇용접 설비 - 작동 안함");
-		//}
+		if (pNotice->Compare(L"작동중") == 0)
+		{
+			SetDlgItemText(IDC_STATIC_RUN_HEAT, L"설비 가동중");
+			m_notify_btn3.SetBitmap(::LoadBitmap(AfxGetInstanceHandle(), MAKEINTRESOURCE(IDB_BITMAP4)));
+		}
+		else
+		{
+			SetDlgItemText(IDC_STATIC_RUN_HEAT, L"설비 가동중지");
+			m_notify_btn3.SetBitmap(::LoadBitmap(AfxGetInstanceHandle(), MAKEINTRESOURCE(IDB_BITMAP5)));
+		}
 
 		delete pNotice; // 메모리 해제
 	}
@@ -1409,7 +1462,6 @@ LRESULT CSF5MFCAIPOPDlg::OnNoticeList(WPARAM wParam, LPARAM lParam)
 }
 
 
-
 BOOL CSF5MFCAIPOPDlg::OnEraseBkgnd(CDC* pDC)
 {
 	CRect rect;
@@ -1449,31 +1501,23 @@ HBRUSH CSF5MFCAIPOPDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 		return (HBRUSH)GetStockObject(NULL_BRUSH);
 	}
 
-	if (pWnd->GetDlgCtrlID() == IDC_STATIC_HEAT_NOTICE
+	if ((pWnd->GetDlgCtrlID() == IDC_STATIC_HEAT_NOTICE
 		|| pWnd->GetDlgCtrlID() == IDC_STATIC_PLASTIC_NOTICE
-		|| pWnd->GetDlgCtrlID() == IDC_STATIC_ROBOT_NOTICE
-		|| pWnd->GetDlgCtrlID() == IDC_STATIC_RUN_ROBOT
-		|| pWnd->GetDlgCtrlID() == IDC_STATIC_RUN_PLASTIC
-		|| pWnd->GetDlgCtrlID() == IDC_STATIC_RUN_HEAT)
+		|| pWnd->GetDlgCtrlID() == IDC_STATIC_ROBOT_NOTICE))
 	{
-		// Set text color to white
 		pDC->SetTextColor(RGB(255, 255, 255));
+		pDC->SetBkColor(RGB(0, 0, 255)); // 파란색
+		hbr = m_brushStopRobot;
+	}
 
-		// Transparent background
-		pDC->SetBkMode(TRANSPARENT);
 
-		// Create a solid brush with background color
-		CBrush brush(RGB(0, 0, 255));
-
-		// Get the control's rectangle
-		CRect rect;
-		pWnd->GetClientRect(&rect);
-
-		// Fill the background with the solid brush
-		pDC->FillRect(&rect, &brush);
-
-		// Return a brush that is not used
-		return (HBRUSH)GetStockObject(NULL_BRUSH);
+	if ((pWnd->GetDlgCtrlID() == IDC_STATIC_RUN_ROBOT
+		|| pWnd->GetDlgCtrlID() == IDC_STATIC_RUN_PLASTIC
+		|| pWnd->GetDlgCtrlID() == IDC_STATIC_RUN_HEAT))
+	{
+		pDC->SetTextColor(RGB(255, 255, 255));
+		pDC->SetBkColor(RGB(0, 0, 255)); // 파란색
+		hbr = m_brushStopRobot;
 	}
 
 	// TODO:  Return a different brush if the default is not desired
@@ -1574,4 +1618,17 @@ void CSF5MFCAIPOPDlg::OnNMCustomdrawList1(NMHDR* pNMHDR, LRESULT* pResult)
 	}
 
 	*pResult = 0;
+}
+
+BOOL CSF5MFCAIPOPDlg::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
+{
+	// TODO: Add your message handler code here and/or call default
+	if (pWnd == pBtn1 || pWnd == pBtn2 || pWnd == pBtn3 || pWnd == pBtnX
+		|| pWnd == GetDlgItem(IDC_BUTTON_ROBOT_NOTICE) || pWnd == GetDlgItem(IDC_BUTTON_PLASTIC_NOTICE) || pWnd == GetDlgItem(IDC_BUTTON_HEAT_NOTICE))
+	{
+		::SetCursor(m_hCursor);
+		return TRUE;
+	}
+
+	return CDialogEx::OnSetCursor(pWnd, nHitTest, message);
 }

@@ -10,7 +10,7 @@
 #include "RobotDetailDlg.h"
 #include "PlasticDetailDlg.h"
 #include "HeatDetailDlg.h"
-
+#include "MyButton.h"
 
 using namespace std;
 
@@ -115,6 +115,7 @@ public:
 	afx_msg LRESULT OnNoticeRobotError2(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnNoticeHeatError2(WPARAM wParam, LPARAM lParam);
 
+	bool runRobot = false, runPlastic = false, runHeat = false;
 
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 
@@ -148,4 +149,15 @@ public:
 	void SendChartUpdateMessage_Robot(vector<vector<double>> newValue);
 	void SendChartUpdateMessage_Plastic(vector<vector<double>> newValue);
 	void SendChartUpdateMessage_Heat(vector<vector<double>> newValue);
+
+private:
+	CBrush m_brushRunRobot; // 가동중 배경색을 위한 브러시
+	CBrush m_brushStopRobot; // 가동중지 배경색을 위한 브러시
+	CMyButton* pBtnX, * pBtn1, * pBtn2, *pBtn3;
+
+public:
+	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
+	CButton m_notify_btn1;
+	CButton m_notify_btn2;
+	CButton m_notify_btn3;
 };

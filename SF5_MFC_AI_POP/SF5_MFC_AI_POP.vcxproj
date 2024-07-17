@@ -232,6 +232,9 @@
     <Image Include="res\img\facility.png" />
     <Image Include="res\img\logo.bmp" />
     <Image Include="res\img\logo.png" />
+    <Image Include="res\img\run0.bmp" />
+    <Image Include="res\img\run1.bmp" />
+    <Image Include="res\img\run2.bmp" />
     <Image Include="res\img\warning.ico" />
     <Image Include="res\img\warning.png" />
     <Image Include="res\SF5_MFC_AI_POP.ico" />

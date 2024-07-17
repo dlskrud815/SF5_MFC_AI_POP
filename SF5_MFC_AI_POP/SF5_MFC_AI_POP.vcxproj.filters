@@ -131,5 +131,14 @@
     <Image Include="res\img\warning.png">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="res\img\run0.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\img\run1.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\img\run2.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>
