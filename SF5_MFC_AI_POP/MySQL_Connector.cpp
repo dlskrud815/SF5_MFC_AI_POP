@@ -34,6 +34,11 @@ bool MySQL_Connector::login(string id, string pw)
     }
 }
 
+void MySQL_Connector::truncateDB(string database) {
+    pstmt = con->prepareStatement("TRUNCATE ?");
+    pstmt->setString(1, database);
+    pstmt->execute();
+}
 
 vector<double> MySQL_Connector::fetchDataFromTable(tNum process, int offset)
 {
@@ -181,6 +186,55 @@ vector<double> MySQL_Connector::fetchDataFromTable(tNum process, int offset)
         }
     }
 
+}
+
+void MySQL_Connector::sendErrorToDB(CString idx, CString time, CString status, CString facility, CString message)
+{
+    try {
+        pstmt = con->prepareStatement("INSERT INTO pop_result.errorlist VALUE (?,?,?,?,?)");
+        pstmt->setString(1, string(CT2CA(idx)));
+        pstmt->setString(2, string(CT2CA(time)));
+        pstmt->setString(3, string(CT2CA(status)));
+        pstmt->setString(4, string(CT2CA(facility)));
+        pstmt->setString(5, string(CT2CA(message)));
+        pstmt->execute();
+        if (facility == "소성가공") {
+            stmt = con->createStatement();
+            result = stmt->executeQuery("SELECT count(*) FROM pop_result.plastic");
+            if (result->next()) idx = result->getString(1).c_str();
+            int idx_plastic = stoi(string(CT2CA(idx)));
+            pstmt = con->prepareStatement("INSERT INTO pop_result.plastic VALUE (?,?,?)");
+            pstmt->setString(1, to_string(idx_plastic + 1));
+            pstmt->setString(2, string(CT2CA(time)));
+            pstmt->setString(3, string(CT2CA(message)));
+            pstmt->execute();
+        }
+        else if (facility == "로봇 용접") {
+            stmt = con->createStatement();
+            result = stmt->executeQuery("SELECT count(*) FROM pop_result.robot");
+            if (result->next()) idx = result->getString(1).c_str();
+            int idx_robot = stoi(string(CT2CA(idx)));
+            pstmt = con->prepareStatement("INSERT INTO pop_result.robot VALUE (?,?,?)");
+            pstmt->setString(1, to_string(idx_robot + 1));
+            pstmt->setString(2, string(CT2CA(time)));
+            pstmt->setString(3, string(CT2CA(message)));
+            pstmt->execute();
+        }
+        else if (facility == "열처리") {
+            stmt = con->createStatement();
+            result = stmt->executeQuery("SELECT count(*) FROM pop_result.heat");
+            if (result->next()) idx = result->getString(1).c_str();
+            int idx_heat = stoi(string(CT2CA(idx)));
+            pstmt = con->prepareStatement("INSERT INTO pop_result.heat VALUE (?,?,?)");
+            pstmt->setString(1, to_string(idx_heat + 1));
+            pstmt->setString(2, string(CT2CA(time)));
+            pstmt->setString(3, string(CT2CA(message)));
+            pstmt->execute();
+        }
+    }
+    catch (sql::SQLException& e) {
+        cerr << "SQLException: " << e.what() << endl;
+    }
 }
 
 void MySQL_Connector::getTable(vector<double> dataset)
